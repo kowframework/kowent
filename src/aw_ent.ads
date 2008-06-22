@@ -40,8 +40,12 @@
 -- 	. auto-generation of keys                                           --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;	use Ada.Strings.Unbounded;
+
+with Ada.Containers.Ordered_Maps;
 
 with APQ;	use APQ;
+
 
 
 package Aw_Ent is
@@ -72,11 +76,14 @@ package Aw_Ent is
 		);
 
 
-	type Value_Type( Contains: Supported_Types ) is private;
-	-- The type Value_Type is used to stored all information in a HashMap.
+	type Value_Type_Record( Contains: Supported_Types ) is private;
+	-- The type Value_Type_Record is used to stored all information in a Ordered_Map.
 
-	type Value_Type_Access is access all Value_Type;
+	type Value_Type is access all Value_Type_Record;
 	-- this access type is used inside the map.
+	-- NOTE: There is no proper memory management implemented so far.
+	--       This should be provided by the Value_Type type, which
+	--      is to be changed to a controlled type soon.
 
 	------------------------
 	-- CONVERSION METHODS --
@@ -85,40 +92,40 @@ package Aw_Ent is
 	-- The following methods should be used to convert from your values
 	-- to Aw_Ent's values. These values are then mapped into a
 	--
-	-- Hash_Map which is used by Aw_Ent to iterate with the database.
+	-- Ordered_Map which is used by Aw_Ent to iterate with the database.
 
 	-- scalar types
-	function Get_Value( Value: APQ_Smallint ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Integer ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Bigint ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Real ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Double ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Serial ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Bigserial ) return Value_Type_Access;
+	function Get_Value( Value: APQ_Smallint ) return Value_Type;
+	function Get_Value( Value: APQ_Integer ) return Value_Type;
+	function Get_Value( Value: APQ_Bigint ) return Value_Type;
+	function Get_Value( Value: APQ_Real ) return Value_Type;
+	function Get_Value( Value: APQ_Double ) return Value_Type;
+	function Get_Value( Value: APQ_Serial ) return Value_Type;
+	function Get_Value( Value: APQ_Bigserial ) return Value_Type;
 
 	-- time types 
-	function Get_Value( Value: APQ_Date ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Time ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Timestamp ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Timezone ) return Value_Type_Access;
+	function Get_Value( Value: APQ_Date ) return Value_Type;
+	function Get_Value( Value: APQ_Time ) return Value_Type;
+	function Get_Value( Value: APQ_Timestamp ) return Value_Type;
+	function Get_Value( Value: APQ_Timezone ) return Value_Type;
 
 
 	-- other types
-	function Get_Value( Value: APQ_Boolean ) return Value_Type_Access;
-	function Get_Value( Value: APQ_Bitstring ) return Value_Type_Access;
-	function Get_Value( Value: String ) return Value_Type_Access;
-	function Get_Value( Value: Unbounded_String ) return Value_Type_Access;
+	function Get_Value( Value: APQ_Boolean ) return Value_Type;
+	function Get_Value( Value: APQ_Bitstring ) return Value_Type;
+	function Get_Value( Value: String ) return Value_Type;
+	function Get_Value( Value: Unbounded_String ) return Value_Type;
 
 
 
-	package Valued_Maps is new Ada.Containers.Hash_Maps(
+	package Valued_Maps is new Ada.Containers.Ordered_Maps(
 			Key_Type => Unbounded_String,
-			Element_Type => Value_Type_Access );
+			Element_Type => Value_Type );
 
 	procedure Append(
 		Map: in out Valued_Maps.Map;
 		Key: in String;
-		Element: Value_Type_Access );
+		Element: Value_Type );
 	-- this method is provided to easy the development, as it's not expected
 	-- to have the field names parammetrized.
 
@@ -127,7 +134,7 @@ package Aw_Ent is
 	-- The entity interface itself --
 	---------------------------------
 
-	type Entity is abstract tagged private;
+	type Entity_Interface is abstract tagged private;
 	-- Every entity should implement the methods declared here.
 	--
 	-- Then the user will have authomatically some methods for
@@ -135,18 +142,18 @@ package Aw_Ent is
 	--
 
 
-	function Get_Keys( E: in Entity )
+	function Get_Keys( E: in Entity_Interface )
 		return Valued_Maps.Map is abstract;
-	procedure Set_Keys( E: in out Entity; Values: Valued_Maps.Map );
+	procedure Set_Keys( E: in out Entity_Interface; Values: Valued_Maps.Map );
 
 
-	function Get_Values( E: in Entity_Inteface )
-		return Valueed_Maps.Map is abstract;
-	procedure Set_Values( E: in out Entity; Values: Valued_Maps.Map );
+	function Get_Values( E: in Entity_Interface )
+		return Valued_Maps.Map is abstract;
+	procedure Set_Values( E: in out Entity_Interface; Values: Valued_Maps.Map );
 
 
 	
-	function Get_Name( E: in Entity_Interface ) return Name_Type;
+	function Get_Name( E: in Entity_Interface ) return String;
 	-- Aw_Ent will use an active APQ connection and will expect the tables
 	--are named using the same name as the implementing type in UPERCASE.
 	-- Follow this rules and you'll be fine.
@@ -161,14 +168,14 @@ package Aw_Ent is
 	-- Entity Management Dispatching Methods --
 	-------------------------------------------
 	
-	procedure Load(	Entity_Object	: in out Entity'Class;
+	procedure Load(	Entity_Object	: in out Entity_Interface'Class;
 			Keys		: in Valued_Maps.Map );
 	-- load an entity using it's own allocated object
 	
-	procedure Store( Entity_Object : in Entity'Class );
+	procedure Store( Entity_Object : in Entity_Interface'Class );
 	-- save an already created entity in the backend
 	
-	procedure Insert( Entity_Object: in out Entity'CLass );
+	procedure Insert( Entity_Object: in out Entity_Interface'CLass );
 	-- insert a new value into the database backend.
 	-- Notice the entity is an "in out" parameter.
 	-- It's so it can be possible to Aw_Ent to determine auto-generated
@@ -183,7 +190,7 @@ private
 	-- this type is created so, internally, we can treat bitstring as it
 	-- was a constrained type.
 
-	type Value_Type( Contains: Supported_Types ) is record
+	type Value_Type_Record( Contains: Supported_Types ) is record
 		case Contains is
 			-- scalar types
 			when Type_APQ_Smallint	=>
@@ -234,7 +241,7 @@ private
 
 
 
-	type Entity is abstract tagged private with null record;
+	type Entity_Interface is abstract tagged null record;
 	-- the entity has no record here (for now. ;)).
 	
 
