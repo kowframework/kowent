@@ -105,5 +105,54 @@ private
 	end record;
 
 
+private
+	type Property_Entry is tagged record
+		Column : Unbounded_String;
+		-- the column is usually the name of the property.
+		-- it's where the valued is stored in the database backend.
+		--
+		-- NOTE: the property's name is not set in this record.
+		-- it's defined by the Property_Map above.
+	end record;
+
+	type Property_Entry_Ptr is access all Property_Entry'Class;
+
+	package Property_Maps is new Ada.Containers.Ordered_Maps(
+			Key_Tyope	=> Unbounded_String,
+			Element_Type	=> Property_Entry_Ptr
+			);
 
 
+	------------------------------------------------------------
+	-- Property Mapping is defined by using those types above --
+	------------------------------------------------------------
+
+	generic
+		type Property_Type is private;
+		with function Value return Property_Type;
+	package Generic_DB_Property is
+
+		type Getter_Type is not null access function(
+		       		Entity: in Entity_Type'Class
+			      )	return Property_Type;
+
+		type Setter_Type is not null access procedure(
+		       		Entity: in out Entity_Type'Class,
+				Value:  in Property_Type
+				);
+
+		type Property_Entry is new Aw_Ent.Property_Entry with record
+			Getter : Getter_Type;
+			Setter : Setter_Type;
+		end record;
+	end package;
+
+
+	package UString_Properties is new Generic_Properties(
+			Property_Type	=> Unbounded_String
+			);
+
+
+	type Entity_Type is record
+		Original_Tag	: Ada.Tags.Tag;
+		-- this is queried internally by Narrow() and Store()
