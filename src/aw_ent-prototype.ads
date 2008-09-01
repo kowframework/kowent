@@ -133,11 +133,11 @@ private
 	package Generic_DB_Property is
 
 		type Getter_Type is not null access function(
-		       		Entity: in Entity_Type'Class
+				Entity: in Entity_Type'Class
 			      )	return Property_Type;
 
 		type Setter_Type is not null access procedure(
-		       		Entity: in out Entity_Type'Class,
+				Entity: in out Entity_Type'Class,
 				Value:  in Property_Type
 				);
 
