@@ -10,7 +10,7 @@ package Aw_Ent.Prototype is
 	-- represents a data thats storedn into the database backend
 
 	type ID_Type is private;
-	-- represents a identifier of the entity
+	-- represents an identifier of the entity
 
 	No_ID: constant Id_Type;
 
@@ -19,7 +19,7 @@ package Aw_Ent.Prototype is
 	-----------------------
 
 	function To_ID( ID: in Natural ) return ID_Type;
-	-- convert a positive into a ID.
+	-- convert a positive into an ID.
 	-- used for loading entities.
 
 	procedure Load( Entity : in out Entity_Type; ID : in ID_Type );
@@ -31,7 +31,7 @@ package Aw_Ent.Prototype is
 	
 	procedure Store( Entity : in out Entity_Type; Recover_ID: Boolean := True );
 	-- save the entity into the database Backend
-	-- if it's a new entity, create a new entry and generates a ID for it.
+	-- if it's a new entity, create a new entry and generates an ID for it.
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 	
@@ -39,6 +39,11 @@ package Aw_Ent.Prototype is
 	-- narrow an entity to it's parent/child preserving/restoring properties
 	-- this is usefull for working with entities that extend a parent entity
 
+
+
+	----------------
+	-- Entity IDs --
+	----------------
 
 
 
@@ -51,6 +56,20 @@ package Aw_Ent.Prototype is
 	function Standard_Id_Generator( Entity: in Entity_Type'Class ) return ID_Type;
 	-- return No_ID, thus making Aw_Ent delegate the id creation task to the 
 	-- database backend.
+
+
+	-----------------------
+	-- Entity Properties --
+	-----------------------
+
+
+	type Entity_Property_Type is abstract tagged null record;
+
+	procedure Set_Property(	Entity: Entity_Type'Class;
+				Property: in Entity_Property_Type;
+				Results: APQ.Root_Query_Type'Class );
+
+
 
 	-------------------------
 	-- Entity Registration --
@@ -105,7 +124,6 @@ private
 	end record;
 
 
-private
 	type Property_Entry is tagged record
 		Column : Unbounded_String;
 		-- the column is usually the name of the property.
