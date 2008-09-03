@@ -62,12 +62,36 @@ package Aw_Ent.Prototype is
 	-- Entity Properties --
 	-----------------------
 
-
 	type Entity_Property_Type is abstract tagged null record;
 
-	procedure Set_Property(	Entity: Entity_Type'Class;
+	type Entity_Property_Ptr is access all Entity_Property_Type'Class;
+
+	procedure Set_Property(	Entity	: in out Entity_Type'Class;
 				Property: in Entity_Property_Type;
-				Results: APQ.Root_Query_Type'Class );
+				Results	: in APQ.Root_Query_Type'Class ) is abstract;
+
+	procedure Get_Property( Entity	: in Entity_Type'Class
+
+
+	type String_Getter_Type is access function(
+				Entity: in Entity_Type'Class
+			) return String;
+	type String_Setter_Type is access procedure(
+				Entity: in out Entity_Type'Class,
+				Value: in String );
+	
+	function New_String_Property(
+				Getter : String_Getter_Type;
+				Setter : String_Setter_Type
+			) return Entity_Property_Ptr;
+
+
+	type String_Property_Type is new Entity_Property_Type with record
+		Getter : String_Getter_Type;
+		Setter : String_Setter_Type;
+	end record;
+
+
 
 
 
