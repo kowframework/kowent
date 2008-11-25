@@ -73,6 +73,19 @@ package Aw_Ent is
 				Setter : String_Setter_Type
 			) return Entity_Property_Ptr;
 
+	procedure Set_Property(	
+				Entity	: in out Entity_Type'Class;		-- the entity
+				Property: in     Entity_Property_Type;		-- the property worker
+				Field	: in     String;			-- the database field name
+				Q	: in     Query_Type'Class		-- the query from witch to fetch the result
+			) is abstract;
+
+	procedure Get_Property(
+				Entity	: in out Entity_Type'Class;		-- the entity
+				Property: in     Entity_Property_Type;		-- the property worker
+				Query	: in out Query_Type'Class		-- the query to witch append the value to insert
+			) is abstract;
+
 
 	type String_Property_Type is new Entity_Property_Type with record
 		Getter : String_Getter_Type;
@@ -80,32 +93,7 @@ package Aw_Ent is
 	end record;
 
 
-	generic
-		type Property_Type is private;
-	package Generic_Property_Worker is
-		type Getter_Type is access function(
-				Entity		: in Entity_Type'Class,
-				Property_Name	: in String
-			) return Property_Type;
-
-		type Setter_Type is access procedure(
-				Entity		: in out Entity_Type'Class,
-				Property_Name	: in String,
-				Value		: in Property_Type
-			);
-
-		type Property_Type is new Entity_Property_Type with record
-			Getter	: Getter_Type;
-			Setter	: Setter_Type;
-		end record;
-
-		function New_Property(
-				Getter		: Getter_Type,
-				Setter		: Setter_Type,
-				Property_Name	: String
-			) return Entity_Property_Ptr;
-
-	end Generic_Property_Worker;
+	
 
 
 
