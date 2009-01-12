@@ -1,8 +1,30 @@
+-- Main Aw_Ent package.
+--
+-- Aw_Ent is reponsible for handling persistent data in your application
+-- stored in Database backends using the native DB types.
+--
+-- author Marcelo C. de Freitas <marcelo.batera@gmail.com>
+-- createdAt 2008-10-XX
+--
+-- Repository information:
+-- $Date: $
+-- $Revision: $
+-- $Author: $
 
 
 
+-- TODO: finish implementing the main engine
+-- fix the UString property
+---------------
+-- Ada Works --
+---------------
+with Aw_Lib.UString_Vectors;
 
--- TODO: implement support for multiple database backends at the same time
+---------
+-- APQ --
+---------
+with APQ;
+
 
 package Aw_Ent is
 
@@ -18,9 +40,6 @@ package Aw_Ent is
 	-- Entity Management --
 	-----------------------
 
-	function To_ID( ID: in Natural ) return ID_Type;
-	-- convert a positive into an ID.
-	-- used for loading entities.
 
 	procedure Load( Entity : in out Entity_Type; ID : in ID_Type );
 	-- load the entity from the default database Backend
@@ -58,44 +77,54 @@ package Aw_Ent is
 	-- return No_ID, thus making Aw_Ent delegate the id creation task to the 
 	-- database backend.
 
+	function To_ID( ID: in Natural ) return ID_Type;
+	-- convert a positive into an ID.
+	-- used for loading entities.
+	
+	function To_ID( ID: in Natural; Tag : in Ada.Tags.Tag ) return ID_Type;
+	-- the same as the previos To_ID, but return an ID initialized
+	-- for a specific tag.
+	-- This is used by Load() procedure.
+
 
 	----------------------------------
 	-- Entity Properties Management --
 	----------------------------------
 
-	type Entity_Property_Type is abstract tagged null record;
+
+	-- The work done in queries is managed by Set_Property and Get_Property procedures.
+	-- This is another part of Aw_Ent that's 100% object oriented, which means you can
+	-- extend Aw_Ent to support your own types.
+
+
+	type Entity_Property_Type is abstract tagged record
+		Name	: Unbounded_String;
+		-- the property name directly maps into some field or fields in a table.
+		-- this is public for two reasons:
+		-- 	1. every entity property has it's own name, which maps to something.
+		-- 		* the user could query all entities and their properties for listing
+		-- 	2. when extending this package it must be clear the developer MUST use this variable.
+		-- 		* Set_property should use this variable
+	end record;
+
 
 	type Entity_Property_Ptr is access all Entity_Property_Type'Class;
 
 
-	function New_String_Property(
-				Getter : String_Getter_Type;
-				Setter : String_Setter_Type
-			) return Entity_Property_Ptr;
 
 	procedure Set_Property(	
-				Entity	: in out Entity_Type'Class;		-- the entity
 				Property: in     Entity_Property_Type;		-- the property worker
-				Field	: in     String;			-- the database field name
-				Q	: in     Query_Type'Class		-- the query from witch to fetch the result
+				Entity	: in out Entity_Type'Class;		-- the entity
+				Q	: in out Query_Type'Class		-- the query from witch to fetch the result
 			) is abstract;
+	-- Set the property into the Entity.
 
 	procedure Get_Property(
-				Entity	: in out Entity_Type'Class;		-- the entity
 				Property: in     Entity_Property_Type;		-- the property worker
+				Entity	: in out Entity_Type'Class;		-- the entity
 				Query	: in out Query_Type'Class		-- the query to witch append the value to insert
 			) is abstract;
-
-
-	type String_Property_Type is new Entity_Property_Type with record
-		Getter : String_Getter_Type;
-		Setter : String_Setter_Type;
-	end record;
-
-
-	
-
-
+	-- Append into a query being created by the main Aw_ent engine.
 
 	-------------------------
 	-- Entity Registration --
@@ -114,19 +143,9 @@ package Aw_Ent is
 	-- Auto generate the table name (using the Tag)
 
 
-
-	-- TODO:
-	-- move this to a generic subpackage
-	type String_Property_Setter_Type is access procedure(
-			Entity	: in Entity_Type'Class,
-			Value	: in String );
-	type String_Property_Getter_Type is access function(
-			Entity	: in Entity_Type'Class ) return String;
-
 	procedure Add_Property( Entity_Tag	: in Ada.Tags.Tag;
 				Property_Name	: in String;
-				Property_Getter	: in String_Property_Getter_Type;
-				Property_Setter	: in String_Property_Setter_Type );
+				Property	: in Property_Access );
 
 private
 
@@ -173,29 +192,6 @@ private
 			Element_Type	=> Property_Entry_Ptr
 			);
 
-	------------------------------------------------------------
-	-- Property Mapping is defined by using those types above --
-	------------------------------------------------------------
-
-	generic
-		type Property_Type is private;
-		with function Value return Property_Type;
-	package Generic_DB_Property is
-
-		type Getter_Type is not null access function(
-				Entity: in Entity_Type'Class
-			      )	return Property_Type;
-
-		type Setter_Type is not null access procedure(
-				Entity: in out Entity_Type'Class,
-				Value:  in Property_Type
-				);
-
-		type Property_Entry is new Aw_Ent.Property_Entry with record
-			Getter : Getter_Type;
-			Setter : Setter_Type;
-		end record;
-	end package;
 
 
 	package UString_Properties is new Generic_Properties(
@@ -203,9 +199,9 @@ private
 			);
 
 
-	type Entity_Type is record
-		Original_Tag	: Ada.Tags.Tag;
+	type Entity_Type is tagged record
+		-- Original_Tag	: Ada.Tags.Tag;
 		-- this is queried internally by Narrow() and Store()
-
-
+		My_ID : ID_Type;
+	end Entity_Type;
 end Aw_Ent;

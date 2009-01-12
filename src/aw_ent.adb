@@ -2,28 +2,41 @@
 
 
 
--- TODO: implement support for multiple database backends at the same time
 
-package Aw_Ent.Prototype is
+with Aw_Lib.UString_Vectors;
 
-	type Entity_Type is tagged private;
-	-- represents a data thats storedn into the database backend
-
-	type ID_Type is private;
-	-- represents an identifier of the entity
-
-	No_ID: constant Id_Type;
+package body Aw_Ent is
 
 	-----------------------
 	-- Entity Management --
 	-----------------------
 
-	function To_ID( ID: in Natural ) return ID_Type;
-	-- convert a positive into an ID.
-	-- used for loading entities.
+	function To_ID( ID: in Natural ) return ID_Type is
+		-- convert a positive into an ID.
+		-- used for loading entities.
+		My_Id : Id_Type;
+	begin
+		My_ID.Value : APQ.APQ_Bigserial( ID );
+		return My_ID;
+	end To_ID;
+	
+	function To_ID( ID: in Natural; Tag : in Ada.Tags.Tag ) return ID_Type is
+		-- convert a positive into an ID.
+		-- used for loading entities.
+		My_Id : Id_Type;
+	begin
+		My_ID.Value  := APQ.APQ_Bigserial( ID );
+		My_ID.My_Tag := Tag;
+		return My_ID;
+	end To_ID;
 
-	procedure Load( Entity : in out Entity_Type; ID : in ID_Type );
-	-- load the entity from the default database Backend
+
+	-- TODO:
+	procedure Load( Entity : in out Entity_Type; ID : in ID_Type ) is
+		-- load the entity from the default database Backend
+	begin
+		null;
+	end Load;
 
 	procedure Load( Entity : in out Entity_Type; ID : in Natural ) is
 		-- load the entity from the default database Backend
@@ -43,6 +56,8 @@ package Aw_Ent.Prototype is
 		-- after it has been saved.
 
 		G : Entity_Getter_Type;
+
+		Keys, Values: Aw_Lib.Ustring_Vectors.Vector;
 	begin
 		for i in Properties( Entity ) loop
 			Append( Keys, Name( i ) );
@@ -60,15 +75,16 @@ package Aw_Ent.Prototype is
 	end Store;
 
 
-	procedure Narrow( From : in Entity_Type'Class; To: out Entity_Type'Class );
+	-- TODO: implement Narrow
+	-- procedure Narrow( From : in Entity_Type'Class; To: out Entity_Type'Class );
 	-- narrow an entity to it's parent/child preserving/restoring properties
 	-- this is usefull for working with entities that extend a parent entity
 
 
 
-	----------------
-	-- Entity IDs --
-	----------------
+	--------------------------
+	-- Entity ID Management --
+	--------------------------
 
 
 
@@ -83,34 +99,32 @@ package Aw_Ent.Prototype is
 	-- database backend.
 
 
-	-----------------------
-	-- Entity Properties --
-	-----------------------
+	----------------------------------
+	-- Entity Properties Management --
+	----------------------------------
 
 	type Entity_Property_Type is abstract tagged null record;
 
 	type Entity_Property_Ptr is access all Entity_Property_Type'Class;
 
-	procedure Set_Property(	Entity	: in out Entity_Type'Class;
-				Property: in Entity_Property_Type;
-				Results	: in APQ.Root_Query_Type'Class ) is abstract;
 
-	procedure Get_Property( Entity	: in Entity_Type'Class
-
-
-	type String_Getter_Type is access function(
-				Entity		: in Entity_Type'Class;
-				Property_Name	: in String
-			) return String;
-	type String_Setter_Type is access procedure(
-				Entity		: in out Entity_Type'Class,
-				Property_Name	: in String,
-				Value: in String );
-	
 	function New_String_Property(
 				Getter : String_Getter_Type;
 				Setter : String_Setter_Type
 			) return Entity_Property_Ptr;
+
+	procedure Set_Property(	
+				Entity	: in out Entity_Type'Class;		-- the entity
+				Property: in     Entity_Property_Type;		-- the property worker
+				Field	: in     String;			-- the database field name
+				Q	: in     Query_Type'Class		-- the query from witch to fetch the result
+			) is abstract;
+
+	procedure Get_Property(
+				Entity	: in out Entity_Type'Class;		-- the entity
+				Property: in     Entity_Property_Type;		-- the property worker
+				Query	: in out Query_Type'Class		-- the query to witch append the value to insert
+			) is abstract;
 
 
 	type String_Property_Type is new Entity_Property_Type with record
@@ -119,32 +133,7 @@ package Aw_Ent.Prototype is
 	end record;
 
 
-	generic
-		type Value_Type is private;
-	package Generic_Property_Worker is
-		type Getter_Type is access function(
-				Entity		: in Entity_Type'Class,
-				Property_Name	: in String
-			) return Value_Type;
-
-		type Setter_Type is access procedure(
-				Entity		: in out Entity_Type'Class,
-				Property_Name	: in String,
-				Value		: in Value_Type
-			);
-
-		type Property_Type is new Entity_Property_Type with record
-			Getter	: Getter_Type;
-			Setter	: Setter_Type;
-		end record;
-
-		function New_Property(
-				Getter		: Getter_Type,
-				Setter		: Setter_Type,
-				Property_Name	: String
-			) return Entity_Property_Ptr;
-
-	end Generic_Property_Worker;
+	
 
 
 
@@ -154,8 +143,15 @@ package Aw_Ent.Prototype is
 
 
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+				Table_Name	: in String;
 				Id_Generator	: in Id_Generator_Type := Standard_Id_Generator );
 	-- register an Entity into the Aw_Ent engine
+	-- Table_Name is the table name to be used.
+	
+	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+				Id_Generator	: in Id_Generator_Type := Standard_Id_Generator );
+	-- register an Entity into the Aw_Ent engine
+	-- Auto generate the table name (using the Tag)
 
 
 
@@ -217,7 +213,6 @@ private
 			Element_Type	=> Property_Entry_Ptr
 			);
 
-
 	------------------------------------------------------------
 	-- Property Mapping is defined by using those types above --
 	------------------------------------------------------------
@@ -248,6 +243,16 @@ private
 			);
 
 
-	type Entity_Type is record
-		Original_Tag	: Ada.Tags.Tag;
-		-- this is queried internally by Narrow() and Store()
+	--------------------------------------------
+	-- "Low level" functions, used internally --
+	--------------------------------------------
+
+	procedure Insert( E'Tag, Keys, Values : in Aw_Lib.UString_Vectors.Vector; ID: in out ID_Type; Recover_ID : in Boolean);
+	-- Used to _REALLY_ insert a new data into the database.
+	-- ID is used to recover the auto generated ID (if Recover_ID == true )
+	
+	procedure Save( Tag: in Ada.Tags.Tag; Keys, Values: in Aw_Lib.UString_Vectors.Vector; ID : in ID_Type );
+	-- This is used to save the entity.
+	-- ID is expected to be correctly initialized.
+
+end Aw_Ent;
