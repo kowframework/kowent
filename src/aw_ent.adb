@@ -16,7 +16,7 @@ package body Aw_Ent is
 		-- used for loading entities.
 		My_Id : Id_Type;
 	begin
-		My_ID.Value : APQ.APQ_Bigserial( ID );
+		My_ID.Value := APQ.APQ_Bigserial( ID );
 		return My_ID;
 	end To_ID;
 	
@@ -158,7 +158,7 @@ package body Aw_Ent is
 	-- TODO:
 	-- move this to a generic subpackage
 	type String_Property_Setter_Type is access procedure(
-			Entity	: in Entity_Type'Class,
+			Entity	: in Entity_Type'Class;
 			Value	: in String );
 	type String_Property_Getter_Type is access function(
 			Entity	: in Entity_Type'Class ) return String;
@@ -168,91 +168,6 @@ package body Aw_Ent is
 				Property_Getter	: in String_Property_Getter_Type;
 				Property_Setter	: in String_Property_Setter_Type );
 
-private
 
-	type ID_Type is record
-		Value : APQ.APQ_Bigserial;
-		-- It's a APQ_Bigserial value so it can store
-		-- arbitrary big indexes.
-		--
-		-- In memory it's not a big issue, as it's only a really big integer and
-		-- not all data is loaded into the RAM at the same time.
-		--
-		-- The shortcomings come when storing it. You can, yet, use even a smallint
-		-- column in the database backend to store this id.
-		--
-		-- If we've chosen other type we'd forbit the user to have a Bigserial
-		-- column for indexing their elements.
-
-		My_Tag : Ada.Tags.Tag := No_Tag;
-		-- This is used to track which entity has been used to generate this ID.
-		-- This is mainly used in the Store and Narrow procedures.
-	end record;
-
-	type Entity_Type is tagged record
-		ID: ID_Type;
-		-- The only thing that comes with the basic entity is an ID.
-		-- For consistence sake, every entity has a numeric ID which is used
-		-- internally to locate and iterate with entities.
-	end record;
-
-
-	type Property_Entry is tagged record
-		Column : Unbounded_String;
-		-- the column is usually the name of the property.
-		-- it's where the valued is stored in the database backend.
-		--
-		-- NOTE: the property's name is not set in this record.
-		-- it's defined by the Property_Map above.
-	end record;
-
-	type Property_Entry_Ptr is access all Property_Entry'Class;
-
-	package Property_Maps is new Ada.Containers.Ordered_Maps(
-			Key_Tyope	=> Unbounded_String,
-			Element_Type	=> Property_Entry_Ptr
-			);
-
-	------------------------------------------------------------
-	-- Property Mapping is defined by using those types above --
-	------------------------------------------------------------
-
-	generic
-		type Property_Type is private;
-		with function Value return Property_Type;
-	package Generic_DB_Property is
-
-		type Getter_Type is not null access function(
-				Entity: in Entity_Type'Class
-			      )	return Property_Type;
-
-		type Setter_Type is not null access procedure(
-				Entity: in out Entity_Type'Class,
-				Value:  in Property_Type
-				);
-
-		type Property_Entry is new Aw_Ent.Property_Entry with record
-			Getter : Getter_Type;
-			Setter : Setter_Type;
-		end record;
-	end package;
-
-
-	package UString_Properties is new Generic_Properties(
-			Property_Type	=> Unbounded_String
-			);
-
-
-	--------------------------------------------
-	-- "Low level" functions, used internally --
-	--------------------------------------------
-
-	procedure Insert( E'Tag, Keys, Values : in Aw_Lib.UString_Vectors.Vector; ID: in out ID_Type; Recover_ID : in Boolean);
-	-- Used to _REALLY_ insert a new data into the database.
-	-- ID is used to recover the auto generated ID (if Recover_ID == true )
-	
-	procedure Save( Tag: in Ada.Tags.Tag; Keys, Values: in Aw_Lib.UString_Vectors.Vector; ID : in ID_Type );
-	-- This is used to save the entity.
-	-- ID is expected to be correctly initialized.
 
 end Aw_Ent;
