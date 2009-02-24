@@ -13,8 +13,12 @@
 
 
 
--- TODO: finish implementing the main engine
--- fix the UString property
+
+
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Containers.Doubly_Linked_Lists;
 ---------------
 -- Ada Works --
 ---------------
@@ -36,6 +40,17 @@ package Aw_Ent is
 
 	No_ID: constant Id_Type;
 
+
+	-------------------------
+	-- Database Management --
+	-------------------------
+	
+	type Connection_Ptr is access all APQ.Root_Connection_Type'Class;
+
+	procedure Set_Connection( Connection: in Connection_Ptr );
+	-- set the current database connection
+	-- TODO: implement some sort of database pooling
+	
 	-----------------------
 	-- Entity Management --
 	-----------------------
@@ -149,6 +164,10 @@ package Aw_Ent is
 
 private
 
+
+	My_Connection : Connection_Ptr;
+
+
 	type ID_Type is record
 		Value : APQ.APQ_Bigserial;
 		-- It's a APQ_Bigserial value so it can store
@@ -168,11 +187,30 @@ private
 		-- This is mainly used in the Store and Narrow procedures.
 	end record;
 
+	package Property_Lists is new Ada.Containers.Doubly_Linked_Lists(
+				Element_Type	=> Entity_Property_Ptr
+			);
+
+
 	type Entity_Type is tagged record
-		ID: ID_Type;
+		ID		: ID_Type;
 		-- The only thing that comes with the basic entity is an ID.
 		-- For consistence sake, every entity has a numeric ID which is used
 		-- internally to locate and iterate with entities.
+
+
+		Table		: Unbounded_String;
+		-- Where this entity is to be stored
+
+
+		Properties	: Property_Lists.List;
+		-- The properties of this entity
+		-- They are stored in a doubly linked list because of better memory usage than vector
+		-- and because we only query this list in a sequential (be it forward or backward) way
+
+
+		-- Original_Tag	: Ada.Tags.Tag;
+		-- this is to be queried internally by Narrow() and Store()
 	end record;
 
 
@@ -189,7 +227,7 @@ private
 
 	package Property_Maps is new Ada.Containers.Ordered_Maps(
 			Key_Tyope	=> Unbounded_String,
-			Element_Type	=> Property_Entry_Ptr
+			Element_Type	=> Entity_Property_Ptr
 			);
 
 
@@ -197,11 +235,4 @@ private
 	package UString_Properties is new Generic_Properties(
 			Property_Type	=> Unbounded_String
 			);
-
-
-	type Entity_Type is tagged record
-		-- Original_Tag	: Ada.Tags.Tag;
-		-- this is queried internally by Narrow() and Store()
-		My_ID : ID_Type;
-	end Entity_Type;
 end Aw_Ent;

@@ -7,6 +7,16 @@ with Aw_Lib.UString_Vectors;
 
 package body Aw_Ent is
 
+
+	-------------------------
+	-- Database Management --
+	-------------------------
+	procedure Set_Connection( Connection : in Connection_Ptr ) is
+	begin
+		My_Connection := Connection;
+	end Set_Connection;
+
+
 	-----------------------
 	-- Entity Management --
 	-----------------------
@@ -31,15 +41,72 @@ package body Aw_Ent is
 	end To_ID;
 
 
-	-- TODO:
-	procedure Load( Entity : in out Entity_Type; ID : in ID_Type ) is
-		-- load the entity from the default database Backend
+
+	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Entity: Entity_Type ) is
+		-- this procedure is used internally to set a column of values in the fashion of:
+		-- a,b,c,d
+		-- where a, b, c and d are columns of this entity
+		First_Property: Boolean := True;
+
+		procedure Set_Column_Names( C: Property_Lists.Cursor ) is
+			use Property_Lists;
+			Column: String := To_String( Element( C ).all.Column );
+		begin
+			if not First_Property then
+				APQ.Append( Query, "," );
+			else
+				First_Property := False;
+			end if;
+
+			APQ.Append( Column );
+		end Set_Column_Names;
+
 	begin
-		null;
+		Property_Elements.Iterate( Entity.Properties, Set_Column_Names'Class );
+	end Append_Column_Names;
+
+
+	procedure Load( Entity : in out Entity_Type; ID : in ID_Type ) is
+		-- load the entity from the database Backend
+		
+		Query : APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
+
+		procedure Set_Value( C : in Property_Lists.Cursor ) is
+		begin
+			Set_Property( Element( C ).all, Entity, Query );
+		end Set_Value;
+
+	begin
+
+		----------------------
+		-- SQL Construction --
+		----------------------
+		
+		APQ.Prepare( Query, "SELECT id," );
+		Append_Column_Names( Query, Entity );
+		APQ.Append( Query, " WHERE id=" );
+		APQ.Append( Query, ID.Value );
+
+		-------------------
+		-- SQL Execution --
+		-------------------
+		
+		APQ.Execute( Query, My_Connection.all );
+		APQ.Fetch( Query );
+		-- we only reach for the first result as there should be only one
+		-- if none is found, No_Tuple is raised. :D
+		
+
+		---------------------
+		-- Data Processing --
+		---------------------
+
+		Property_Lists.Iterate( Entity.Properties, Set_Value'Access );
+
 	end Load;
 
 	procedure Load( Entity : in out Entity_Type; ID : in Natural ) is
-		-- load the entity from the default database Backend
+		-- load the entity from the database Backend
 		-- it's the same as Load( Entity, To_ID( ID ) );
 	begin
 		Entity.ID		:= To_ID( ID );
@@ -55,16 +122,7 @@ package body Aw_Ent is
 		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 		-- after it has been saved.
 
-		G : Entity_Getter_Type;
-
-		Keys, Values: Aw_Lib.Ustring_Vectors.Vector;
 	begin
-		for i in Properties( Entity ) loop
-			Append( Keys, Name( i ) );
-			G: Getter( i );
-			Append( Values, G( i ) );
-		end loop;
-
 		if E.ID.My_Tag = No_Tag then
 			Insert( E'Tag, Keys, Values, E.ID, Recover_ID );
 		else
