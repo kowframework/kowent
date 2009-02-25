@@ -28,7 +28,7 @@ package Aw_Ent.Properties is
 	procedure Set_Property(	
 				Property: in     UString_Entity_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Q	: in out Query_Type'Class		-- the query from witch to fetch the result
+				Q	: in out Root_Query_Type'Class		-- the query from witch to fetch the result
 			);
 	-- Set the property into the Entity.
 
@@ -36,7 +36,7 @@ package Aw_Ent.Properties is
 	procedure Get_Property(
 				Property: in     Entity_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Query	: in out Query_Type'Class		-- the query to witch append the value to insert
+				Query	: in out Root_Query_Type'Class		-- the query to witch append the value to insert
 			);
 
 

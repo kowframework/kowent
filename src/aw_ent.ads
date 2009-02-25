@@ -15,6 +15,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Containers;
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
@@ -40,7 +41,6 @@ package Aw_Ent is
 	type ID_Type is private;
 	-- represents an identifier of the entity
 
-	No_ID: constant Id_Type;
 
 
 	-------------------------
@@ -58,14 +58,14 @@ package Aw_Ent is
 	-----------------------
 
 
-	procedure Load( Entity : in out Entity_Type; ID : in ID_Type );
+	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type );
 	-- load the entity from the default database Backend
 
-	procedure Load( Entity : in out Entity_Type; ID : in Natural );
+	procedure Load( Entity : in out Entity_Type'Class; ID : in Natural );
 	-- load the entity from the default database Backend
 	-- it's the same as Load( Entity, To_ID( ID ) );
 	
-	procedure Store( Entity : in out Entity_Type; Recover_ID: Boolean := True );
+	procedure Store( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True );
 	-- save the entity into the database Backend
 	-- if it's a new entity, create a new entry and generates an ID for it.
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
@@ -87,12 +87,8 @@ package Aw_Ent is
 	type Id_Generator_Type is access function( Entity: in Entity_Type'Class )
 		return ID_Type;
 	-- The ID generator is used to help Aw_Ent generate IDs.
-	-- If the ID returned is equal to the constant No_ID then the task
-	-- of id creation is delegated to the database backend.
+	-- When it's NULL the id generation is task for the database backend
 
-	function Standard_Id_Generator( Entity: in Entity_Type'Class ) return ID_Type;
-	-- return No_ID, thus making Aw_Ent delegate the id creation task to the 
-	-- database backend.
 
 	function To_ID( ID: in Natural ) return ID_Type;
 	-- convert a positive into an ID.
@@ -135,14 +131,14 @@ package Aw_Ent is
 	procedure Set_Property(	
 				Property: in     Entity_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Q	: in out Query_Type'Class		-- the query from witch to fetch the result
+				Q	: in out APQ.Root_Query_Type'Class	-- the query from witch to fetch the result
 			) is abstract;
 	-- Set the property from the query into the Entity.
 
 	procedure Get_Property(
 				Property: in     Entity_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Query	: in out Query_Type'Class		-- the query to witch append the value to insert
+				Query	: in out APQ.Root_Query_Type'Class	-- the query to witch append the value to insert
 			) is abstract;
 	-- Append into a query being created by the main Aw_ent engine.
 
@@ -172,7 +168,7 @@ package Aw_Ent is
 		-- if it's null, let the database generate the ID;
 
 
-		Table		: Unbounded_String;
+		Table_Name	: Unbounded_String;
 		-- Where this entity is to be stored
 
 
@@ -183,10 +179,16 @@ package Aw_Ent is
 
 	end record;
 
+	function Hash(Key : Ada.Tags.Tag) return Ada.Containers.Hash_Type;
+--	function Ada.Strings.Hash (Key : String) return Containers.Hash_Type;
+
+
 	
 	package Entity_Information_Maps is new Ada.Containers.Hashed_Maps(
-				Index_Type	=> Ada.Tags.Tag,
-				Element_Type	=> Entity_Information_Type
+				Key_Type	=> Ada.Tags.Tag,
+				Element_Type	=> Entity_Information_Type,
+				Hash		=> Hash,
+				Equivalent_Keys	=> Ada.Tags."="
 			);
 	-- this is used to map an entity tag to it's properties
 
@@ -239,11 +241,11 @@ private
 	-- Auxiliar Functions for Entity Management --
 	----------------------------------------------
 
-	procedure Save( Entity : in out Entity_Type );
+	procedure Save( Entity : in out Entity_Type'Class );
 	-- save the existing entity into the database Backend
 	
 
-	procedure Insert( Entity : in out Entity_Type; Recover_ID: Boolean := True );
+	procedure Insert( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True );
 	-- save the entity into the database Backend
 	-- if it's a new entity, create a new entry and generates an ID for it.
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity

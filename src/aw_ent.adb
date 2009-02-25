@@ -1,14 +1,17 @@
 
 
 
-
+with Ada.Strings.Hash;
 
 with Aw_Lib.UString_Vectors;
 
 package body Aw_Ent is
 
+	
+	procedure ID_Append is new APQ.Append_Integer( Val_Type => APQ.APQ_Bigserial );
 
-	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); is
+
+	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
 		-- this procedure is used internally to set a column of values in the fashion of:
 		-- a,b,c,d
 		-- where a, b, c and d are columns of this entity
@@ -51,7 +54,7 @@ package body Aw_Ent is
 
 
 
-	procedure Load( Entity : in out Entity_Type; ID : in ID_Type ) is
+	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type ) is
 		-- load the entity from the database Backend
 		
 		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
@@ -59,12 +62,13 @@ package body Aw_Ent is
 
 		procedure Set_Value( C : in Property_Lists.Cursor ) is
 		begin
-			Set_Property( Element( C ).all, Entity, Query );
+			Set_Property( Property_Lists.Element( C ).all, Entity, Query );
 		end Set_Value;
 
 	begin
 
-		Id.My_Tag := Entity'Tag;
+		Entity.ID := ID;
+		Entity.ID.My_Tag := Entity'Tag;
 		-- and now we set the tag of the entity into it's ID
 
 		----------------------
@@ -74,7 +78,7 @@ package body Aw_Ent is
 		APQ.Prepare( Query, "SELECT id," );
 		Append_Column_Names( Query, Info.Properties );
 		APQ.Append( Query, " WHERE id=" );
-		APQ.Append( Query, ID.Value );
+		ID_Append( Query, Entity.ID.Value );
 
 		-------------------
 		-- SQL Execution --
@@ -94,7 +98,7 @@ package body Aw_Ent is
 
 	end Load;
 
-	procedure Load( Entity : in out Entity_Type; ID : in Natural ) is
+	procedure Load( Entity : in out Entity_Type'Class; ID : in Natural ) is
 		-- load the entity from the database Backend
 		-- it's the same as Load( Entity, To_ID( ID ) );
 	begin
@@ -105,14 +109,14 @@ package body Aw_Ent is
 	end Load;
 
 
-	procedure Store( Entity : in out Entity_Type; Recover_ID: Boolean := True ) is
+	procedure Store( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True ) is
 		-- save the entity into the database Backend
 		-- if it's a new entity, create a new entry and generates an ID for it.
 		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 		-- after it has been saved.
 
 	begin
-		if E.ID.My_Tag = No_Tag then
+		if Entity.ID.My_Tag = No_Tag then
 			Insert( Entity, Recover_ID );
 		else
 			Save( Entity );
@@ -123,12 +127,19 @@ package body Aw_Ent is
 
 
 
+
+
+	function Hash(Key : Ada.Tags.Tag) return Ada.Containers.Hash_Type is
+	begin
+		return Ada.Strings.Hash (Expanded_Name( Key ) );
+	end Hash;
+
 	-------------------------
 	-- Entity Registration --
 	-------------------------
 
 
-	protected Entity_Registry is
+	protected body Entity_Registry is
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
 					Id_Generator	: in Id_Generator_Type := Null ) is
@@ -178,7 +189,7 @@ package body Aw_Ent is
 			-- and now we replace the existing entity registry
 		exception
 			when Constraint_Error =>
-				raise Constraint_Error with "Unknown entity :: """ & Expanded_Nape( Entity_Tag ) & """";
+				raise Constraint_Error with "Unknown entity :: """ & Expanded_Name( Entity_Tag ) & """";
 		end Add_Property;
 
 
@@ -187,7 +198,8 @@ package body Aw_Ent is
 			return Entity_Information_Maps.Element( My_Entities, Entity_Tag );
 		exception
 			when Constraint_Error =>
-				raise Constraint_Error with "Unknown entity :: """ & Expanded_Nape( Entity_Tag ) & """";
+				raise Constraint_Error with "Unknown entity :: """ & Expanded_Name( Entity_Tag ) & """";
+		end Get_Information;
 
 
 		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List is
@@ -206,15 +218,15 @@ package body Aw_Ent is
 	-- Auxiliar Functions for Entity Management --
 	----------------------------------------------
 
-	procedure Save( Entity : in out Entity_Type ) is
+	procedure Save( Entity : in out Entity_Type'Class ) is
 		-- save the existing entity into the database Backend
 		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
-		Info	: Entity_Registry.Get_Information( Entity'Tag );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 
 		First_Element	: Boolean := True;
 		procedure Update_Appender( C : Property_Lists.Cursor ) is
-			Property: Entity_Property_Ptr;
+			Property: Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
 			if not First_Element then
 				APQ.Append( Query, "," );
@@ -222,12 +234,18 @@ package body Aw_Ent is
 				First_Element := False;
 			end if;
 
-			APQ.Append(
-				Query,
-				To_String( Property.all.Column_Name ) & "="
-			);
 
-			Get_Property( Property.all, Entity, Query );
+			if Property /= null then
+				APQ.Append(
+					Query,
+					To_String( Property.all.Column_Name ) & "="
+				);
+				
+
+				Get_Property( Property.all, Entity, Query );
+			else
+				raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
+			end if;
 		end Update_Appender;
 				
 			
@@ -248,7 +266,7 @@ package body Aw_Ent is
 			" WHERE id="
 		);
 
-		APQ.Append(
+		ID_Append(
 			Query,
 			Entity.ID.Value
 		);
@@ -260,7 +278,7 @@ package body Aw_Ent is
 	end Save;
 	
 
-	procedure Insert( Entity : in out Entity_Type; Recover_ID: Boolean := True ) is
+	procedure Insert( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True ) is
 		-- save the entity into the database Backend
 		-- if it's a new entity, create a new entry and generates an ID for it.
 		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
@@ -270,16 +288,21 @@ package body Aw_Ent is
 	
 		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
 
+		First_Element : Boolean := True;
 
 		procedure Insert_Appender( C: in Property_Lists.Cursor ) is
-			Property: Entity_Property_Ptr;
+			Property: Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
 			if not First_Element then
 				APQ.Append( Query, "," );
 			else
 				First_Element := False;
 			end if;
-			Get_Property( Property.all, Entity, Query );
+			if Property /= null then
+				Get_Property( Property.all, Entity, Query );
+			else
+				raise Constraint_Error with "Some property is null at """ & Expanded_Name( Entity'Tag ) & """";
+			end if;
 		end Insert_Appender;
 
 	begin
@@ -293,7 +316,7 @@ package body Aw_Ent is
 			"INSERT INTO " & To_String( Info.Table_Name ) & "("
 		);
 
-		Append_Column_Names( Query, Entity );
+		Append_Column_Names( Query, Info.Properties );
 
 		if Info.Id_Generator /= NULL then
 			APQ.Append(
@@ -312,7 +335,7 @@ package body Aw_Ent is
 				Query,
 				","
 			);
-			APQ.Append(
+			ID_Append(
 				Query,
 				ID.Value
 			);
@@ -326,7 +349,7 @@ package body Aw_Ent is
 
 		APQ.Execute( Query, My_Connection.all );
 
-		if Retrieve_ID then
+		if Recover_ID then
 			if Info.Id_Generator /= NULL then
 				Entity.ID := ID;
 			else
@@ -334,7 +357,8 @@ package body Aw_Ent is
 					OID : APQ.Row_Id_Type;
 				begin
 					OID := APQ.Command_OID( Query );
-				Entity.ID := To_Id( Natural( OID ) );
+					Entity.ID := To_Id( Natural( OID ) );
+				end;
 			end if;
 		end if;
 	end Insert;
@@ -354,7 +378,7 @@ package body Aw_Ent is
 
 		procedure Set_Column_Names( C: Property_Lists.Cursor ) is
 			use Property_Lists;
-			Column: String := To_String( Element( C ).all.Column );
+			Column: String := To_String( Element( C ).all.Column_Name );
 		begin
 			if not First_Property then
 				APQ.Append( Query, "," );
@@ -362,11 +386,11 @@ package body Aw_Ent is
 				First_Property := False;
 			end if;
 
-			APQ.Append( Column );
+			APQ.Append( Query, Column );
 		end Set_Column_Names;
 
 	begin
-		Property_Elements.Iterate( Properties, Set_Column_Names'Class );
+		Property_Lists.Iterate( Properties, Set_Column_Names'Access );
 	end Append_Column_Names;
 
 
