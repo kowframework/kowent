@@ -5,6 +5,10 @@
 -- TODO :: implement support for more types.
 
 
+
+
+with APQ;
+
 with Aw_Ent;
 
 
@@ -15,10 +19,10 @@ package Aw_Ent.Properties is
 	-------------------------------
 
 	type UString_Getter_Type is not null access function(
-				Entity	: in Entity'Class
+				Entity	: in Aw_Ent.Entity_Type'Class
 			) return Unbounded_String;
 	type UString_Setter_Type is not null access procedure(
-				Entity	: in Entity'Class;
+				Entity	: in Aw_Ent.Entity_Type'Class;
 				Value	: in Unbounded_String
 			);
 
@@ -26,17 +30,17 @@ package Aw_Ent.Properties is
 
 	overriding
 	procedure Set_Property(	
-				Property: in     UString_Entity_Property_Type;		-- the property worker
+				Property: in     UString_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Q	: in out Root_Query_Type'Class		-- the query from witch to fetch the result
+				Q	: in out APQ.Root_Query_Type'Class	-- the query from witch to fetch the result
 			);
 	-- Set the property into the Entity.
 
 	overriding
 	procedure Get_Property(
-				Property: in     Entity_Property_Type;		-- the property worker
+				Property: in     UString_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Query	: in out Root_Query_Type'Class		-- the query to witch append the value to insert
+				Query	: in out APQ.Root_Query_Type'Class	-- the query to witch append the value to insert
 			);
 
 

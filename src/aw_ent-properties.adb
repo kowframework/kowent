@@ -25,13 +25,10 @@ package body Aw_Ent.Properties is
 	-------------------------------
 	-- Unbounded String property --
 	-------------------------------
-
-
-	overriding
 	procedure Set_Property(	
-				Property: in     UString_Entity_Property_Type;		-- the property worker
+				Property: in     UString_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Q	: in out Root_Query_Type'Class		-- the query from witch to fetch the result
+				Q	: in out APQ.Root_Query_Type'Class	-- the query from witch to fetch the result
 			) is
 		-- Set the property into the Entity.
 	begin
@@ -41,12 +38,10 @@ package body Aw_Ent.Properties is
 			);
 	end Set_Property;
 
-
-	overriding
 	procedure Get_Property(
-				Property: in     Entity_Property_Type;		-- the property worker
+				Property: in     UString_Property_Type;		-- the property worker
 				Entity	: in out Entity_Type'Class;		-- the entity
-				Query	: in out Root_Query_Type'Class		-- the query to witch append the value to insert
+				Query	: in out APQ.Root_Query_Type'Class	-- the query to witch append the value to insert
 			) is
 	begin
 		APQ.Append_Quoted( Query, To_String( Property.Getter.All( Entity ) ) );
