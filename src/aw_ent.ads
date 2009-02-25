@@ -12,13 +12,15 @@
 -- $Author: $
 
 
-
-
-
 --------------
 -- Ada 2005 --
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
+with Ada.Containers.Hashed_Maps;
+with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
+with Ada.Tags;					use Ada.Tags;
+
+
 ---------------
 -- Ada Works --
 ---------------
@@ -113,13 +115,16 @@ package Aw_Ent is
 
 
 	type Entity_Property_Type is abstract tagged record
-		Name	: Unbounded_String;
-		-- the property name directly maps into some field or fields in a table.
+		Column_Name	: Unbounded_String;
+		-- the property column name directly maps into some field or fields in a table.
 		-- this is public for two reasons:
 		-- 	1. every entity property has it's own name, which maps to something.
 		-- 		* the user could query all entities and their properties for listing
 		-- 	2. when extending this package it must be clear the developer MUST use this variable.
 		-- 		* Set_property should use this variable
+		--
+		--
+
 	end record;
 
 
@@ -132,7 +137,7 @@ package Aw_Ent is
 				Entity	: in out Entity_Type'Class;		-- the entity
 				Q	: in out Query_Type'Class		-- the query from witch to fetch the result
 			) is abstract;
-	-- Set the property into the Entity.
+	-- Set the property from the query into the Entity.
 
 	procedure Get_Property(
 				Property: in     Entity_Property_Type;		-- the property worker
@@ -141,31 +146,115 @@ package Aw_Ent is
 			) is abstract;
 	-- Append into a query being created by the main Aw_ent engine.
 
+
+
+
+	--------------------------------
+	-- Generic Packages Instances --
+	--------------------------------
+
+
+	package Property_Lists is new Ada.Containers.Doubly_Linked_Lists(
+				Element_Type	=> Entity_Property_Ptr
+			);
+	-- this is used to map every property in a given entity.
+
+	--
+	-- Where the entity is described..
+	--
+	
+	type Entity_Information_Type is record
+		Entity_Tag	: Ada.Tags.Tag;
+		-- just for internal reference (maybe we'll need it at some point?).
+
+		Id_Generator	: Id_Generator_Type;
+		-- how the id is generated.
+		-- if it's null, let the database generate the ID;
+
+
+		Table		: Unbounded_String;
+		-- Where this entity is to be stored
+
+
+		Properties	: Property_Lists.List;
+		-- The properties of this entity
+		-- They are stored in a doubly linked list because of better memory usage than vector
+		-- and because we only query this list in a sequential (be it forward or backward) way
+
+	end record;
+
+	
+	package Entity_Information_Maps is new Ada.Containers.Hashed_Maps(
+				Index_Type	=> Ada.Tags.Tag,
+				Element_Type	=> Entity_Information_Type
+			);
+	-- this is used to map an entity tag to it's properties
+
+
+
+
+
 	-------------------------
 	-- Entity Registration --
 	-------------------------
 
 
-	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-				Table_Name	: in String;
-				Id_Generator	: in Id_Generator_Type := Standard_Id_Generator );
-	-- register an Entity into the Aw_Ent engine
-	-- Table_Name is the table name to be used.
+
+	protected Entity_Registry is
+		-- This is task save.
+		-- The part that really register the entities.
+
+		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+					Table_Name	: in String;
+					Id_Generator	: in Id_Generator_Type := Null );
+		-- register an Entity into the Aw_Ent engine
+		-- Table_Name is the table name to be used.
 	
-	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-				Id_Generator	: in Id_Generator_Type := Standard_Id_Generator );
-	-- register an Entity into the Aw_Ent engine
-	-- Auto generate the table name (using the Tag)
+		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+					Id_Generator	: in Id_Generator_Type := Null );
+		-- register an Entity into the Aw_Ent engine
+		-- Auto generate the table name (using the Tag)
 
 
-	procedure Add_Property( Entity_Tag	: in Ada.Tags.Tag;
-				Property_Name	: in String;
-				Property	: in Property_Access );
+		procedure Add_Property( Entity_Tag	: in Ada.Tags.Tag;
+					Property	: in Entity_Property_Ptr );
+		-- add another property to this entity
+
+		function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type;
+		-- retrieve the entity information by it's tag
+
+		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List;
+		-- retrieve the property list for the given entity;
+
+	private
+		My_Entities	: Entity_Information_Maps.Map;
+	end Entity_Registry;
+
 
 private
 
 
-	My_Connection : Connection_Ptr;
+
+	----------------------------------------------
+	-- Auxiliar Functions for Entity Management --
+	----------------------------------------------
+
+	procedure Save( Entity : in out Entity_Type );
+	-- save the existing entity into the database Backend
+	
+
+	procedure Insert( Entity : in out Entity_Type; Recover_ID: Boolean := True );
+	-- save the entity into the database Backend
+	-- if it's a new entity, create a new entry and generates an ID for it.
+	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
+	-- after it has been saved.
+
+
+
+	------------------------
+	-- Type Specification --
+	------------------------
+
 
 
 	type ID_Type is record
@@ -184,12 +273,11 @@ private
 
 		My_Tag : Ada.Tags.Tag := No_Tag;
 		-- This is used to track which entity has been used to generate this ID.
-		-- This is mainly used in the Store and Narrow procedures.
+		-- This is used by the Store() procedure to determine if it should be saved or inserted
+		-- It's set in Load() and Insert() procedures
 	end record;
 
-	package Property_Lists is new Ada.Containers.Doubly_Linked_Lists(
-				Element_Type	=> Entity_Property_Ptr
-			);
+
 
 
 	type Entity_Type is tagged record
@@ -199,14 +287,6 @@ private
 		-- internally to locate and iterate with entities.
 
 
-		Table		: Unbounded_String;
-		-- Where this entity is to be stored
-
-
-		Properties	: Property_Lists.List;
-		-- The properties of this entity
-		-- They are stored in a doubly linked list because of better memory usage than vector
-		-- and because we only query this list in a sequential (be it forward or backward) way
 
 
 		-- Original_Tag	: Ada.Tags.Tag;
@@ -214,25 +294,18 @@ private
 	end record;
 
 
-	type Property_Entry is tagged record
-		Column : Unbounded_String;
-		-- the column is usually the name of the property.
-		-- it's where the valued is stored in the database backend.
-		--
-		-- NOTE: the property's name is not set in this record.
-		-- it's defined by the Property_Map above.
-	end record;
 
-	type Property_Entry_Ptr is access all Property_Entry'Class;
+	-----------------------
+	-- Package Variables --
+	-----------------------
 
-	package Property_Maps is new Ada.Containers.Ordered_Maps(
-			Key_Tyope	=> Unbounded_String,
-			Element_Type	=> Entity_Property_Ptr
-			);
+	---------------------------
+	-- Connection Management --
+	---------------------------
+
+	My_Connection	: Connection_Ptr;
+
+	
 
 
-
-	package UString_Properties is new Generic_Properties(
-			Property_Type	=> Unbounded_String
-			);
 end Aw_Ent;
