@@ -129,16 +129,18 @@ package Aw_Ent is
 
 
 	procedure Set_Property(	
-				Property: in     Entity_Property_Type;		-- the property worker
-				Entity	: in out Entity_Type'Class;		-- the entity
-				Q	: in out APQ.Root_Query_Type'Class	-- the query from witch to fetch the result
+				Property	: in     Entity_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Connection_Ptr			-- the connection that belongs the query
 			) is abstract;
 	-- Set the property from the query into the Entity.
 
 	procedure Get_Property(
-				Property: in     Entity_Property_Type;		-- the property worker
-				Entity	: in out Entity_Type'Class;		-- the entity
-				Query	: in out APQ.Root_Query_Type'Class	-- the query to witch append the value to insert
+				Property	: in     Entity_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Connection_Ptr			-- the connection that belongs the query
 			) is abstract;
 	-- Append into a query being created by the main Aw_ent engine.
 

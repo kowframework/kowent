@@ -62,7 +62,7 @@ package body Aw_Ent is
 
 		procedure Set_Value( C : in Property_Lists.Cursor ) is
 		begin
-			Set_Property( Property_Lists.Element( C ).all, Entity, Query );
+			Set_Property( Property_Lists.Element( C ).all, Entity, Query, My_Connection );
 		end Set_Value;
 
 	begin
@@ -242,7 +242,7 @@ package body Aw_Ent is
 				);
 				
 
-				Get_Property( Property.all, Entity, Query );
+				Get_Property( Property.all, Entity, Query, My_Connection );
 			else
 				raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
 			end if;
@@ -299,7 +299,7 @@ package body Aw_Ent is
 				First_Element := False;
 			end if;
 			if Property /= null then
-				Get_Property( Property.all, Entity, Query );
+				Get_Property( Property.all, Entity, Query, My_Connection );
 			else
 				raise Constraint_Error with "Some property is null at """ & Expanded_Name( Entity'Tag ) & """";
 			end if;
