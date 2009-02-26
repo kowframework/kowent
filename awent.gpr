@@ -10,6 +10,9 @@
 with "apq";
 
 
+
+with "awlib";
+
 project AwEnt is
 
 	version := "0.1.0";
@@ -29,8 +32,5 @@ project AwEnt is
 		for Default_Switches ("ada") use ("-O2", "-gnat05");
 	end Compiler;
 
-	package Linker is
-		for Default_Switches ("ada") use APQ.Linker'Default_Switches( "ada" );
-	end Linker;
 end AwEnt;
 
