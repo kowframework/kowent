@@ -77,6 +77,7 @@ package body Aw_Ent is
 		
 		APQ.Prepare( Query, "SELECT id," );
 		Append_Column_Names( Query, Info.Properties );
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 		APQ.Append( Query, " WHERE id=" );
 		ID_Append( Query, Entity.ID.Value );
 

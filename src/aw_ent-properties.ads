@@ -22,7 +22,7 @@ package Aw_Ent.Properties is
 				Entity	: in Aw_Ent.Entity_Type'Class
 			) return Unbounded_String;
 	type UString_Setter_Type is not null access procedure(
-				Entity	: in Aw_Ent.Entity_Type'Class;
+				Entity	: in out Aw_Ent.Entity_Type'Class;
 				Value	: in Unbounded_String
 			);
 

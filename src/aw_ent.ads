@@ -35,11 +35,40 @@ with APQ;
 
 package Aw_Ent is
 
-	type Entity_Type is tagged private;
-	-- represents a data thats storedn into the database backend
 
-	type ID_Type is private;
-	-- represents an identifier of the entity
+
+	type ID_Type is record
+		Value : APQ.APQ_Bigserial;
+		-- It's a APQ_Bigserial value so it can store
+		-- arbitrary big indexes.
+		--
+		-- In memory it's not a big issue, as it's only a really big integer and
+		-- not all data is loaded into the RAM at the same time.
+		--
+		-- The shortcomings come when storing it. You can, yet, use even a smallint
+		-- column in the database backend to store this id.
+		--
+		-- If we've chosen other type we'd forbit the user to have a Bigserial
+		-- column for indexing their elements.
+
+		My_Tag : Ada.Tags.Tag := No_Tag;
+		-- This is used to track which entity has been used to generate this ID.
+		-- This is used by the Store() procedure to determine if it should be saved or inserted
+		-- It's set in Load() and Insert() procedures
+	end record;
+
+	type Entity_Type is tagged record
+		ID		: ID_Type;
+		-- The only thing that comes with the basic entity is an ID.
+		-- For consistence sake, every entity has a numeric ID which is used
+		-- internally to locate and iterate with entities.
+
+
+
+
+		-- Original_Tag	: Ada.Tags.Tag;
+		-- this is to be queried internally by Narrow() and Store()
+	end record;
 
 
 
@@ -259,43 +288,6 @@ private
 	-- Type Specification --
 	------------------------
 
-
-
-	type ID_Type is record
-		Value : APQ.APQ_Bigserial;
-		-- It's a APQ_Bigserial value so it can store
-		-- arbitrary big indexes.
-		--
-		-- In memory it's not a big issue, as it's only a really big integer and
-		-- not all data is loaded into the RAM at the same time.
-		--
-		-- The shortcomings come when storing it. You can, yet, use even a smallint
-		-- column in the database backend to store this id.
-		--
-		-- If we've chosen other type we'd forbit the user to have a Bigserial
-		-- column for indexing their elements.
-
-		My_Tag : Ada.Tags.Tag := No_Tag;
-		-- This is used to track which entity has been used to generate this ID.
-		-- This is used by the Store() procedure to determine if it should be saved or inserted
-		-- It's set in Load() and Insert() procedures
-	end record;
-
-
-
-
-	type Entity_Type is tagged record
-		ID		: ID_Type;
-		-- The only thing that comes with the basic entity is an ID.
-		-- For consistence sake, every entity has a numeric ID which is used
-		-- internally to locate and iterate with entities.
-
-
-
-
-		-- Original_Tag	: Ada.Tags.Tag;
-		-- this is to be queried internally by Narrow() and Store()
-	end record;
 
 
 
