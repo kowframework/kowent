@@ -40,11 +40,6 @@ package body Aw_Ent is
 	procedure ID_Append is new APQ.Append_Integer( Val_Type => APQ.APQ_Bigserial );
 
 
-	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
-		-- this procedure is used internally to set a column of values in the fashion of:
-		-- a,b,c,d
-		-- where a, b, c and d are columns of this entity
-		-- implementation is at the end of the file
 
 
 	-------------------------
@@ -79,21 +74,26 @@ package body Aw_Ent is
 		return My_ID;
 	end To_ID;
 
+	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class ) is
+		-- set all the values from the resulting query
 
-
-
-
-	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type ) is
-		-- load the entity from the database Backend
-		
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
 		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 		procedure Set_Value( C : in Property_Lists.Cursor ) is
 		begin
 			Set_Property( Property_Lists.Element( C ).all, Entity, Query, My_Connection );
 		end Set_Value;
+	begin
+		Property_Lists.Iterate( Info.Properties, Set_Value'Access );
+	end Set_Values_From_Query;
 
+
+
+
+	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type ) is
+		-- load the entity from the database Backend
+		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 	begin
 
 		Entity.ID := ID;
@@ -118,13 +118,21 @@ package body Aw_Ent is
 		APQ.Fetch( Query );
 		-- we only reach for the first result as there should be only one
 		-- if none is found, No_Tuple is raised. :D
-		
 
 		---------------------
 		-- Data Processing --
 		---------------------
 
-		Property_Lists.Iterate( Info.Properties, Set_Value'Access );
+		Set_Values_From_Query( Entity, Query );
+
+		begin
+			loop
+				-- fetch any remaining data just in case..
+				APQ.Fetch( Query );
+			end loop;
+		exception
+			when others => null;
+		end;
 
 	end Load;
 

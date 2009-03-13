@@ -102,4 +102,10 @@ package Aw_Ent.Relations is
 	end Relation_Handler;
 
 
+
+private
+	
+	protected Key_Registry is
+
+
 end Aw_Ent.Relations;

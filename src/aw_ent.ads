@@ -118,6 +118,8 @@ package Aw_Ent is
 	-- Entity Management --
 	-----------------------
 
+	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class );
+	-- set all the values from the resulting query
 
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type );
 	-- load the entity from the default database Backend
@@ -314,6 +316,10 @@ private
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 
+	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
+	-- this procedure is used internally to set a column of values in the fashion of:
+	-- a,b,c,d
+	-- where a, b, c and d are columns of this entity
 
 
 	------------------------
