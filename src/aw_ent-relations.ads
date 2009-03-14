@@ -105,7 +105,5 @@ package Aw_Ent.Relations is
 
 private
 	
-	protected Key_Registry is
-
 
 end Aw_Ent.Relations;
