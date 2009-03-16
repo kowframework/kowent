@@ -312,6 +312,32 @@ package Aw_Ent is
 	end Entity_Registry;
 
 
+	--------------------------------
+	-- Shortcuts for the Registry --
+	--------------------------------
+	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+				Table_Name	: in String;
+				Id_Generator	: in Id_Generator_Type := Null ) renames Entity_Registry.Register;
+	-- register an Entity into the Aw_Ent engine
+	-- Table_Name is the table name to be used.
+
+	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
+				Id_Generator	: in Id_Generator_Type := Null ) renames Entity_Registry.Register;
+	-- register an Entity into the Aw_Ent engine
+	-- Auto generate the table name (using the Tag)
+
+
+	procedure Add_Property( Entity_Tag	: in Ada.Tags.Tag;
+				Property	: in Entity_Property_Ptr ) renames Entity_Registry.Add_Property;
+	-- add another property to this entity
+
+	function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type renames Entity_Registry.Get_Information;
+	-- retrieve the entity information by it's tag
+
+	function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List renames Entity_Registry.Get_Properties;
+	-- retrieve the property list for the given entity;
+
+
 private
 
 
