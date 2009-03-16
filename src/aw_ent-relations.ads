@@ -69,6 +69,10 @@ package Aw_Ent.Relations is
 		
 		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type;
 
+		procedure Store_All(
+				Entity			: in out From_Entity_Type;
+				Related_Entities	: in out Related_Entity_Query_Builders.Entity_Vectors.Vector
+			);
 	end One_To_Many_Relation_Handlers;
 
 

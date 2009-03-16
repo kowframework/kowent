@@ -83,7 +83,7 @@ package Aw_Ent is
 
 
 	type ID_Type is record
-		Value : APQ.APQ_Bigserial;
+		Value : APQ.APQ_Bigserial := 1;
 		-- It's a APQ_Bigserial value so it can store
 		-- arbitrary big indexes.
 		--
