@@ -38,10 +38,12 @@
 
 
 
-
+---------------
+-- Ada Works --
+---------------
 with APQ;
-
 with Aw_Ent;
+with Aw_Lib.Locales;
 
 
 package Aw_Ent.Properties is
@@ -90,6 +92,51 @@ package Aw_Ent.Properties is
 				Getter			: in ID_Getter_Type;
 				Setter			: in ID_Setter_Type
 			) return Entity_Property_Ptr;
+
+
+	---------------------
+	-- Locale Property --
+	---------------------
+	type Locale_Getter_Type is not null access function(
+				Entity : in Aw_ent.Entity_Type'Class
+			) return Aw_Lib.Locales.Locale;
+	type Locale_Setter_Type is not null access procedure(
+				Entity : in out Aw_Ent.Entity_Type'Class;
+				Locale : in     Aw_Lib.Locales.Locale
+			);
+
+
+
+	type Locale_Property_Type is new Entity_Property_Type with record
+		Getter			: Locale_Getter_Type;
+		Setter			: Locale_Setter_Type;
+	end record;
+
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+	-- Set the property into the Entity.
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+
+
+	function New_Locale_Property(
+				Column_Name		: in String;
+				Getter			: in Locale_Getter_Type;
+				Setter			: in Locale_Setter_Type
+			) return Entity_Property_Ptr;
+
 
 
 

@@ -8,9 +8,6 @@
 -- $Author: ogro $
 
 with "apq";
-
-
-
 with "awlib";
 
 project AwEnt is
