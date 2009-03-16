@@ -66,7 +66,20 @@ with APQ;
 
 
 package Aw_Ent is
+	-------------------------
+	-- Database Management --
+	-------------------------
+	
+	type Connection_Ptr is access all APQ.Root_Connection_Type'Class;
 
+	procedure Set_Connection( Connection: in Connection_Ptr );
+	-- set the current database connection
+	-- TODO: implement some sort of database pooling
+
+
+	-------------------
+	-- ID Management --
+	-------------------
 
 
 	type ID_Type is record
@@ -89,6 +102,13 @@ package Aw_Ent is
 		-- It's set in Load() and Insert() procedures
 	end record;
 
+	function To_String( ID: in Id_Type ) return String;
+	-- get the ID value as a String
+	
+	-----------------------
+	-- Entity Management --
+	-----------------------
+
 	type Entity_Type is tagged record
 		ID		: ID_Type;
 		-- The only thing that comes with the basic entity is an ID.
@@ -104,19 +124,6 @@ package Aw_Ent is
 
 
 
-	-------------------------
-	-- Database Management --
-	-------------------------
-	
-	type Connection_Ptr is access all APQ.Root_Connection_Type'Class;
-
-	procedure Set_Connection( Connection: in Connection_Ptr );
-	-- set the current database connection
-	-- TODO: implement some sort of database pooling
-	
-	-----------------------
-	-- Entity Management --
-	-----------------------
 
 	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class );
 	-- set all the values from the resulting query

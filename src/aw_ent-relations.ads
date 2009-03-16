@@ -49,6 +49,7 @@ with Ada.Containers.Vectors;
 ---------------
 with Aw_Ent;
 with Aw_Ent.Properties;
+with Aw_Ent.Query_Builders;
 
 
 
@@ -87,19 +88,16 @@ package Aw_Ent.Relations is
 	generic
 		type From_Entity_Type is new Entity_Type with private;
 		type To_Entity_Type is new Entity_Type with private;
-		Relation : Relation_Type;
-	package Relation_Handler is
+		Foreign_Key_Column : String;
+	package One_to_Many_Relation_Handlers is
 		
-		package Related_Entity_Vectors is new Ada.Containers.Vectors(
-					Index_Type	=> Natural,
-					Element_Type	=> To_Entity_Type
-				);
+		package Related_Entity_Query_Builders is new Aw_Ent.Query_Builders( Entity_Type => To_Entity_Type );
 
-		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Vectors.Vector;
+		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Vectors.Vector;
 		
 		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type;
 
-	end Relation_Handler;
+	end One_To_Many_Relation_Handlers;
 
 
 

@@ -55,24 +55,36 @@ with Aw_Ent.Properties;
 package body Aw_Ent.Relations is
 
 
-	package body Relation_Handler is
+	package body One_To_Many_Relation_Handlers is
 		
 		-- package Related_Entity_Vectors is new Ada.Containers.Vectors(
 
-		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Vectors.Vector is
-			-- this is by far not the most efficient implementation
-			Vect : Related_Entity_Vectors.Vector;
+		function Get_Query( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Query_Type is
+			use Related_Entity_Query_Builders;
+			Query : Query_Type;
 		begin
-			return Vect;
+			Append(
+				Q		=> Query,
+				Column		=> Foreign_Key_Column,
+				Value		=> Entity.Id,
+				Appender	=> Appender_And,
+				Operator	=> Operator_Equals
+			);
+			return Query;
+		end Get_Query;
+
+
+		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Vectors.Vector is
+		begin
+			return Related_Entity_Query_Builders.Get_All( Q => Get_Query( Entity ) );
 		end get_All;
 		
 		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type is
-			E : To_Entity_Type;
 		begin
-			return E;
+			return Related_Entity_Query_Builders.Get_First( Q => Get_Query( Entity ), Unique => False );
 		end get_First;
 
-	end Relation_Handler;
+	end One_To_Many_Relation_Handlers;
 
 
 end Aw_Ent.Relations;

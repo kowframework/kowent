@@ -93,6 +93,17 @@ package Aw_Ent.Query_Builders is
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     String;
+				Value	: in     Aw_Ent.Id_Type;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			);
+	-- append a query element to this query
+
+
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
 				Value	: in     String;
 				Appender: in     Logic_Appender := Appender_AND;
 				Operator: in     Logic_Operator := Operator_Equals

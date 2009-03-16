@@ -29,6 +29,7 @@
 ------------------------------------------------------------------------------
 
 
+with Ada.Text_IO;
 --------------
 -- Ada 2005 --
 --------------
@@ -48,6 +49,25 @@ package body Aw_Ent.Query_Builders is
 	-- Query Management --
 	----------------------
 	
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Aw_Ent.Id_Type;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			) is
+	begin
+		Append(
+			Q		=> Q,
+			Column		=> Column,
+			Value		=> To_String( Value ),
+			Appender	=> Appender,
+			Operator	=> Operator
+		);
+	end Append;
+
+
+
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     String;
@@ -245,12 +265,12 @@ package body Aw_Ent.Query_Builders is
 			loop
 				APQ.Fetch( Query );
 				-- if it got here, then check if it's ok to have duplicated results:
-				if not Unique then
+				if Unique then
 					raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
 				end if;
 			end loop;
 		exception
-			when others => null;
+			when APQ.No_Tuple => null;
 		end;
 
 		return Result;

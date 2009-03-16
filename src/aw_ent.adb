@@ -30,8 +30,17 @@
 
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Strings.Fixed;
+with Ada.Strings;
 with Ada.Strings.Hash;
 
+
+---------------
+-- Ada Works --
+---------------
 with Aw_Lib.UString_Vectors;
 
 package body Aw_Ent is
@@ -50,6 +59,14 @@ package body Aw_Ent is
 		My_Connection := Connection;
 	end Set_Connection;
 
+
+
+	function To_String( ID: in Id_Type ) return String is
+		-- get the ID value as a String
+	begin
+		-- TODO: I know there is a better way of doing it but I just can't remember how
+		return Ada.Strings.Fixed.Trim( APQ.APQ_Bigserial'Image( ID.Value ), Ada.Strings.Both );
+	end To_String;
 
 	-----------------------
 	-- Entity Management --
@@ -83,7 +100,11 @@ package body Aw_Ent is
 		begin
 			Set_Property( Property_Lists.Element( C ).all, Entity, Query, My_Connection );
 		end Set_Value;
+		TMP_Id : Integer := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
 	begin
+		Entity.ID		:= To_ID( TMP_Id );
+		Entity.ID.My_Tag	:= Entity'Tag;
+
 		Property_Lists.Iterate( Info.Properties, Set_Value'Access );
 	end Set_Values_From_Query;
 
