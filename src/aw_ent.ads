@@ -105,6 +105,13 @@ package Aw_Ent is
 	function To_String( ID: in Id_Type ) return String;
 	-- get the ID value as a String
 	
+
+	procedure ID_Append is new APQ.Append_Integer( Val_Type => APQ.APQ_Bigserial );
+	-- append an ID value into a query
+	
+	function ID_Value( Query : APQ.Root_Query_Type'Class; CX : APQ.Column_Index_Type) return APQ.APQ_Bigserial;
+	-- get the ID value from a query
+
 	-----------------------
 	-- Entity Management --
 	-----------------------

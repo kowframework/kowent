@@ -65,8 +65,7 @@ package body Aw_Ent.Relations is
 		begin
 			Append(
 				Q		=> Query,
-				Column		=> Foreign_Key_Column,
-				Value		=> Entity.Id,
+				Foreign_Key	=> Entity,
 				Appender	=> Appender_And,
 				Operator	=> Operator_Equals
 			);
@@ -83,6 +82,25 @@ package body Aw_Ent.Relations is
 		begin
 			return Related_Entity_Query_Builders.Get_First( Q => Get_Query( Entity ), Unique => False );
 		end get_First;
+
+		procedure Store_All(
+				Entity			: in out From_Entity_Type;
+				Related_Entities	: in out Related_Entity_Query_Builders.Entity_Vectors.Vector
+			) is
+			
+			use Related_Entity_Query_Builders.Entity_Vectors;
+
+			procedure Iterator( C: in Cursor ) is
+				E : To_entity_Type := Element( C );
+			begin
+				Set_Foreign_Key( Entity => E, Key_From => Entity );
+				Aw_Ent.Store( E );
+				Replace_Element( Related_Entities, C, E );
+			end Iterator;
+		begin
+			Aw_Ent.Store( Entity );
+			Iterate( Related_Entities, Iterator'Access );
+		end Store_All;
 
 	end One_To_Many_Relation_Handlers;
 

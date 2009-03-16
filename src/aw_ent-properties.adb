@@ -54,6 +54,64 @@ with APQ;
 
 package body Aw_Ent.Properties is
 
+
+	-----------------
+	-- Foreign Key --
+	-----------------
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is
+		-- Set the property into the Entity.
+		Column : String := To_String( Property.Column_Name );
+		Index  : APQ.Column_Index_Type := APQ.Column_Index( Q, Column );
+		Value  : APQ.APQ_Bigserial := Aw_Ent.ID_Value( Q, Index );
+		Key    : Aw_Ent.Id_Type;
+	begin
+		Key.Value := Value;
+		Key.My_Tag := Property.Related_Entity_Tag;
+		Property.Setter.all(
+				Entity,
+				Key
+			);
+
+	end Set_Property;
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is
+		Key : Aw_Ent.ID_Type := Property.Getter.All( Entity );
+	begin
+		Aw_Ent.ID_Append( Query, Key.Value  );
+	end Get_Property;
+
+
+	function New_Foreign_Key_Property(
+				Column_Name		: in String;
+				Related_Entity_Tag	: in Ada.Tags.Tag;
+				Getter			: in ID_Getter_Type;
+				Setter			: in ID_Setter_Type
+			) return Entity_Property_Ptr is
+	begin
+		return new Foreign_Key_Property_Type'(
+				Column_Name		=> To_Unbounded_String( Column_Name ),
+				Related_Entity_Tag	=> Related_Entity_Tag,
+				Getter			=> Getter,
+				Setter			=> Setter
+				);
+
+	end New_Foreign_Key_Property;
+
+
+
 	-------------------------------
 	-- Unbounded String property --
 	-------------------------------

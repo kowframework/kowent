@@ -56,39 +56,11 @@ with Aw_Ent.Query_Builders;
 package Aw_Ent.Relations is
 
 
-	type Relation_Type is ( ONE_TO_ONE, ONE_TO_MANY, MANY_TO_MANY );
-
-	type Foreign_Key is record
-		Related_Entity : Ada.Tags.Tag;
-		-- the entity to whom it's the owner of this FK is related.
-
-		Relation : Relation_Type;
-		-- how the entities are related (from this one to the other one)
-
-
-		Helper_Table : Unbounded_String;
-		-- if /= "" maps to a table used to help the relation.
-		-- usefull in MANY_TO_MANY relations but can be used to help other times.
-
-
-		This_ID_Column : Unbounded_String;
-		-- the column name for the ID of this entity
-		-- ignored when Helper_Table = ""
-
-		Other_ID_Column : Unbounded_String;
-		-- the column name for the ID of the related entity.
-	end record;
-
-
-	package Foreign_Key_Lists is new Ada.Containers.Doubly_Linked_Lists(
-				Element_Type	=> Foreign_Key
-			);
-
 
 	generic
 		type From_Entity_Type is new Entity_Type with private;
 		type To_Entity_Type is new Entity_Type with private;
-		Foreign_Key_Column : String;
+		with procedure Set_Foreign_Key( Entity : in out To_Entity_Type; Key_From : in Aw_Ent.Entity_Type'Class );
 	package One_to_Many_Relation_Handlers is
 		
 		package Related_Entity_Query_Builders is new Aw_Ent.Query_Builders( Entity_Type => To_Entity_Type );

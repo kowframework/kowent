@@ -46,7 +46,6 @@ with Aw_Lib.UString_Vectors;
 package body Aw_Ent is
 
 	
-	procedure ID_Append is new APQ.Append_Integer( Val_Type => APQ.APQ_Bigserial );
 
 
 
@@ -67,6 +66,17 @@ package body Aw_Ent is
 		-- TODO: I know there is a better way of doing it but I just can't remember how
 		return Ada.Strings.Fixed.Trim( APQ.APQ_Bigserial'Image( ID.Value ), Ada.Strings.Both );
 	end To_String;
+
+
+	-------------------
+	-- ID Management --
+	-------------------
+	function ID_Value( Query : APQ.Root_Query_Type'Class; CX : APQ.Column_Index_Type) return APQ.APQ_Bigserial is
+		-- get the ID value from a query
+		i : Integer := APQ.Value( Query, CX );
+	begin
+		return APQ.APQ_Bigserial( i );
+	end ID_Value;
 
 	-----------------------
 	-- Entity Management --

@@ -46,6 +46,53 @@ with Aw_Ent;
 
 package Aw_Ent.Properties is
 
+	-----------------
+	-- Foreign Key --
+	-----------------
+	
+	-- this is used to map a foreign key for the entity
+	type ID_Getter_Type is not null access function(
+				Entity	: in Aw_Ent.Entity_Type'Class
+			) return Aw_Ent.ID_Type;
+	type ID_Setter_Type is not null access procedure(
+				Entity	: in out Aw_Ent.Entity_Type'Class;
+				ID	: in     Aw_Ent.ID_Type
+			);
+	
+	type Foreign_Key_Property_Type is new Entity_Property_Type with record
+		Related_Entity_Tag	: Ada.Tags.Tag;
+		Getter			: ID_Getter_Type;
+		Setter			: ID_Setter_Type;
+	end record;
+
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+	-- Set the property into the Entity.
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+
+
+	function New_Foreign_Key_Property(
+				Column_Name		: in String;
+				Related_Entity_Tag	: in Ada.Tags.Tag;
+				Getter			: in ID_Getter_Type;
+				Setter			: in ID_Setter_Type
+			) return Entity_Property_Ptr;
+
+
+
 	-------------------------------
 	-- Unbounded String property --
 	-------------------------------
@@ -55,7 +102,7 @@ package Aw_Ent.Properties is
 			) return Unbounded_String;
 	type UString_Setter_Type is not null access procedure(
 				Entity	: in out Aw_Ent.Entity_Type'Class;
-				Value	: in Unbounded_String
+				Value	: in     Unbounded_String
 			);
 
 	type UString_Property_Type is new Entity_Property_Type with private;
@@ -85,9 +132,14 @@ package Aw_Ent.Properties is
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 private
+	-------------------------------
+	-- Unbounded String property --
+	-------------------------------
 
 	type UString_Property_Type is new Entity_Property_Type with record
 		Getter : UString_Getter_Type;
 		Setter : UString_Setter_Type;
 	end record;
+
+
 end Aw_Ent.Properties;
