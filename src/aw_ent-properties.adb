@@ -112,6 +112,57 @@ package body Aw_Ent.Properties is
 
 
 
+
+
+	----------------------
+	-- Boolean Property --
+	----------------------
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is
+		-- Set the property into the Entity.
+		Index	: APQ.Column_Index_Type := APQ.Column_Index( Q, To_String( Property.Column_Name ) );
+		Value	: Boolean := APQ.Value( Q, Index );
+	begin
+		Property.Setter.all(
+				Entity,
+				Value
+			);
+	end Set_Property;
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is
+		Value : Boolean := Property.Getter.all( Entity );
+	begin
+		APQ.Append( Query, APQ.APQ_Boolean( Value ) );
+	end Get_Property;
+
+
+	function New_Boolean_Property(
+				Column_Name		: in String;
+				Getter			: in Boolean_Getter_Type;
+				Setter			: in Boolean_Setter_Type
+			) return Entity_Property_Ptr is
+	begin
+		return new Boolean_Property_Type'(
+				Column_Name	=> To_Unbounded_String( Column_Name ),
+				Getter		=> Getter,
+				Setter		=> Setter
+			);
+	end New_Boolean_Property;
+
+
+
 	---------------------
 	-- Locale Property --
 	---------------------
@@ -132,6 +183,7 @@ package body Aw_Ent.Properties is
 				Entity,
 				Aw_Lib.Locales.Get_Locale( To_Unbounded_String( Locale_Code ) )
 			);
+
 	end Set_Property;
 
 

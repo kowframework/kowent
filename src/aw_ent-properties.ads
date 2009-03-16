@@ -94,6 +94,50 @@ package Aw_Ent.Properties is
 			) return Entity_Property_Ptr;
 
 
+	----------------------
+	-- Boolean Property --
+	----------------------
+
+	type Boolean_Getter_Type is not null access function(
+				Entity	: in Aw_Ent.Entity_Type'Class
+			) return Boolean;
+	type Boolean_Setter_Type is not null access procedure(
+				Entity	: in out Aw_Ent.Entity_Type'Class;
+				ID	: in     Boolean
+			);
+	
+	type Boolean_Property_Type is new Entity_Property_Type with record
+		Getter			: Boolean_Getter_Type;
+		Setter			: Boolean_Setter_Type;
+	end record;
+
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+	-- Set the property into the Entity.
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+
+
+	function New_Boolean_Property(
+				Column_Name		: in String;
+				Getter			: in Boolean_Getter_Type;
+				Setter			: in Boolean_Setter_Type
+			) return Entity_Property_Ptr;
+
+
+
 	---------------------
 	-- Locale Property --
 	---------------------
