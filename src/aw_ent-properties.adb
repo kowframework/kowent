@@ -37,18 +37,20 @@
 -- TODO :: implement support for more types.
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Strings.Hash;
 
 ---------------
 -- Ada Works --
 ---------------
-
 with Aw_Ent;
 
 
 ---------
 -- APQ --
 ---------
-
 with APQ;
 
 
@@ -259,5 +261,41 @@ package body Aw_Ent.Properties is
 				);
 	end New_UString_Property;
 
+	-----------------------
+	-- Password Property --
+	-----------------------
+	
+	overriding
+	procedure Get_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is
+
+		function Calculate_Hash return String is
+		begin
+			return Aw_Ent.Calculate_Hash(
+					To_String(
+						Property.Getter.All( Entity )
+					)
+				);
+		end Calculate_Hash;
+	begin
+		APQ.Append_Quoted( Query, Connection.all, Calculate_Hash );
+	end Get_Property;
+
+
+	function New_Password_Property(
+				Column_Name	: in     String;
+				Getter		: in     Password_Getter_Type
+			) return Entity_Property_Ptr is
+		-- used to assist the creation of password properties.
+	begin
+		return new Password_Property_Type'(
+				Column_Name	=> To_Unbounded_String( Column_Name ),
+				Getter		=> Getter
+			);
+	end New_Password_Property;
 
 end Aw_Ent.Properties;

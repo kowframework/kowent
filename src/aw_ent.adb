@@ -33,6 +33,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Containers;
 with Ada.Strings.Fixed;
 with Ada.Strings;
 with Ada.Strings.Hash;
@@ -66,6 +67,21 @@ package body Aw_Ent is
 		-- TODO: I know there is a better way of doing it but I just can't remember how
 		return Ada.Strings.Fixed.Trim( APQ.APQ_Bigserial'Image( ID.Value ), Ada.Strings.Both );
 	end To_String;
+
+
+
+	-------------------------
+	-- Password Management --
+	-------------------------
+	function Calculate_Hash( Pwd : in String ) return String is
+		-- return a hashed version of Pwd.
+		-- Used in both Aw_Ent.Properties and Aw_Ent.Query_Builders for handling password fields
+	begin
+		return Ada.Containers.Hash_Type'Image(
+				Ada.Strings.Hash( Pwd )
+			);
+	end Calculate_Hash;
+
 
 
 	-------------------

@@ -90,6 +90,9 @@ package Aw_Ent.Query_Builders is
 	type Query_Ptr is access Query_Type;
 
 
+	--
+	-- Foreign Key
+	--
 	procedure Append(
 				Q		: in out Query_Type;
 				Foreign_Key	: in     Aw_Ent.Entity_Type'Class;
@@ -98,6 +101,9 @@ package Aw_Ent.Query_Builders is
 			);
 	-- append a query element based on foreign key
 	
+	--
+	-- Aw_Ent.ID_Type
+	--
 
 	procedure Append(
 				Q	: in out Query_Type;
@@ -116,6 +122,9 @@ package Aw_Ent.Query_Builders is
 				Operator: in     Logic_Operator := Operator_Equals
 			);
 
+	--
+	-- String
+	--
 
 	procedure Append(
 				Q	: in out Query_Type;
@@ -147,6 +156,45 @@ package Aw_Ent.Query_Builders is
 	-- append a query element to this query
 	
 
+	-- 
+	-- Password
+	--
+	
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			);
+	-- append a query element to this query
+
+
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Unbounded_String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			);
+	-- append a query element to this query
+
+	
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     Unbounded_String;
+				Value	: in     Unbounded_String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			);
+	-- append a query element to this query
+
+
+	--
+	-- Sub Queries
+	--
+
+
 	procedure Append(
 				Q	: in out Query_Type;
 				Child_Q	: in     Query_Type;
@@ -155,6 +203,10 @@ package Aw_Ent.Query_Builders is
 	-- append another query as a child query :: () stuff
 	
 
+
+	--------------------
+	-- IMPLEMENTATION --
+	--------------------
 
 	procedure Append_to_APQ_Query(
 				Q	: in     Query_Type;

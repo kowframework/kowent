@@ -77,6 +77,13 @@ package Aw_Ent is
 	-- TODO: implement some sort of database pooling
 
 
+	-------------------------
+	-- Password Management --
+	-------------------------
+	function Calculate_Hash( Pwd : in String ) return String;
+	-- return a hashed version of Pwd.
+	-- Used in both Aw_Ent.Properties and Aw_Ent.Query_Builders for handling password fields
+
 	-------------------
 	-- ID Management --
 	-------------------

@@ -196,7 +196,11 @@ package Aw_Ent.Properties is
 				Value	: in     Unbounded_String
 			);
 
-	type UString_Property_Type is new Entity_Property_Type with private;
+	type UString_Property_Type is new Entity_Property_Type with record
+		Getter : UString_Getter_Type;
+		Setter : UString_Setter_Type;
+	end record;
+
 
 	overriding
 	procedure Set_Property(	
@@ -222,15 +226,49 @@ package Aw_Ent.Properties is
 				Setter		: in     UString_Setter_Type
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
-private
-	-------------------------------
-	-- Unbounded String property --
-	-------------------------------
 
-	type UString_Property_Type is new Entity_Property_Type with record
-		Getter : UString_Getter_Type;
-		Setter : UString_Setter_Type;
+
+	-----------------------
+	-- Password Property --
+	-----------------------
+
+	type Password_Getter_Type is not null access function(
+				Entity	: in Aw_Ent.Entity_Type'Class
+			) return Unbounded_String;
+
+	type Password_Property_Type is new Entity_Property_Type with record
+		-- A password property is a property that never reads from the database
+		-- it's only used to set a new password.
+		--
+		-- The stored password is Hashed.
+		Getter : Password_Getter_Type;
+		-- get the non-hashed password
 	end record;
 
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			) is null;
+	-- Set the property into the Entity.
+	-- This procedure does nothin'
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+			);
+
+
+	function New_Password_Property(
+				Column_Name	: in     String;
+				Getter		: in     Password_Getter_Type
+			) return Entity_Property_Ptr;
+	-- used to assist the creation of password properties.
 
 end Aw_Ent.Properties;

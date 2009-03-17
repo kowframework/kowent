@@ -50,6 +50,10 @@ package body Aw_Ent.Query_Builders is
 	-- Query Management --
 	----------------------
 	
+	--
+	-- Foreign Key
+	--
+
 	procedure Append(
 				Q		: in out Query_Type;
 				Foreign_Key	: in     Aw_Ent.Entity_Type'Class;
@@ -95,6 +99,8 @@ package body Aw_Ent.Query_Builders is
 	end Append;
 
 
+	-- 
+	-- Aw_Ent.Id_Type
 
 	procedure Append(
 				Q	: in out Query_Type;
@@ -131,6 +137,9 @@ package body Aw_Ent.Query_Builders is
 	end Append;
 
 
+	--
+	-- String 
+	--
 
 	procedure Append(
 				Q	: in out Query_Type;
@@ -190,6 +199,77 @@ package body Aw_Ent.Query_Builders is
 
 		Operator_Vectors.Append( Q.Operators, Handler );
 	end Append;
+
+
+
+
+	-- 
+	-- Password
+	--
+	
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			) is
+		-- append a query element to this query
+	begin
+		Append(
+			Q	=> Q,
+			Column	=> Column,
+			Value	=> Aw_Ent.Calculate_Hash( Value ),
+			Appender=> Appender,
+			Operator=> Operator
+		);
+
+	end Append_Password;
+
+
+
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Unbounded_String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			) is
+		-- append a query element to this query
+	begin
+		Append_Password(
+			Q	=> Q,
+			Column	=> Column,
+			Value	=> To_String( Value ),
+			Appender=> Appender,
+			Operator=> Operator
+		);
+	end Append_Password;
+
+	
+	procedure Append_Password(
+				Q	: in out Query_Type;
+				Column	: in     Unbounded_String;
+				Value	: in     Unbounded_String;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equals
+			) is
+		-- append a query element to this query
+	begin
+		Append_Password(
+			Q	=> Q,
+			Column	=> To_String( Column ),
+			Value	=> To_String( Value ),
+			Appender=> Appender,
+			Operator=> Operator
+		);
+	end Append_Password;
+
+
+	--
+	-- Sub Queries
+	--
+
 
 
 
