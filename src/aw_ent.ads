@@ -230,6 +230,15 @@ package Aw_Ent is
 
 
 
+	function Should_Read( Property : in Entity_Property_Type ) return Boolean;
+	-- Asks if the value should be set from the database or not
+	-- Default :: true
+	-- This is here for the Password_Property_Type (that doesn't read from the database)
+
+	function Should_Store( Property : in Entity_Property_Type; Entity : in Entity_Type'Class ) return Boolean;
+	-- asks if the property for the given entity should be stored or no
+	-- useful to track if the user password has been changed and need to be stored back or not
+	-- Default :: true
 
 	--------------------------------
 	-- Generic Packages Instances --
@@ -363,11 +372,16 @@ private
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 
-	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
+	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
 	-- this procedure is used internally to set a column of values in the fashion of:
 	-- a,b,c,d
 	-- where a, b, c and d are columns of this entity
+	-- This respect the Should_Read method for the property
 
+	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class );
+	-- this procedure is used internally to set a column of values in the fashion of:
+	-- a,b,c,d
+	-- where a, b, c and d are columns of this entity
 
 	------------------------
 	-- Type Specification --

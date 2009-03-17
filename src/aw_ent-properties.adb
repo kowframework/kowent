@@ -274,16 +274,40 @@ package body Aw_Ent.Properties is
 			) is
 
 		function Calculate_Hash return String is
+			Str: Unbounded_String := Property.Getter.All( Entity );
 		begin
-			return Aw_Ent.Calculate_Hash(
-					To_String(
-						Property.Getter.All( Entity )
-					)
-				);
+			if Str = Null_Unbounded_String then
+				return "";
+			else
+				return Aw_Ent.Calculate_Hash(
+						To_String( Str )
+					);
+			end if;
 		end Calculate_Hash;
+
+
+		Hash : String := Calculate_Hash;
 	begin
-		APQ.Append_Quoted( Query, Connection.all, Calculate_Hash );
+		if Hash /= "" then
+			APQ.Append_Quoted( Query, Connection.all, Calculate_Hash );
+		end if;
 	end Get_Property;
+
+	overriding
+	function Should_Read( Property : in Password_Property_Type ) return Boolean is
+		-- The password should never be read from the database, so this is == false
+	begin
+		return False;
+	end Should_Read;
+
+	overriding
+	function Should_Store( Property : in Password_Property_Type; Entity : in Entity_Type'Class ) return Boolean is
+		-- The password should only be stored when changed
+	begin
+		return Property.Getter.All( Entity ) /= Null_Unbounded_String;
+	end Should_Store;
+
+
 
 
 	function New_Password_Property(

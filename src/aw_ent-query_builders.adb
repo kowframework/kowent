@@ -361,7 +361,7 @@ package body Aw_Ent.Query_Builders is
 
 	begin
 		APQ.Prepare( Query, "SELECT id," );
-		Append_Column_Names( Query, Info.Properties );
+		Append_Column_Names_For_Read( Query, Info.Properties );
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query );
 

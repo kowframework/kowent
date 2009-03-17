@@ -263,6 +263,14 @@ package Aw_Ent.Properties is
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+	
+	overriding
+	function Should_Read( Property : in Password_Property_Type ) return Boolean;
+	-- The password should never be read from the database, so this is == false
+
+	overriding
+	function Should_Store( Property : in Password_Property_Type; Entity : in Entity_Type'Class ) return Boolean;
+	-- The password should only be stored when changed
 
 
 	function New_Password_Property(

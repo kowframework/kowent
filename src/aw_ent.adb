@@ -152,7 +152,7 @@ package body Aw_Ent is
 		----------------------
 		
 		APQ.Prepare( Query, "SELECT id," );
-		Append_Column_Names( Query, Info.Properties );
+		Append_Column_Names_For_Read( Query, Info.Properties );
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 		APQ.Append( Query, " WHERE id=" );
 		ID_Append( Query, Entity.ID.Value );
@@ -218,6 +218,25 @@ package body Aw_Ent is
 	begin
 		return Ada.Strings.Hash (Expanded_Name( Key ) );
 	end Hash;
+
+
+
+	function Should_Read( Property : in Entity_Property_Type ) return Boolean is
+		-- Asks if the value should be set from the database or not
+		-- Default :: true
+		-- This is here for the Password_Property_Type (that doesn't read from the database)
+	begin
+		return True;
+	end Should_Read;
+
+	function Should_Store( Property : in Entity_Property_Type; Entity : in Entity_Type'Class ) return Boolean is
+		-- asks if the property for the given entity should be stored or no
+		-- useful to track if the user password has been changed and need to be stored back or not
+		-- Default :: true
+	begin
+		return True;
+	end Should_Store;
+
 
 	-------------------------
 	-- Entity Registration --
@@ -313,23 +332,25 @@ package body Aw_Ent is
 		procedure Update_Appender( C : Property_Lists.Cursor ) is
 			Property: Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
-			if not First_Element then
-				APQ.Append( Query, "," );
-			else
-				First_Element := False;
-			end if;
-
-
-			if Property /= null then
-				APQ.Append(
-					Query,
-					To_String( Property.all.Column_Name ) & "="
-				);
-				
-
-				Get_Property( Property.all, Entity, Query, My_Connection );
-			else
-				raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
+			if Should_Store( Property.all, Entity ) then
+				if not First_Element then
+					APQ.Append( Query, "," );
+				else
+					First_Element := False;
+				end if;
+	
+	
+				if Property /= null then
+					APQ.Append(
+						Query,
+						To_String( Property.all.Column_Name ) & "="
+					);
+					
+	
+					Get_Property( Property.all, Entity, Query, My_Connection );
+				else
+					raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
+				end if;
 			end if;
 		end Update_Appender;
 				
@@ -401,7 +422,7 @@ package body Aw_Ent is
 			"INSERT INTO " & To_String( Info.Table_Name ) & "("
 		);
 
-		Append_Column_Names( Query, Info.Properties );
+		Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 
 		if Info.Id_Generator /= NULL then
 			APQ.Append(
@@ -453,7 +474,7 @@ package body Aw_Ent is
 	-- Other Auxiliar Functions --
 	------------------------------
 
-	procedure Append_Column_Names( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List ) is
+	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List ) is
 		-- this procedure is used internally to set a column of values in the fashion of:
 		-- a,b,c,d
 		-- where a, b, c and d are columns of this entity
@@ -465,18 +486,48 @@ package body Aw_Ent is
 			use Property_Lists;
 			Column: String := To_String( Element( C ).all.Column_Name );
 		begin
-			if not First_Property then
-				APQ.Append( Query, "," );
-			else
-				First_Property := False;
-			end if;
+			if Should_Read( Element( C ).all ) then
+				if not First_Property then
+					APQ.Append( Query, "," );
+				else
+					First_Property := False;
+				end if;
 
-			APQ.Append( Query, Column );
+				APQ.Append( Query, Column );
+			end if;
 		end Set_Column_Names;
 
 	begin
 		Property_Lists.Iterate( Properties, Set_Column_Names'Access );
-	end Append_Column_Names;
+	end Append_Column_Names_For_Read;
+
+
+	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class ) is
+		-- this procedure is used internally to set a column of values in the fashion of:
+		-- a,b,c,d
+		-- where a, b, c and d are columns of this entity
+		-- implementation is at the end of the file
+
+		First_Property: Boolean := True;
+
+		procedure Set_Column_Names( C: Property_Lists.Cursor ) is
+			use Property_Lists;
+			Column: String := To_String( Element( C ).all.Column_Name );
+		begin
+			if Should_Store( Element( C ).all, Entity ) then
+				if not First_Property then
+					APQ.Append( Query, "," );
+				else
+					First_Property := False;
+				end if;
+
+				APQ.Append( Query, Column );
+			end if;
+		end Set_Column_Names;
+
+	begin
+		Property_Lists.Iterate( Properties, Set_Column_Names'Access );
+	end Append_Column_Names_For_Store;
 
 
 end Aw_Ent;
