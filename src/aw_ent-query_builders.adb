@@ -365,6 +365,8 @@ package body Aw_Ent.Query_Builders is
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query );
 
+		--Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+
 
 		APQ.Execute( Query, Aw_Ent.My_Connection.All );
 	end Prepare_and_Run_Query;
