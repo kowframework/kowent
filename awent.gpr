@@ -10,6 +10,9 @@
 with "apq";
 with "awlib";
 
+
+with "adaworks_setup";
+
 project AwEnt is
 
 	version := "0.1.0";
@@ -26,13 +29,7 @@ project AwEnt is
 	-- LIBRARY
 	for Library_Dir use "lib";
 	for Library_Name use "awent";
-	case target is
-		when "Windows_NT" =>
-			for Library_Kind use "static";
-
-		when "GNU/Linux" =>
-			for Library_Kind use "dynamic";
-	end case;
+	for Library_Kind use AdaWorks_Setup'Library_Kind;
 	for Library_Version use "libawent.so." & Version;
 	
 	
