@@ -14,3 +14,7 @@ all: libs
 
 libs:
 	gnatmake -P ${PROJECT}
+
+
+clean:
+	gnatclean -P ${PROJECT}
