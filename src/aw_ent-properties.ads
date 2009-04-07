@@ -33,10 +33,12 @@
 -- This package contains all from factory supported property type handlers.
 -- 
 --
--- NOTE :: for now the only type implemented is Unbounded_String
--- TODO :: implement support for more types.
-
-
+-- TODO: implement support for delta types (maybe in another - generic - package)
+-- TODO: implement support for integer types (maybe in another - generic - package)
+-- TODO: implement support for float types (maybe in another - generic - package)
+--
+-- TODO: think about changin all the above implementation into generic packages, one for each
+-- property type and then instanciate all of them here for the lazy ones
 
 ---------------
 -- Ada Works --
