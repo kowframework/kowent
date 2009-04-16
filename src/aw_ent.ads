@@ -222,13 +222,24 @@ package Aw_Ent is
 
 	procedure Get_Property(
 				Property	: in     Entity_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Connection_Ptr			-- the connection that belongs the query
 			) is abstract;
 	-- Append into a query being created by the main Aw_ent engine.
 
 
+	procedure Set_Property(
+				Property	: in     Entity_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is abstract;
+	-- Set the property from a String representation of the value
+	
+	function Get_Property(
+				Property	: in     Entity_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is abstract;
 
 	function Should_Read( Property : in Entity_Property_Type ) return Boolean;
 	-- Asks if the value should be set from the database or not

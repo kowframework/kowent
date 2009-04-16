@@ -86,7 +86,7 @@ package body Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			) is
@@ -94,6 +94,36 @@ package body Aw_Ent.Properties is
 	begin
 		Aw_Ent.ID_Append( Query, Key.Value  );
 	end Get_Property;
+
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+		Key : Aw_Ent.Id_Type;
+	begin
+		Key.Value  := APQ.APQ_Bigserial'Value( Value );
+		Key.My_Tag := Property.Related_Entity_Tag;
+		Property.Setter.all(
+				Entity,
+				Key
+			);
+	end Set_Property;
+	
+	overriding
+	function Get_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+		Value	: Aw_Ent.ID_Type := Property.Getter.All( Entity );
+	begin
+		return APQ.APQ_Bigserial'Image( Value.Value );
+	end Get_Property;
+
 
 
 	function New_Foreign_Key_Property(
@@ -140,7 +170,7 @@ package body Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Boolean_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			) is
@@ -148,6 +178,33 @@ package body Aw_Ent.Properties is
 	begin
 		APQ.Append( Query, APQ.APQ_Boolean( Value ) );
 	end Get_Property;
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+		Bool_Value : Boolean := Boolean'Value( Value );
+	begin
+		Property.Setter.all(
+				Entity,
+				Bool_Value
+			);
+	end Set_Property;
+	
+	overriding
+	function Get_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+	begin
+		return Boolean'Image( Property.Getter.all( Entity ) );
+	end Get_Property;
+
+
 
 
 	function New_Boolean_Property(
@@ -192,7 +249,7 @@ package body Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Locale_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			) is
@@ -200,6 +257,32 @@ package body Aw_Ent.Properties is
 	begin
 		APQ.Append_Quoted( Query, Connection.all, To_String( Locale.CODE ) );
 	end Get_Property;
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+	begin
+		Property.Setter.all(
+				Entity,
+				Aw_Lib.Locales.Get_Locale( To_Unbounded_String( Value ) )
+			);
+	end Set_Property;
+	
+	overriding
+	function Get_Property(
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+		Locale : Aw_Lib.Locales.Locale := Property.Getter.all( Entity );
+	begin
+		return To_String( Locale.CODE );
+	end Get_Property;
+
 
 	function New_Locale_Property(
 				Column_Name		: in String;
@@ -238,12 +321,32 @@ package body Aw_Ent.Properties is
 
 	procedure Get_Property(
 				Property	: in     UString_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			) is
 	begin
 		APQ.Append_Quoted( Query, Connection.all, To_String( Property.Getter.All( Entity ) ) );
+	end Get_Property;
+
+	overriding
+	procedure Set_Property(
+				Property	: in     UString_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+	begin
+		Property.Setter.all( Entity, To_Unbounded_String( Value ) );
+	end Set_Property;
+	
+	overriding
+	function Get_Property(
+				Property	: in     UString_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+	begin
+		return To_String( Property.Getter.all( Entity ) );
 	end Get_Property;
 
 
@@ -268,7 +371,7 @@ package body Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Password_Property_Type;	-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			) is
@@ -293,6 +396,32 @@ package body Aw_Ent.Properties is
 		end if;
 	end Get_Property;
 
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+	begin
+		if Property.Setter /= null then
+			Property.Setter.all( Entity, To_Unbounded_String( Value ) );
+		end if;
+	end Set_Property;
+	
+	overriding
+	function Get_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+	begin
+		return To_String( Property.Getter.all( Entity ) );
+	end Get_Property;
+
+
+
+
 	overriding
 	function Should_Read( Property : in Password_Property_Type ) return Boolean is
 		-- The password should never be read from the database, so this is == false
@@ -312,13 +441,15 @@ package body Aw_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: in     Password_Getter_Type
+				Getter		: in     Password_Getter_Type;
+				Setter		: in     Password_Setter_Type := null
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of password properties.
 	begin
 		return new Password_Property_Type'(
 				Column_Name	=> To_Unbounded_String( Column_Name ),
-				Getter		=> Getter
+				Getter		=> Getter,
+				Setter		=> Setter
 			);
 	end New_Password_Property;
 

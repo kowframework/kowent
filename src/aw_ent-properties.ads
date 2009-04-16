@@ -82,10 +82,26 @@ package Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     Foreign_Key_Property_Type;	-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+
+
 
 
 	function New_Foreign_Key_Property(
@@ -126,10 +142,25 @@ package Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Boolean_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     Boolean_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+
 
 
 	function New_Boolean_Property(
@@ -171,10 +202,26 @@ package Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Locale_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     Locale_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+
+
 
 
 	function New_Locale_Property(
@@ -216,10 +263,27 @@ package Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     UString_Property_Type;		-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     UString_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     UString_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+
 
 
 	function New_UString_Property(
@@ -238,6 +302,13 @@ package Aw_Ent.Properties is
 				Entity	: in Aw_Ent.Entity_Type'Class
 			) return Unbounded_String;
 
+	type Password_Setter_Type is access procedure(
+				Entity	: in out Aw_Ent.Entity_Type'Class;
+				Password: in     Unbounded_String
+			);
+	-- NOTE:: the password setter type CAN be null!
+		
+
 	type Password_Property_Type is new Entity_Property_Type with record
 		-- A password property is a property that never reads from the database
 		-- it's only used to set a new password.
@@ -245,7 +316,11 @@ package Aw_Ent.Properties is
 		-- The stored password is Hashed.
 		Getter : Password_Getter_Type;
 		-- get the non-hashed password
+
+
+		Setter : Password_Setter_Type;
 	end record;
+
 
 
 	overriding
@@ -261,10 +336,25 @@ package Aw_Ent.Properties is
 	overriding
 	procedure Get_Property(
 				Property	: in     Password_Property_Type;	-- the property worker
-				Entity		: in out Entity_Type'Class;		-- the entity
+				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
 			);
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     Password_Property_Type;	-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+		
 	
 	overriding
 	function Should_Read( Property : in Password_Property_Type ) return Boolean;
@@ -277,8 +367,10 @@ package Aw_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: in     Password_Getter_Type
+				Getter		: in     Password_Getter_Type;
+				Setter		: in     Password_Setter_Type := null
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
+	-- when Setter is NULL, aw_view-entity_forms won't work for this property
 
 end Aw_Ent.Properties;
