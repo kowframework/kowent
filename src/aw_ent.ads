@@ -70,6 +70,10 @@ package Aw_Ent is
 	-- Database Management --
 	-------------------------
 	
+
+	No_Factory : Exception;
+	-- used when trying to produce an entity object with no factory in it's registry
+
 	type Connection_Ptr is access all APQ.Root_Connection_Type'Class;
 
 	procedure Set_Connection( Connection: in Connection_Ptr );
@@ -265,6 +269,7 @@ package Aw_Ent is
 	-- Where the entity is described..
 	--
 	
+	type Entity_Factory_Type is access function return Entity_Type'Class;
 	type Entity_Information_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		-- just for internal reference (maybe we'll need it at some point?).
@@ -283,6 +288,7 @@ package Aw_Ent is
 		-- They are stored in a doubly linked list because of better memory usage than vector
 		-- and because we only query this list in a sequential (be it forward or backward) way
 
+		Factory		: Entity_Factory_Type;
 	end record;
 
 	function Hash(Key : Ada.Tags.Tag) return Ada.Containers.Hash_Type;
@@ -314,12 +320,14 @@ package Aw_Ent is
 
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
-					Id_Generator	: in Id_Generator_Type := Null );
+					Id_Generator	: in Id_Generator_Type := Null;
+					Factory		: in Entity_Factory_Type := Null );
 		-- register an Entity into the Aw_Ent engine
 		-- Table_Name is the table name to be used.
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-					Id_Generator	: in Id_Generator_Type := Null );
+					Id_Generator	: in Id_Generator_Type := Null;
+					Factory		: in Entity_Factory_Type := Null );
 		-- register an Entity into the Aw_Ent engine
 		-- Auto generate the table name (using the Tag)
 
@@ -334,6 +342,8 @@ package Aw_Ent is
 		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List;
 		-- retrieve the property list for the given entity;
 
+		function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class;
+		-- produce a new entity
 	private
 		My_Entities	: Entity_Information_Maps.Map;
 	end Entity_Registry;
@@ -344,12 +354,14 @@ package Aw_Ent is
 	--------------------------------
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 				Table_Name	: in String;
-				Id_Generator	: in Id_Generator_Type := Null ) renames Entity_Registry.Register;
+				Id_Generator	: in Id_Generator_Type := Null;
+				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
 	-- register an Entity into the Aw_Ent engine
 	-- Table_Name is the table name to be used.
 
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-				Id_Generator	: in Id_Generator_Type := Null ) renames Entity_Registry.Register;
+				Id_Generator	: in Id_Generator_Type := Null;
+				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
 	-- register an Entity into the Aw_Ent engine
 	-- Auto generate the table name (using the Tag)
 
@@ -363,6 +375,11 @@ package Aw_Ent is
 
 	function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List renames Entity_Registry.Get_Properties;
 	-- retrieve the property list for the given entity;
+	
+
+	function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class renames Entity_Registry.New_Entity;
+	-- creates a new entity object returning it
+	-- raises No_Factory if the entity has been created without one
 
 
 private

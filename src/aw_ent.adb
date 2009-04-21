@@ -246,7 +246,8 @@ package body Aw_Ent is
 	protected body Entity_Registry is
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
-					Id_Generator	: in Id_Generator_Type := Null ) is
+					Id_Generator	: in Id_Generator_Type := Null;
+					Factory		: in Entity_Factory_Type := Null ) is
 			-- register an Entity into the Aw_Ent engine
 			-- Table_Name is the table name to be used.
 
@@ -268,7 +269,8 @@ package body Aw_Ent is
 		end Register;
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-					Id_Generator	: in Id_Generator_Type := Null ) is
+					Id_Generator	: in Id_Generator_Type := Null;
+					Factory		: in Entity_Factory_Type := Null ) is
 			-- register an Entity into the Aw_Ent engine
 			-- Auto generate the table name (using the Tag)
 		begin
@@ -311,6 +313,17 @@ package body Aw_Ent is
 		begin
 			return Get_Information( Entity_Tag ).Properties;
 		end Get_Properties;
+
+		function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class is
+			-- produce a new entity
+			Info : Entity_information_Type := Get_Information( Entity_Tag );
+		begin
+			if Info.Factory = Null then
+				raise No_Factory with "No factory registered for entity :: """ & Expanded_Name( Entity_Tag ) & """";
+			end if;
+
+			return Info.Factory.all;
+		end New_Entity;
 
 	end Entity_Registry;
 
