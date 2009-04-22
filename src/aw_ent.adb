@@ -33,10 +33,12 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Characters.Handling;
 with Ada.Containers;
-with Ada.Strings.Fixed;
 with Ada.Strings;
+with Ada.Strings.Fixed;
 with Ada.Strings.Hash;
+with Ada.Strings.Unbounded;
 
 
 ---------------
@@ -214,9 +216,9 @@ package body Aw_Ent is
 
 
 
-	function Hash(Key : Ada.Tags.Tag) return Ada.Containers.Hash_Type is
+	function Hash(Key : Ada.Strings.Unbounded.Unbounded_String) return Ada.Containers.Hash_Type is
 	begin
-		return Ada.Strings.Hash (Expanded_Name( Key ) );
+		return Ada.Strings.Hash (Ada.Strings.Unbounded.To_String( Key ) );
 	end Hash;
 
 
@@ -243,6 +245,33 @@ package body Aw_Ent is
 	-------------------------
 
 
+	function To_UString( Str : in String ) return Unbounded_String is
+	begin
+		return Ada.Strings.Unbounded.To_Unbounded_String(
+				Ada.Characters.Handling.To_Lower(
+					Ada.Strings.Fixed.Trim(
+							Str,
+							Ada.Strings.Both
+						)
+					)
+				);
+	end To_UString;
+
+
+	function To_UString( T : in Ada.Tags.Tag ) return Unbounded_String is
+		Str : String := Ada.Tags.Expanded_Name( T );
+	begin
+		return To_UString( Str );
+	end To_UString;
+
+	function To_UString( U : in Ada.Strings.Unbounded.Unbounded_String ) return Unbounded_String is
+		Str : String := Ada.Strings.Unbounded.To_String( U );
+	begin
+
+		return To_UString( Str );
+	end To_UString;
+
+
 	protected body Entity_Registry is
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
@@ -256,10 +285,11 @@ package body Aw_Ent is
 			Info.Entity_Tag   := Entity_Tag;
 			Info.Table_Name	  := To_Unbounded_String( Table_Name );
 			Info.Id_Generator := Id_Generator;
+			Info.Factory      := Factory;
 
 			Entity_Information_Maps.Insert(
 				Container	=> My_Entities,
-				Key		=> Entity_Tag,
+				Key		=> To_UString( Entity_Tag ),
 				New_Item	=> Info
 			);
 		exception
@@ -277,7 +307,8 @@ package body Aw_Ent is
 			Register(
 				Entity_Tag	=> Entity_Tag,
 				Table_Name	=> Expanded_Name( Entity_Tag ),
-				Id_Generator	=> Id_Generator
+				Id_Generator	=> Id_Generator,
+				Factory		=> Factory
 			);
 		end Register;
 	
@@ -287,11 +318,11 @@ package body Aw_Ent is
 			-- add another property to this entity
 			Info : Entity_Information_Type;
 		begin
-			Info := Entity_Information_Maps.Element( My_Entities, Entity_Tag );
+			Info := Entity_Information_Maps.Element( My_Entities, To_UString( Entity_Tag ) );
 			Property_Lists.Append( Info.Properties, Property );
 			-- we add the entity to the list we retrieved.
 
-			Entity_Information_Maps.Include( My_Entities, Entity_Tag, Info );
+			Entity_Information_Maps.Include( My_Entities, To_UString( Entity_Tag ), Info );
 			-- and now we replace the existing entity registry
 		exception
 			when Constraint_Error =>
@@ -301,18 +332,33 @@ package body Aw_Ent is
 
 		function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type is
 		begin
-			return Entity_Information_Maps.Element( My_Entities, Entity_Tag );
+			return Entity_Information_Maps.Element( My_Entities, To_UString( Entity_Tag ) );
 		exception
 			when Constraint_Error =>
 				raise Constraint_Error with "Unknown entity :: """ & Expanded_Name( Entity_Tag ) & """";
 		end Get_Information;
 
+		function Get_Information( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Information_Type is
+			-- retrieve the entity information by it's tag's expanded name
+		begin
+			return Entity_Information_Maps.Element( My_Entities, To_UString( Entity_Tag ) );
+		exception
+			when Constraint_Error =>
+				raise Constraint_Error with "Unknown entity :: """ &  To_String ( Entity_Tag ) & """";
+		end Get_Information;
 
 		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List is
 			-- retrieve the property list for the given entity;
 		begin
 			return Get_Information( Entity_Tag ).Properties;
 		end Get_Properties;
+		
+		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List is
+			-- retrieve the property list for the given entity;
+		begin
+			return Get_Information( Entity_Tag ).Properties;
+		end Get_Properties;
+
 
 		function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class is
 			-- produce a new entity
@@ -320,6 +366,18 @@ package body Aw_Ent is
 		begin
 			if Info.Factory = Null then
 				raise No_Factory with "No factory registered for entity :: """ & Expanded_Name( Entity_Tag ) & """";
+			end if;
+
+			return Info.Factory.all;
+		end New_Entity;
+
+
+		function New_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Type'Class is
+			-- produce a new entity
+			Info : Entity_information_Type := Get_Information( Entity_Tag );
+		begin
+			if Info.Factory = Null then
+				raise No_Factory with "No factory registered for entity :: """ & Ada.Strings.Unbounded.To_String( Entity_Tag ) & """";
 			end if;
 
 			return Info.Factory.all;

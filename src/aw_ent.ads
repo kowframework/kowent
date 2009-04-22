@@ -291,16 +291,16 @@ package Aw_Ent is
 		Factory		: Entity_Factory_Type;
 	end record;
 
-	function Hash(Key : Ada.Tags.Tag) return Ada.Containers.Hash_Type;
+	function Hash(Key : Ada.Strings.Unbounded.Unbounded_String ) return Ada.Containers.Hash_Type;
 --	function Ada.Strings.Hash (Key : String) return Containers.Hash_Type;
 
 
 	
 	package Entity_Information_Maps is new Ada.Containers.Hashed_Maps(
-				Key_Type	=> Ada.Tags.Tag,
+				Key_Type	=> Ada.Strings.Unbounded.Unbounded_String,
 				Element_Type	=> Entity_Information_Type,
 				Hash		=> Hash,
-				Equivalent_Keys	=> Ada.Tags."="
+				Equivalent_Keys	=> Ada.Strings.Unbounded."="
 			);
 	-- this is used to map an entity tag to it's properties
 
@@ -339,11 +339,21 @@ package Aw_Ent is
 		function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type;
 		-- retrieve the entity information by it's tag
 
+		function Get_Information( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Information_Type;
+		-- retrieve the entity information by it's tag's expanded name
+
 		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List;
+		-- retrieve the property list for the given entity;
+
+		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List;
 		-- retrieve the property list for the given entity;
 
 		function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class;
 		-- produce a new entity
+		
+		function New_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Type'Class;
+		-- produce a new entity
+
 	private
 		My_Entities	: Entity_Information_Maps.Map;
 	end Entity_Registry;
@@ -375,11 +385,15 @@ package Aw_Ent is
 
 	function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List renames Entity_Registry.Get_Properties;
 	-- retrieve the property list for the given entity;
-	
+
+	function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List renames Entity_Registry.Get_Properties;
 
 	function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class renames Entity_Registry.New_Entity;
 	-- creates a new entity object returning it
 	-- raises No_Factory if the entity has been created without one
+
+	function New_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Type'Class renames Entity_Registry.New_Entity;
+
 
 
 private
