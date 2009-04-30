@@ -317,6 +317,12 @@ package body Aw_Ent.Properties is
 				Entity,
 				To_Unbounded_String( Value )
 			);
+	exception
+		when APQ.Null_Value =>
+			Property.Setter.all(
+				Entity,
+				Property.Default_Value
+			);
 	end Set_Property;
 
 	procedure Get_Property(
@@ -353,14 +359,16 @@ package body Aw_Ent.Properties is
 	function New_UString_Property(
 				Column_Name	: in     String;
 				Getter		: in     UString_Getter_Type;
-				Setter		: in     UString_Setter_Type
+				Setter		: in     UString_Setter_Type;
+				Default_Value	: in     String := "N/A"
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of UString properties.
 	begin
 		return new UString_Property_Type'(
 				Column_Name	=> To_Unbounded_String( Column_Name ),
 				Getter		=> Getter,
-				Setter		=> Setter
+				Setter		=> Setter,
+				Default_Value	=> To_Unbounded_String( Default_Value )
 				);
 	end New_UString_Property;
 

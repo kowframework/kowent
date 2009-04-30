@@ -246,8 +246,9 @@ package Aw_Ent.Properties is
 			);
 
 	type UString_Property_Type is new Entity_Property_Type with record
-		Getter : UString_Getter_Type;
-		Setter : UString_Setter_Type;
+		Getter		: UString_Getter_Type;
+		Setter		: UString_Setter_Type;
+		Default_Value	: Unbounded_String;
 	end record;
 
 
@@ -289,9 +290,11 @@ package Aw_Ent.Properties is
 	function New_UString_Property(
 				Column_Name	: in     String;
 				Getter		: in     UString_Getter_Type;
-				Setter		: in     UString_Setter_Type
+				Setter		: in     UString_Setter_Type;
+				Default_Value	: in     String := "N/A"
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
+	-- default_value represents the value to be set when the one retoner from database is NULL
 
 
 	-----------------------
