@@ -489,6 +489,11 @@ package body Aw_Ent is
 		procedure Insert_Appender( C: in Property_Lists.Cursor ) is
 			Property: Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
+			if not Should_Store( Property.all, Entity ) then
+				-- if there is nothing to store here, simply ignores this one property
+				return;
+			end if;
+
 			if not First_Element then
 				APQ.Append( Query, "," );
 			else
@@ -538,8 +543,6 @@ package body Aw_Ent is
 		end if;
 
 		APQ.Append( Query, ")" );
-
-		Log( APQ.To_String( Query ) );
 
 		-------------------
 		-- SQL Execution --
