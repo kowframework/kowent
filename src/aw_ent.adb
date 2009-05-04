@@ -44,11 +44,28 @@ with Ada.Strings.Unbounded;
 ---------------
 -- Ada Works --
 ---------------
+with Aw_Lib.Log;
 with Aw_Lib.UString_Vectors;
 
 package body Aw_Ent is
 
 	
+	Logger : Aw_Lib.Log.Logger_Type := 
+			Aw_Lib.Log.Get_Logger( "Aw_Ent" );
+	
+
+	procedure Log(
+			Message : in String;
+			Level : Aw_Lib.Log.Log_Level := Aw_lib.Log.Level_Info
+		) is
+	begin
+		Aw_lib.Log.Log(
+				Logger	=> Logger,
+				Level	=> Level,
+				Message	=> Message
+			);
+	end Log;
+
 
 
 
@@ -204,8 +221,10 @@ package body Aw_Ent is
 
 	begin
 		if Entity.ID.My_Tag = No_Tag then
+			Log( "inserting entity" );
 			Insert( Entity, Recover_ID );
 		else
+			Log( "updating entity" );
 			Save( Entity );
 		end if;
 		
@@ -519,6 +538,8 @@ package body Aw_Ent is
 		end if;
 
 		APQ.Append( Query, ")" );
+
+		Log( APQ.To_String( Query ) );
 
 		-------------------
 		-- SQL Execution --
