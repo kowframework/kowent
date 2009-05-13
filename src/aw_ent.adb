@@ -548,6 +548,7 @@ package body Aw_Ent is
 		-- SQL Execution --
 		-------------------
 
+		Log( "Will run :: " & APQ.To_String( Query ) , Aw_Lib.Log.Level_Debug );
 		APQ.Execute( Query, My_Connection.all );
 
 		if Recover_ID then
