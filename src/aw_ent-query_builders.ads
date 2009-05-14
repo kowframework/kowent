@@ -32,7 +32,7 @@
 -- This is a generic package to assist building queries for retrieving your
 -- data from the Database
 --
--- @author Marcelo C. de Freitas <mfreitas@ydeasolutions.com.br>
+-- @author Marcelo C. de Freitas <marcelo@kow.com.br>
 
 
 --------------
