@@ -57,6 +57,10 @@ with Ada.Tags;					use Ada.Tags;
 ---------------
 -- Ada Works --
 ---------------
+with Aw_Config;
+with Aw_Config.Generic_Registry;
+with Aw_Config.Text;
+with Aw_Lib.Locales;
 with Aw_Lib.UString_Vectors;
 
 ---------
@@ -141,6 +145,10 @@ package Aw_Ent is
 	end record;
 
 
+	function To_String( Entity : in Entity_Type ) return String;
+	-- return the string representation for this entity
+	-- as default, return the ID as String.
+	-- Should be overriden to something that makes more sence
 
 
 	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class );
@@ -159,6 +167,77 @@ package Aw_Ent is
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 	
+
+	-- NOTE :: How the Entity Labels should work ::
+	--
+	-- They should be stored in an instance of Aw_Config·Generic_Registry
+	-- Each configuration file name as in name1.name2 is mapped to the tag name1.name2 (all lower case).
+	-- The entity label is set by the key "entity_label". All other labels are the property name. All lower case.
+
+
+	type Label_Getter is record
+		Id	: Unbounded_String;
+		Config	: Aw_Config.Config_File;
+	end record;
+
+	package Labels is new Aw_Config.Generic_Registry(
+					Element_Type	=> Label_Getter,
+					Relative_Path	=> "awent/labels",
+					Parser		=> new Aw_Config.Text.Parser
+				);
+
+	function Get_Label( Getter : in Label_Getter; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String;
+	-- get a label for this getter
+	
+	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String;
+	-- get a label for a property in this getter
+
+
+	
+
+
+	function Get_Label(
+				Entity : in Entity_Type'Class;
+				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String;
+	-- get the Label for this entity type as string
+	
+	function Get_Label(
+				Entity : in Entity_Type'Class;
+				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String;
+	-- get the Label for this entity type as unbounded_string
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String;
+	-- get the Label for the given property of this entity type as string
+		
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String;
+	-- get the Label for given property of this entity type as unbounded_string
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in Unbounded_String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String;
+	-- get the Label for the given property of this entity type as string
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in Unbounded_String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String;
+	-- get the Label for given property of this entity type as unbounded_string
+
+
+
 	-- TODO: implement Narrow
 	-- procedure Narrow( From : in Entity_Type'Class; To: out Entity_Type'Class );
 	-- narrow an entity to it's parent/child preserving/restoring properties

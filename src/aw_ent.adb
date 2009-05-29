@@ -45,6 +45,7 @@ with Ada.Strings.Unbounded;
 -- Ada Works --
 ---------------
 with Aw_Lib.Log;
+with Aw_Lib.String_Util;
 with Aw_Lib.UString_Vectors;
 
 package body Aw_Ent is
@@ -135,6 +136,15 @@ package body Aw_Ent is
 		My_ID.My_Tag := Tag;
 		return My_ID;
 	end To_ID;
+
+
+	function To_String( Entity : in Entity_Type ) return String is
+		-- return the string representation for this entity
+		-- as default, return the ID as String.
+		-- Should be overriden to something that makes more sence
+	begin
+		return To_String( Entity.Id );
+	end To_String;
 
 	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class ) is
 		-- set all the values from the resulting query
@@ -230,6 +240,123 @@ package body Aw_Ent is
 		
 		-- Construct_SQL( Table_Name( Entity'Tag ), Keys, Values );
 	end Store;
+
+
+	-- NOTE :: How the Entity Labels should work ::
+	--
+	-- They should be stored in an instance of Aw_Config·Generic_Registry
+	-- Each configuration file name as in name1.name2 is mapped to the tag name1.name2 (all lower case).
+	-- The entity label is set by the key "entity_label". All other labels are the property name. All lower case.
+
+
+	function Standard_Label_Getter_Factory( Id : in String; Config : Aw_Config.Config_File ) return Label_Getter is
+		G: Label_Getter;
+	begin
+		G.Id		:= To_Unbounded_String( Id );
+		G.Config	:= Config;
+		return G;
+	end Standard_Label_Getter_Factory;
+
+
+	function Get_Label( Getter : in Label_Getter; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String is
+		-- get a label for this getter
+	begin
+		return Aw_Config.Element( Getter.Config, To_Unbounded_String( "entity_label" ), Locale.CODE );
+	end Get_Label;
+
+	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String is
+		-- get a label for a property in this getter
+	begin
+		return Aw_Config.Element( Getter.Config, Property, Locale.CODE );
+	end Get_Label;
+
+	function Get_Label(
+				Entity : in Entity_Type'Class;
+				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String is
+		-- get the Label for this entity type as string
+	begin
+		return To_String( Get_Label( Entity, Locale ) );
+	end Get_Label;
+	
+
+
+	function Get_Label(
+				Entity : in Entity_Type'Class;
+				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String is
+		-- TODO get the Label for this entity type as unbounded_string
+		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
+	begin
+		Aw_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
+		return Get_Label(
+				Labels.Registry.Get( '/' & Str_Tag ),
+				Locale
+			);
+	exception
+		when others =>
+			return To_Unbounded_String( '[' & Ada.Tags.Expanded_Name( Entity'Tag ) & ']' );
+	end Get_Label;
+	
+
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String is
+		-- get the Label for the given property of this entity type as string
+	begin
+		return To_String( Get_Label( Entity, To_Unbounded_String( Property ), Locale ) );
+	end Get_Label;
+	
+
+	
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String is
+		-- get the Label for given property of this entity type as unbounded_string
+	begin
+		return Get_Label( Entity, To_Unbounded_String( Property ), Locale );
+	end Get_Label;
+
+
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in Unbounded_String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return String is
+		-- get the Label for the given property of this entity type as string
+	begin
+		return To_String( Get_Label( Entity, Property, Locale ) );
+	end Get_Label;
+
+
+	function Get_Label(
+				Entity		: in Entity_Type'Class;
+				Property	: in Unbounded_String;
+				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			) return Unbounded_String is
+		-- get the Label for given property of this entity type as unbounded_string
+		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
+	begin
+		Aw_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
+		return Get_Label(
+				Labels.Registry.Get( '/' & Str_Tag ),
+				Property,
+				Locale
+			);
+	exception
+		when others =>
+			return To_Unbounded_String( '[' & Ada.Tags.Expanded_Name( Entity'Tag ) & "::" )  & Property & ']';
+	end Get_Label;
 
 
 
@@ -626,4 +753,6 @@ package body Aw_Ent is
 	end Append_Column_Names_For_Store;
 
 
+begin
+	Labels.Factory_Registry.Register( "standard", Standard_Label_Getter_Factory'Access );
 end Aw_Ent;
