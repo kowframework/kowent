@@ -242,6 +242,37 @@ package body Aw_Ent is
 	end Store;
 
 
+
+	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type is
+		-- get all IDs from a given entity
+		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+
+
+		function Inner_Get_All_Ids return ID_Array_Type is
+			Ret : ID_Array_Type( 1 .. 1 );
+			TMP_Id : Integer;
+			ID : ID_Type;
+			
+		begin
+			APQ.Fetch( Query );
+
+			TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
+			ID := To_ID( TMP_Id );
+			ID.My_Tag := Entity_Tag;
+			Ret( 1 ) := ID;
+
+			return Ret & Inner_Get_All_Ids;
+		exception
+			when APQ.No_Tuple => return Ret( 1 .. 0 );
+		end Inner_Get_All_Ids;
+	begin
+		APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+		APQ.Execute( Query, My_Connection.all );
+
+		return Inner_Get_All_Ids;
+	end Get_All_IDs;
+
 	-- NOTE :: How the Entity Labels should work ::
 	--
 	-- They should be stored in an instance of Aw_Config·Generic_Registry

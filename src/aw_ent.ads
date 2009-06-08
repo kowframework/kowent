@@ -117,6 +117,7 @@ package Aw_Ent is
 		-- It's set in Load() and Insert() procedures
 	end record;
 
+
 	function To_String( ID: in Id_Type ) return String;
 	-- get the ID value as a String
 	
@@ -126,6 +127,7 @@ package Aw_Ent is
 	
 	function ID_Value( Query : APQ.Root_Query_Type'Class; CX : APQ.Column_Index_Type) return APQ.APQ_Bigserial;
 	-- get the ID value from a query
+
 
 	-----------------------
 	-- Entity Management --
@@ -167,6 +169,14 @@ package Aw_Ent is
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 	
+
+	type ID_Array_Type is Array( Natural range <> ) of ID_Type;
+	-- used to list IDs for any entity type
+	
+	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type;
+	-- get all IDs from a given entity
+
+
 
 	-- NOTE :: How the Entity Labels should work ::
 	--
