@@ -176,6 +176,9 @@ package Aw_Ent is
 	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type;
 	-- get all IDs from a given entity
 
+	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type;
+	-- get all IDs from a given entity
+
 
 
 	-- NOTE :: How the Entity Labels should work ::
