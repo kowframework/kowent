@@ -66,7 +66,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		-- Set the property into the Entity.
 		Column : String := To_String( Property.Column_Name );
@@ -88,7 +88,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		Key : Aw_Ent.ID_Type := Property.Getter.All( Entity );
 	begin
@@ -155,7 +155,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Boolean_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		-- Set the property into the Entity.
 		Index	: APQ.Column_Index_Type := APQ.Column_Index( Q, To_String( Property.Column_Name ) );
@@ -172,7 +172,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Boolean_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		Value : Boolean := Property.Getter.all( Entity );
 	begin
@@ -231,7 +231,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Locale_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		-- Set the property into the Entity.
 		Column		: String := To_String( Property.Column_Name );
@@ -251,11 +251,11 @@ package body Aw_Ent.Properties is
 				Property	: in     Locale_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		Locale : Aw_Lib.Locales.Locale := Property.Getter.All( Entity );
 	begin
-		APQ.Append_Quoted( Query, Connection.all, To_String( Locale.CODE ) );
+		APQ.Append_Quoted( Query, Connection, To_String( Locale.CODE ) );
 	end Get_Property;
 
 
@@ -305,7 +305,7 @@ package body Aw_Ent.Properties is
 				Property	: in     UString_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 		-- Set the property into the Entity.
 
@@ -329,10 +329,10 @@ package body Aw_Ent.Properties is
 				Property	: in     UString_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 	begin
-		APQ.Append_Quoted( Query, Connection.all, To_String( Property.Getter.All( Entity ) ) );
+		APQ.Append_Quoted( Query, Connection, To_String( Property.Getter.All( Entity ) ) );
 	end Get_Property;
 
 	overriding
@@ -381,7 +381,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Password_Property_Type;	-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
 
 		function Calculate_Hash return String is
@@ -400,7 +400,7 @@ package body Aw_Ent.Properties is
 		Hash : String := Calculate_Hash;
 	begin
 		if Hash /= "" then
-			APQ.Append_Quoted( Query, Connection.all, Calculate_Hash );
+			APQ.Append_Quoted( Query, Connection, Calculate_Hash );
 		end if;
 	end Get_Property;
 

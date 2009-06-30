@@ -42,7 +42,12 @@ with Ada.Tags;
 ---------------
 with Aw_Ent;
 with Aw_Ent.Properties;
+
+---------
+-- APQ --
+---------
 with APQ;
+with APQ_Provider;
 
 package body Aw_Ent.Query_Builders is
 	
@@ -290,8 +295,9 @@ package body Aw_Ent.Query_Builders is
 
 
 	procedure Append_to_APQ_Query(
-				Q	: in     Query_Type;
-				APQ_Q	: in out APQ.Root_Query_Type'Class
+				Q		: in     Query_Type;
+				APQ_Q		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
 			) is
 		First_Element : Boolean := True;
 
@@ -331,13 +337,13 @@ package body Aw_Ent.Query_Builders is
 					end case;
 					APQ.Append_Quoted( 
 							APQ_Q, 
-							Aw_Ent.My_Connection.all, 
+							Connection, 
 							To_String( Handler.Value )
 						);
 
 				when Q_Operator =>
 					APQ.Append( APQ_Q, "(" );
-					Append_to_APQ_Query( Handler.Child_Query.all, APQ_Q );
+					Append_to_APQ_Query( Handler.Child_Query.all, APQ_Q, Connection );
 					APQ.Append( APQ_Q, ")" );
 			end case;
 		end Append_Operator;
@@ -354,7 +360,7 @@ package body Aw_Ent.Query_Builders is
 
 
 
-	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	
 
 		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
@@ -363,36 +369,42 @@ package body Aw_Ent.Query_Builders is
 		APQ.Prepare( Query, "SELECT id," );
 		Append_Column_Names_For_Read( Query, Info.Properties );
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-		Append_to_APQ_Query( Q, Query );
+		Append_to_APQ_Query( Q, Query, Connection );
 
 		--Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 
 
-		APQ.Execute( Query, Aw_Ent.My_Connection.All );
+		APQ.Execute( Query, Connection );
 	end Prepare_and_Run_Query;
 
 	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector is
 		-- get all results from the query
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Aw_Ent.My_Connection.All );
-		Results : Entity_Vectors.Vector;
-	begin
-		Prepare_And_Run_Query( Q, Query );
-		begin
-			loop
-				APQ.Fetch( Query );
-				
-				declare
-					E: Entity_Type;
-				begin
-					Set_Values_From_Query( E, Query );
-					Entity_Vectors.Append( Results, E );
-				end;
 	
-			end loop;
-		exception
-			when others => null;
-		end;
-
+		Results : Entity_Vectors.Vector;
+		
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			Prepare_And_Run_Query( Q, Query, Connection );
+			begin
+				loop
+					APQ.Fetch( Query );
+					
+					declare
+						E: Entity_Type;
+					begin
+						Set_Values_From_Query( E, Query, Connection );
+						Entity_Vectors.Append( Results, E );
+					end;
+		
+				end loop;
+			exception
+				when others => null;
+			end;
+		end Runner;
+	begin
+		APQ_Provider.Run( Aw_Ent.My_Provider.all, Runner'Access );
+	
 		return Results;
 	end Get_All;
 	
@@ -401,23 +413,27 @@ package body Aw_Ent.Query_Builders is
 		-- get the first element from the query
 		-- if no results, raise NO_ENTITY
 		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Aw_Ent.My_Connection.All );
 		Result : Entity_Type;
-	begin
-		Prepare_And_Run_Query( Q, Query );
-		APQ.Fetch( Query );
-		Set_Values_From_Query( Result, Query );
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
-			loop
-				APQ.Fetch( Query );
-				-- if it got here, then check if it's ok to have duplicated results:
-				if Unique then
-					raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
-				end if;
-			end loop;
-		exception
-			when APQ.No_Tuple => null;
-		end;
+			Prepare_And_Run_Query( Q, Query, Connection );
+			APQ.Fetch( Query );
+			Set_Values_From_Query( Result, Query, Connection );
+			begin
+				loop
+					APQ.Fetch( Query );
+					-- if it got here, then check if it's ok to have duplicated results:
+					if Unique then
+						raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
+					end if;
+				end loop;
+			exception
+				when APQ.No_Tuple => null;
+			end;
+		end Runner;
+	begin
+		APQ_Provider.Run( Aw_Ent.My_Provider.all, Runner'Access );
 
 		return Result;
 	exception

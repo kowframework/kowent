@@ -39,6 +39,7 @@ with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Hash;
 with Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 
 
 ---------------
@@ -47,6 +48,7 @@ with Ada.Strings.Unbounded;
 with Aw_Lib.Log;
 with Aw_Lib.String_Util;
 with Aw_Lib.UString_Vectors;
+
 
 package body Aw_Ent is
 
@@ -69,15 +71,26 @@ package body Aw_Ent is
 
 
 
+	----------------------
+	-- Auxiliar Methods --
+	----------------------
+
+	type Id_Array_Ptr is access Id_Array_Type;
+	procedure Free is new Ada.Unchecked_Deallocation(
+				Name	=> Id_Array_Ptr,
+				Object	=> Id_Array_Type
+			);
+
 
 
 	-------------------------
 	-- Database Management --
 	-------------------------
-	procedure Set_Connection( Connection : in Connection_Ptr ) is
+	procedure Set_Connection_Provider( Provider : in APQ_Provider.Connection_Provider_Ptr ) is
+		-- set the current database connection provider
 	begin
-		My_Connection := Connection;
-	end Set_Connection;
+		My_Provider := Provider;
+	end Set_Connection_Provider;
 
 
 
@@ -146,14 +159,18 @@ package body Aw_Ent is
 		return To_String( Entity.Id );
 	end To_String;
 
-	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class ) is
+	procedure Set_Values_From_Query(
+				Entity		: in out Entity_Type'Class;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			) is
 		-- set all the values from the resulting query
 
 		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 		procedure Set_Value( C : in Property_Lists.Cursor ) is
 		begin
-			Set_Property( Property_Lists.Element( C ).all, Entity, Query, My_Connection );
+			Set_Property( Property_Lists.Element( C ).all, Entity, Query, Connection );
 		end Set_Value;
 		TMP_Id : Integer := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
 	begin
@@ -168,47 +185,53 @@ package body Aw_Ent is
 
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type ) is
 		-- load the entity from the database Backend
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
-	begin
 
-		Entity.ID := ID;
-		Entity.ID.My_Tag := Entity'Tag;
-		-- and now we set the tag of the entity into it's ID
-
-		----------------------
-		-- SQL Construction --
-		----------------------
-		
-		APQ.Prepare( Query, "SELECT id," );
-		Append_Column_Names_For_Read( Query, Info.Properties );
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
-		APQ.Append( Query, " WHERE id=" );
-		ID_Append( Query, Entity.ID.Value );
-
-		-------------------
-		-- SQL Execution --
-		-------------------
-		
-		APQ.Execute( Query, My_Connection.all );
-		APQ.Fetch( Query );
-		-- we only reach for the first result as there should be only one
-		-- if none is found, No_Tuple is raised. :D
-
-		---------------------
-		-- Data Processing --
-		---------------------
-
-		Set_Values_From_Query( Entity, Query );
-
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 		begin
-			loop
-				-- fetch any remaining data just in case..
-				APQ.Fetch( Query );
-			end loop;
-		exception
-			when others => null;
-		end;
+
+			Entity.ID := ID;
+			Entity.ID.My_Tag := Entity'Tag;
+			-- and now we set the tag of the entity into it's ID
+
+			----------------------
+			-- SQL Construction --
+			----------------------
+		
+			APQ.Prepare( Query, "SELECT id," );
+			Append_Column_Names_For_Read( Query, Info.Properties );
+			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
+			APQ.Append( Query, " WHERE id=" );
+			ID_Append( Query, Entity.ID.Value );
+
+			-------------------
+			-- SQL Execution --
+			-------------------
+		
+			APQ.Execute( Query, Connection );
+			APQ.Fetch( Query );
+			-- we only reach for the first result as there should be only one
+			-- if none is found, No_Tuple is raised. :D
+	
+			---------------------
+			-- Data Processing --
+			---------------------
+
+			Set_Values_From_Query( Entity, Query, Connection );
+
+			begin
+				loop
+					-- fetch any remaining data just in case..
+					APQ.Fetch( Query );
+				end loop;
+			exception
+				when others => null;
+			end;
+		end Runner;
+
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
 
 	end Load;
 
@@ -245,61 +268,94 @@ package body Aw_Ent is
 
 	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type is
 		-- get all IDs from a given entity
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+
+		My_Ids : Id_Array_Ptr;
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
 
 
-		function Inner_Get_All_Ids return ID_Array_Type is
-			Ret : ID_Array_Type( 1 .. 1 );
-			TMP_Id : Integer;
-			ID : ID_Type;
-			
+			function Inner_Get_All_Ids return ID_Array_Type is
+				Ret : ID_Array_Type( 1 .. 1 );
+				TMP_Id : Integer;
+				ID : ID_Type;
+				
+			begin
+				APQ.Fetch( Query );
+	
+				TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
+				ID := To_ID( TMP_Id );
+				ID.My_Tag := Entity_Tag;
+				Ret( 1 ) := ID;
+	
+				return Ret & Inner_Get_All_Ids;
+			exception
+				when APQ.No_Tuple => return Ret( 1 .. 0 );
+			end Inner_Get_All_Ids;
 		begin
-			APQ.Fetch( Query );
-
-			TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
-			ID := To_ID( TMP_Id );
-			ID.My_Tag := Entity_Tag;
-			Ret( 1 ) := ID;
-
-			return Ret & Inner_Get_All_Ids;
-		exception
-			when APQ.No_Tuple => return Ret( 1 .. 0 );
-		end Inner_Get_All_Ids;
+			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+			APQ.Execute( Query, Connection );
+	
+			declare
+				My_Inner_Ids : Id_Array_Type := Inner_Get_All_Ids;
+			begin
+				My_Ids := new Id_Array_Type( My_Inner_ids'First .. My_inner_Ids'Last );
+			end;
+		end Runner;
 	begin
-		APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
-		APQ.Execute( Query, My_Connection.all );
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
 
-		return Inner_Get_All_Ids;
+		declare
+			My_Inner_Ids_Again : Id_Array_Type := My_Ids.all;
+		begin
+			Free( My_Ids );
+			return My_Inner_Ids_Again;
+		end;
 	end Get_All_IDs;
 	
 	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type is
 		-- get all IDs from a given entity
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+
+		My_Ids : Id_Array_Ptr;
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
 
 
-		function Inner_Get_All_Ids return ID_Array_Type is
-			Ret : ID_Array_Type( 1 .. 1 );
-			TMP_Id : Integer;
-			ID : ID_Type;
+			function Inner_Get_All_Ids return ID_Array_Type is
+				Ret : ID_Array_Type( 1 .. 1 );
+				TMP_Id : Integer;
+				ID : ID_Type;
 			
+			begin
+				APQ.Fetch( Query );
+	
+				TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
+				ID := To_ID( TMP_Id );
+				Ret( 1 ) := ID;
+	
+				return Ret & Inner_Get_All_Ids;
+			exception
+				when APQ.No_Tuple => return Ret( 1 .. 0 );
+			end Inner_Get_All_Ids;
 		begin
-			APQ.Fetch( Query );
+			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+			APQ.Execute( Query, Connection );
 
-			TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
-			ID := To_ID( TMP_Id );
-			Ret( 1 ) := ID;
-
-			return Ret & Inner_Get_All_Ids;
-		exception
-			when APQ.No_Tuple => return Ret( 1 .. 0 );
-		end Inner_Get_All_Ids;
+			My_Ids := new Id_Array_Type'( Inner_Get_All_Ids );
+		end Runner;
 	begin
-		APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
-		APQ.Execute( Query, My_Connection.all );
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
 
-		return Inner_Get_All_Ids;
+		declare
+			My_Inner_Ids : Id_Array_Type := My_Ids.all;
+		begin
+			Free( My_ids );
+			return My_Inner_ids;
+		end;
+
 	end Get_All_IDs;
 
 
@@ -603,63 +659,67 @@ package body Aw_Ent is
 
 	procedure Save( Entity : in out Entity_Type'Class ) is
 		-- save the existing entity into the database Backend
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 
-		First_Element	: Boolean := True;
-		procedure Update_Appender( C : Property_Lists.Cursor ) is
-			Property: Entity_Property_Ptr := Property_Lists.Element( C );
-		begin
-			if Should_Store( Property.all, Entity ) then
-				if not First_Element then
-					APQ.Append( Query, "," );
-				else
-					First_Element := False;
-				end if;
+			First_Element	: Boolean := True;
+			procedure Update_Appender( C : Property_Lists.Cursor ) is
+				Property: Entity_Property_Ptr := Property_Lists.Element( C );
+			begin
+				if Should_Store( Property.all, Entity ) then
+					if not First_Element then
+						APQ.Append( Query, "," );
+					else
+						First_Element := False;
+					end if;
+		
 	
-	
-				if Property /= null then
-					APQ.Append(
-						Query,
-						To_String( Property.all.Column_Name ) & "="
-					);
+					if Property /= null then
+						APQ.Append(
+							Query,
+							To_String( Property.all.Column_Name ) & "="
+						);
 					
 	
-					Get_Property( Property.all, Entity, Query, My_Connection );
-				else
-					raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
+						Get_Property( Property.all, Entity, Query, Connection );
+					else
+						raise Constraint_Error with "Some null property exists in """& Expanded_Name( Entity'Tag ) & """";
+					end if;
 				end if;
-			end if;
-		end Update_Appender;
+			end Update_Appender;
 				
-			
+	
+		begin
+			APQ.Prepare(
+				Query,
+				"UPDATE " &
+					To_String( Info.Table_Name ) &
+					" SET "
+			);
 
+			Property_Lists.Iterate( Info.Properties, Update_Appender'Access );
+
+
+			APQ.Append(
+				Query,
+				" WHERE id="
+			);
+	
+			ID_Append(
+				Query,
+				Entity.ID.Value
+			);
+
+			APQ.Execute(
+				Query,
+				Connection
+			);
+		end Runner;
 	begin
-		APQ.Prepare(
-			Query,
-			"UPDATE " &
-				To_String( Info.Table_Name ) &
-				" SET "
-		);
-
-		Property_Lists.Iterate( Info.Properties, Update_Appender'Access );
-
-
-		APQ.Append(
-			Query,
-			" WHERE id="
-		);
-
-		ID_Append(
-			Query,
-			Entity.ID.Value
-		);
-
-		APQ.Execute(
-			Query,
-			My_Connection.all
-		);
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Save;
 	
 
@@ -668,90 +728,95 @@ package body Aw_Ent is
 		-- if it's a new entity, create a new entry and generates an ID for it.
 		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 		-- after it has been saved
-		ID	: Id_Type;
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
-	
-		Query	: APQ.Root_Query_Type'Class := APQ.New_Query( My_Connection.all );
 
-		First_Element : Boolean := True;
-
-		procedure Insert_Appender( C: in Property_Lists.Cursor ) is
-			Property: Entity_Property_Ptr := Property_Lists.Element( C );
-		begin
-			if not Should_Store( Property.all, Entity ) then
-				-- if there is nothing to store here, simply ignores this one property
-				return;
-			end if;
-
-			if not First_Element then
-				APQ.Append( Query, "," );
-			else
-				First_Element := False;
-			end if;
-			if Property /= null then
-				Get_Property( Property.all, Entity, Query, My_Connection );
-			else
-				raise Constraint_Error with "Some property is null at """ & Expanded_Name( Entity'Tag ) & """";
-			end if;
-		end Insert_Appender;
-
-	begin
-
-		---------------
-		-- SQL Setup --
-		---------------
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			ID	: Id_Type;
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 		
-		APQ.Prepare(
-			Query,
-			"INSERT INTO " & To_String( Info.Table_Name ) & "("
-		);
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+	
+			First_Element : Boolean := True;
 
-		Append_Column_Names_For_Store( Query, Info.Properties, Entity );
+			procedure Insert_Appender( C: in Property_Lists.Cursor ) is
+				Property: Entity_Property_Ptr := Property_Lists.Element( C );
+			begin
+				if not Should_Store( Property.all, Entity ) then
+					-- if there is nothing to store here, simply ignores this one property
+					return;
+				end if;
+	
+				if not First_Element then
+					APQ.Append( Query, "," );
+				else
+					First_Element := False;
+				end if;
+				if Property /= null then
+					Get_Property( Property.all, Entity, Query, Connection );
+				else
+					raise Constraint_Error with "Some property is null at """ & Expanded_Name( Entity'Tag ) & """";
+				end if;
+			end Insert_Appender;
 
-		if Info.Id_Generator /= NULL then
-			APQ.Append(
+		begin
+
+			---------------
+			-- SQL Setup --
+			---------------
+			
+			APQ.Prepare(
 				Query,
-				",id"
+				"INSERT INTO " & To_String( Info.Table_Name ) & "("
 			);
-		end if;
 
-		APQ.Append( Query, ") VALUES(" );
+			Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 
-		Property_Lists.Iterate( Info.Properties, Insert_Appender'Access );
-
-		if Info.Id_Generator /= NULL then
-			ID := Info.Id_Generator.all( Entity );
-			APQ.Append(
-				Query,
-				","
-			);
-			ID_Append(
-				Query,
-				ID.Value
-			);
-		end if;
-
-		APQ.Append( Query, ")" );
-
-		-------------------
-		-- SQL Execution --
-		-------------------
-
-		Log( "Will run :: " & APQ.To_String( Query ) , Aw_Lib.Log.Level_Debug );
-		APQ.Execute( Query, My_Connection.all );
-
-		if Recover_ID then
 			if Info.Id_Generator /= NULL then
-				Entity.ID := ID;
-			else
-				declare
-					OID : APQ.Row_Id_Type;
-				begin
-					OID := APQ.Command_OID( Query );
-					Entity.ID := To_Id( Natural( OID ) );
-				end;
+				APQ.Append(
+					Query,
+					",id"
+				);
 			end if;
-		end if;
+	
+			APQ.Append( Query, ") VALUES(" );
+
+			Property_Lists.Iterate( Info.Properties, Insert_Appender'Access );
+
+			if Info.Id_Generator /= NULL then
+				ID := Info.Id_Generator.all( Entity );
+				APQ.Append(
+					Query,
+					","
+				);
+				ID_Append(
+					Query,
+					ID.Value
+				);
+			end if;
+
+			APQ.Append( Query, ")" );
+
+			-------------------
+			-- SQL Execution --
+			-------------------
+
+			Log( "Will run :: " & APQ.To_String( Query ) , Aw_Lib.Log.Level_Debug );
+			APQ.Execute( Query, Connection );
+
+			if Recover_ID then
+				if Info.Id_Generator /= NULL then
+					Entity.ID := ID;
+				else
+					declare
+						OID : APQ.Row_Id_Type;
+					begin
+						OID := APQ.Command_OID( Query );
+						Entity.ID := To_Id( Natural( OID ) );
+					end;
+				end if;
+			end if;
+		end Runner;
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Insert;
 
 

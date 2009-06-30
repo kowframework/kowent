@@ -75,7 +75,7 @@ package Aw_Ent.Properties is
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 	-- Set the property into the Entity.
 
@@ -84,7 +84,7 @@ package Aw_Ent.Properties is
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 
 	overriding
@@ -135,7 +135,7 @@ package Aw_Ent.Properties is
 				Property	: in     Boolean_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 	-- Set the property into the Entity.
 
@@ -144,7 +144,7 @@ package Aw_Ent.Properties is
 				Property	: in     Boolean_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 
 	overriding
@@ -195,7 +195,7 @@ package Aw_Ent.Properties is
 				Property	: in     Locale_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 	-- Set the property into the Entity.
 
@@ -204,7 +204,7 @@ package Aw_Ent.Properties is
 				Property	: in     Locale_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 
 	overriding
@@ -257,7 +257,7 @@ package Aw_Ent.Properties is
 				Property	: in     UString_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 	-- Set the property into the Entity.
 
@@ -266,7 +266,7 @@ package Aw_Ent.Properties is
 				Property	: in     UString_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 
 
@@ -331,7 +331,7 @@ package Aw_Ent.Properties is
 				Property	: in     Password_Property_Type;	-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is null;
 	-- Set the property into the Entity.
 	-- This procedure does nothin'
@@ -341,7 +341,7 @@ package Aw_Ent.Properties is
 				Property	: in     Password_Property_Type;	-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Aw_Ent.Connection_Ptr		-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			);
 
 	overriding

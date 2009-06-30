@@ -8,6 +8,7 @@
 -- $Author: ogro $
 
 with "apq";
+with "apq_provider";
 with "awconfig";
 with "awconfig-text";
 with "awlib";

@@ -209,8 +209,9 @@ package Aw_Ent.Query_Builders is
 	--------------------
 
 	procedure Append_to_APQ_Query(
-				Q	: in     Query_Type;
-				APQ_Q	: in out APQ.Root_Query_Type'Class
+				Q		: in     Query_Type;
+				APQ_Q		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
 			);
 
 

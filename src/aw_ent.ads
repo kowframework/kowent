@@ -67,6 +67,7 @@ with Aw_Lib.UString_Vectors;
 -- APQ --
 ---------
 with APQ;
+with APQ_Provider;
 
 
 package Aw_Ent is
@@ -78,11 +79,8 @@ package Aw_Ent is
 	No_Factory : Exception;
 	-- used when trying to produce an entity object with no factory in it's registry
 
-	type Connection_Ptr is access all APQ.Root_Connection_Type'Class;
-
-	procedure Set_Connection( Connection: in Connection_Ptr );
-	-- set the current database connection
-	-- TODO: implement some sort of database pooling
+	procedure Set_Connection_Provider( Provider : in APQ_Provider.Connection_Provider_Ptr );
+	-- set the current database connection provider
 
 
 	-------------------------
@@ -153,7 +151,11 @@ package Aw_Ent is
 	-- Should be overriden to something that makes more sence
 
 
-	procedure Set_Values_From_Query( Entity : in out Entity_Type'Class; Query: in out APQ.Root_Query_Type'Class );
+	procedure Set_Values_From_Query(
+				Entity		: in out Entity_Type'Class;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+				);
 	-- set all the values from the resulting query
 
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type );
@@ -312,7 +314,7 @@ package Aw_Ent is
 				Property	: in     Entity_Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
-				Connection	: in     Connection_Ptr			-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_Type'Class -- the connection that belongs the query
 			) is abstract;
 	-- Set the property from the query into the Entity.
 
@@ -320,7 +322,7 @@ package Aw_Ent is
 				Property	: in     Entity_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
-				Connection	: in     Connection_Ptr			-- the connection that belongs the query
+				Connection	: in out APQ.Root_Connection_Type'Class	-- the connection that belongs the query
 			) is abstract;
 	-- Append into a query being created by the main Aw_ent engine.
 
@@ -532,8 +534,7 @@ private
 	-- Connection Management --
 	---------------------------
 
-	My_Connection	: Connection_Ptr;
-
+	My_Provider : APQ_Provider.Connection_Provider_Ptr;
 	
 
 
