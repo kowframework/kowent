@@ -300,7 +300,7 @@ package body Aw_Ent is
 			declare
 				My_Inner_Ids : Id_Array_Type := Inner_Get_All_Ids;
 			begin
-				My_Ids := new Id_Array_Type( My_Inner_ids'First .. My_inner_Ids'Last );
+				My_Ids := new Id_Array_Type'( My_Inner_Ids );
 			end;
 		end Runner;
 	begin
