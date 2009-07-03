@@ -1,0 +1,31 @@
+
+
+
+
+
+with "awconfig";
+with "awconfig-text";
+with "awent";
+
+with "apq";
+with "apq-mysql";
+with "apq_provider";
+with "apq_provider-mysql";
+
+
+
+project AwEnt.Samples is
+
+	for Exec_Dir use "bin";
+
+	for Source_Dirs use ( "src" );
+
+	for Object_Dir use "obj";
+
+	for Main use( "book_store" );
+
+	package Linker is
+		for Default_Switches ("ada") use APQ.MySQL.Linker'Default_Switches( "ada" );
+	end Linker;
+
+end AwEnt.Samples;
