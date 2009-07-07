@@ -14,7 +14,7 @@ with "kowconfig-text";
 with "kowlib";
 
 
-with "adkoworks_setup";
+with "adaworks_setup";
 
 project KOWEnt is
 
