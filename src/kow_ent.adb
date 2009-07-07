@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -45,24 +45,24 @@ with Ada.Unchecked_Deallocation;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Lib.Log;
-with Aw_Lib.String_Util;
-with Aw_Lib.UString_Vectors;
+with KOW_Lib.Log;
+with KOW_Lib.String_Util;
+with KOW_Lib.UString_Vectors;
 
 
-package body Aw_Ent is
+package body KOW_Ent is
 
 	
-	Logger : Aw_Lib.Log.Logger_Type := 
-			Aw_Lib.Log.Get_Logger( "Aw_Ent" );
+	Logger : KOW_Lib.Log.Logger_Type := 
+			KOW_Lib.Log.Get_Logger( "KOW_Ent" );
 	
 
 	procedure Log(
 			Message : in String;
-			Level : Aw_Lib.Log.Log_Level := Aw_lib.Log.Level_Info
+			Level : KOW_Lib.Log.Log_Level := KOW_lib.Log.Level_Info
 		) is
 	begin
-		Aw_lib.Log.Log(
+		KOW_lib.Log.Log(
 				Logger	=> Logger,
 				Level	=> Level,
 				Message	=> Message
@@ -108,7 +108,7 @@ package body Aw_Ent is
 	-------------------------
 	function Calculate_Hash( Pwd : in String ) return String is
 		-- return a hashed version of Pwd.
-		-- Used in both Aw_Ent.Properties and Aw_Ent.Query_Builders for handling password fields
+		-- Used in both KOW_Ent.Properties and KOW_Ent.Query_Builders for handling password fields
 	begin
 		return Ada.Containers.Hash_Type'Image(
 				Ada.Strings.Hash( Pwd )
@@ -362,12 +362,12 @@ package body Aw_Ent is
 
 	-- NOTE :: How the Entity Labels should work ::
 	--
-	-- They should be stored in an instance of Aw_Config·Generic_Registry
+	-- They should be stored in an instance of KOW_Config·Generic_Registry
 	-- Each configuration file name as in name1.name2 is mapped to the tag name1.name2 (all lower case).
 	-- The entity label is set by the key "entity_label". All other labels are the property name. All lower case.
 
 
-	function Standard_Label_Getter_Factory( Id : in String; Config : Aw_Config.Config_File ) return Label_Getter is
+	function Standard_Label_Getter_Factory( Id : in String; Config : KOW_Config.Config_File ) return Label_Getter is
 		G: Label_Getter;
 	begin
 		G.Id		:= To_Unbounded_String( Id );
@@ -376,21 +376,21 @@ package body Aw_Ent is
 	end Standard_Label_Getter_Factory;
 
 
-	function Get_Label( Getter : in Label_Getter; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String is
+	function Get_Label( Getter : in Label_Getter; Locale : in KOW_Lib.Locales.Locale ) return Unbounded_String is
 		-- get a label for this getter
 	begin
-		return Aw_Config.Element( Getter.Config, To_Unbounded_String( "entity_label" ), Locale.CODE );
+		return KOW_Config.Element( Getter.Config, To_Unbounded_String( "entity_label" ), Locale.CODE );
 	end Get_Label;
 
-	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String is
+	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in KOW_Lib.Locales.Locale ) return Unbounded_String is
 		-- get a label for a property in this getter
 	begin
-		return Aw_Config.Element( Getter.Config, Property, Locale.CODE );
+		return KOW_Config.Element( Getter.Config, Property, Locale.CODE );
 	end Get_Label;
 
 	function Get_Label(
 				Entity : in Entity_Type'Class;
-				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale : in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String is
 		-- get the Label for this entity type as string
 	begin
@@ -401,14 +401,14 @@ package body Aw_Ent is
 
 	function Get_Label(
 				Entity : in Entity_Type'Class;
-				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale : in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String is
 		-- TODO get the Label for this entity type as unbounded_string
 		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
 	begin
-		Aw_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
+		KOW_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
 		return Get_Label(
 				Labels.Registry.Get( '/' & Str_Tag ),
 				Locale
@@ -423,7 +423,7 @@ package body Aw_Ent is
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String is
 		-- get the Label for the given property of this entity type as string
 	begin
@@ -435,7 +435,7 @@ package body Aw_Ent is
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String is
 		-- get the Label for given property of this entity type as unbounded_string
 	begin
@@ -447,7 +447,7 @@ package body Aw_Ent is
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in Unbounded_String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String is
 		-- get the Label for the given property of this entity type as string
 	begin
@@ -458,14 +458,14 @@ package body Aw_Ent is
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in Unbounded_String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String is
 		-- get the Label for given property of this entity type as unbounded_string
 		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
 	begin
-		Aw_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
+		KOW_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
 		return Get_Label(
 				Labels.Registry.Get( '/' & Str_Tag ),
 				Property,
@@ -541,7 +541,7 @@ package body Aw_Ent is
 					Table_Name	: in String;
 					Id_Generator	: in Id_Generator_Type := Null;
 					Factory		: in Entity_Factory_Type := Null ) is
-			-- register an Entity into the Aw_Ent engine
+			-- register an Entity into the KOW_Ent engine
 			-- Table_Name is the table name to be used.
 
 			Info	: Entity_Information_Type;
@@ -565,7 +565,7 @@ package body Aw_Ent is
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Id_Generator	: in Id_Generator_Type := Null;
 					Factory		: in Entity_Factory_Type := Null ) is
-			-- register an Entity into the Aw_Ent engine
+			-- register an Entity into the KOW_Ent engine
 			-- Auto generate the table name (using the Tag)
 		begin
 			Register(
@@ -799,7 +799,7 @@ package body Aw_Ent is
 			-- SQL Execution --
 			-------------------
 
-			Log( "Will run :: " & APQ.To_String( Query ) , Aw_Lib.Log.Level_Debug );
+			Log( "Will run :: " & APQ.To_String( Query ) , KOW_Lib.Log.Level_Debug );
 			APQ.Execute( Query, Connection );
 
 			if Recover_ID then
@@ -882,4 +882,4 @@ package body Aw_Ent is
 
 begin
 	Labels.Factory_Registry.Register( "standard", Standard_Label_Getter_Factory'Access );
-end Aw_Ent;
+end KOW_Ent;

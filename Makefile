@@ -4,7 +4,7 @@
 # is to map tagged types into tables and create and execute SQL queries in order
 # to manage persistent data in your application.\
 
-PROJECT=awent
+PROJECT=kowent
 
 
 all: libs

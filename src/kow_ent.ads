@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -30,9 +30,9 @@
 
 
 
--- Main Aw_Ent package.
+-- Main KOW_Ent package.
 --
--- Aw_Ent is reponsible for handling persistent data in your application
+-- KOW_Ent is reponsible for handling persistent data in your application
 -- stored in Database backends using the native DB types.
 --
 -- author Marcelo C. de Freitas <marcelo.batera@gmail.com>
@@ -57,11 +57,11 @@ with Ada.Tags;					use Ada.Tags;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Config;
-with Aw_Config.Generic_Registry;
-with Aw_Config.Text;
-with Aw_Lib.Locales;
-with Aw_Lib.UString_Vectors;
+with KOW_Config;
+with KOW_Config.Generic_Registry;
+with KOW_Config.Text;
+with KOW_Lib.Locales;
+with KOW_Lib.UString_Vectors;
 
 ---------
 -- APQ --
@@ -70,7 +70,7 @@ with APQ;
 with APQ_Provider;
 
 
-package Aw_Ent is
+package KOW_Ent is
 	-------------------------
 	-- Database Management --
 	-------------------------
@@ -88,7 +88,7 @@ package Aw_Ent is
 	-------------------------
 	function Calculate_Hash( Pwd : in String ) return String;
 	-- return a hashed version of Pwd.
-	-- Used in both Aw_Ent.Properties and Aw_Ent.Query_Builders for handling password fields
+	-- Used in both KOW_Ent.Properties and KOW_Ent.Query_Builders for handling password fields
 
 	-------------------
 	-- ID Management --
@@ -185,26 +185,26 @@ package Aw_Ent is
 
 	-- NOTE :: How the Entity Labels should work ::
 	--
-	-- They should be stored in an instance of Aw_Config·Generic_Registry
+	-- They should be stored in an instance of KOW_Config·Generic_Registry
 	-- Each configuration file name as in name1.name2 is mapped to the tag name1.name2 (all lower case).
 	-- The entity label is set by the key "entity_label". All other labels are the property name. All lower case.
 
 
 	type Label_Getter is record
 		Id	: Unbounded_String;
-		Config	: Aw_Config.Config_File;
+		Config	: KOW_Config.Config_File;
 	end record;
 
-	package Labels is new Aw_Config.Generic_Registry(
+	package Labels is new KOW_Config.Generic_Registry(
 					Element_Type	=> Label_Getter,
-					Relative_Path	=> "awent/labels",
-					Parser		=> new Aw_Config.Text.Parser
+					Relative_Path	=> "kowent/labels",
+					Parser		=> new KOW_Config.Text.Parser
 				);
 
-	function Get_Label( Getter : in Label_Getter; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String;
+	function Get_Label( Getter : in Label_Getter; Locale : in KOW_Lib.Locales.Locale ) return Unbounded_String;
 	-- get a label for this getter
 	
-	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in Aw_Lib.Locales.Locale ) return Unbounded_String;
+	function Get_Label( Getter : in Label_Getter; Property : in Unbounded_String; Locale : in KOW_Lib.Locales.Locale ) return Unbounded_String;
 	-- get a label for a property in this getter
 
 
@@ -213,41 +213,41 @@ package Aw_Ent is
 
 	function Get_Label(
 				Entity : in Entity_Type'Class;
-				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale : in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String;
 	-- get the Label for this entity type as string
 	
 	function Get_Label(
 				Entity : in Entity_Type'Class;
-				Locale : in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale : in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String;
 	-- get the Label for this entity type as unbounded_string
 
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String;
 	-- get the Label for the given property of this entity type as string
 		
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String;
 	-- get the Label for given property of this entity type as unbounded_string
 
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in Unbounded_String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return String;
 	-- get the Label for the given property of this entity type as string
 
 	function Get_Label(
 				Entity		: in Entity_Type'Class;
 				Property	: in Unbounded_String;
-				Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String;
 	-- get the Label for given property of this entity type as unbounded_string
 
@@ -268,7 +268,7 @@ package Aw_Ent is
 
 	type Id_Generator_Type is access function( Entity: in Entity_Type'Class )
 		return ID_Type;
-	-- The ID generator is used to help Aw_Ent generate IDs.
+	-- The ID generator is used to help KOW_Ent generate IDs.
 	-- When it's NULL the id generation is task for the database backend
 
 
@@ -288,8 +288,8 @@ package Aw_Ent is
 
 
 	-- The work done in queries is managed by Set_Property and Get_Property procedures.
-	-- This is another part of Aw_Ent that's 100% object oriented, which means you can
-	-- extend Aw_Ent to support your own types.
+	-- This is another part of KOW_Ent that's 100% object oriented, which means you can
+	-- extend KOW_Ent to support your own types.
 
 
 	type Entity_Property_Type is abstract tagged record
@@ -324,7 +324,7 @@ package Aw_Ent is
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in out APQ.Root_Connection_Type'Class	-- the connection that belongs the query
 			) is abstract;
-	-- Append into a query being created by the main Aw_ent engine.
+	-- Append into a query being created by the main KOW_ent engine.
 
 
 	procedure Set_Property(
@@ -416,13 +416,13 @@ package Aw_Ent is
 					Table_Name	: in String;
 					Id_Generator	: in Id_Generator_Type := Null;
 					Factory		: in Entity_Factory_Type := Null );
-		-- register an Entity into the Aw_Ent engine
+		-- register an Entity into the KOW_Ent engine
 		-- Table_Name is the table name to be used.
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Id_Generator	: in Id_Generator_Type := Null;
 					Factory		: in Entity_Factory_Type := Null );
-		-- register an Entity into the Aw_Ent engine
+		-- register an Entity into the KOW_Ent engine
 		-- Auto generate the table name (using the Tag)
 
 
@@ -460,13 +460,13 @@ package Aw_Ent is
 				Table_Name	: in String;
 				Id_Generator	: in Id_Generator_Type := Null;
 				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
-	-- register an Entity into the Aw_Ent engine
+	-- register an Entity into the KOW_Ent engine
 	-- Table_Name is the table name to be used.
 
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 				Id_Generator	: in Id_Generator_Type := Null;
 				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
-	-- register an Entity into the Aw_Ent engine
+	-- register an Entity into the KOW_Ent engine
 	-- Auto generate the table name (using the Tag)
 
 
@@ -538,4 +538,4 @@ private
 	
 
 
-end Aw_Ent;
+end KOW_Ent;

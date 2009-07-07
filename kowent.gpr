@@ -1,4 +1,4 @@
--- Build file for Aw_Lib.
+-- Build file for KOW_Lib.
 --
 -- author Marcelo Coraça de Freitas <marcelo.batera@gmail.com> 
 --
@@ -9,14 +9,14 @@
 
 with "apq";
 with "apq_provider";
-with "awconfig";
-with "awconfig-text";
-with "awlib";
+with "kowconfig";
+with "kowconfig-text";
+with "kowlib";
 
 
-with "adaworks_setup";
+with "adkoworks_setup";
 
-project AwEnt is
+project KOWEnt is
 
 	version := "0.1.0";
 	
@@ -31,14 +31,14 @@ project AwEnt is
 	
 	-- LIBRARY
 	for Library_Dir use "lib";
-	for Library_Name use "awent";
+	for Library_Name use "kowent";
 	for Library_Kind use AdaWorks_Setup'Library_Kind;
-	for Library_Version use "libawent.so." & Version;
+	for Library_Version use "libkowent.so." & Version;
 	
 	
 	package Compiler is
 		for Default_Switches ("ada") use ("-O2", "-gnat05");
 	end Compiler;
 
-end AwEnt;
+end KOWEnt;
 

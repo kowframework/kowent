@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -40,8 +40,8 @@ with Ada.Tags;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Ent;
-with Aw_Ent.Properties;
+with KOW_Ent;
+with KOW_Ent.Properties;
 
 ---------
 -- APQ --
@@ -49,7 +49,7 @@ with Aw_Ent.Properties;
 with APQ;
 with APQ_Provider;
 
-package body Aw_Ent.Query_Builders is
+package body KOW_Ent.Query_Builders is
 	
 	----------------------
 	-- Query Management --
@@ -61,25 +61,25 @@ package body Aw_Ent.Query_Builders is
 
 	procedure Append(
 				Q		: in out Query_Type;
-				Foreign_Key	: in     Aw_Ent.Entity_Type'Class;
+				Foreign_Key	: in     KOW_Ent.Entity_Type'Class;
 				Appender	: in     Logic_Appender := Appender_AND;
 				Operator	: in     Logic_Operator := Operator_Equals
 			) is
 		-- append a query element based on foreign key
-		Properties : Aw_Ent.Property_Lists.List;
+		Properties : KOW_Ent.Property_Lists.List;
 		Found_Foreign_Key : Boolean := False;
 
 		-- TODO: create an index for foreign key properties in the entity registry
 
-		procedure Iterator( C : in Aw_Ent.Property_Lists.Cursor ) is
-			use Aw_Ent.Properties;
-			E : Aw_Ent.Entity_Property_Ptr;
+		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			use KOW_Ent.Properties;
+			E : KOW_Ent.Entity_Property_Ptr;
 		begin
 			if Found_Foreign_Key then
 				return;
 			end if;
 
-			E := Aw_Ent.Property_Lists.Element( C );
+			E := KOW_Ent.Property_Lists.Element( C );
 			if E.all in Foreign_Key_Property_Type then
 				if Foreign_key_Property_Type( E.all ).Related_Entity_Tag = Foreign_Key'Tag then
 					Found_Foreign_Key := True;
@@ -97,20 +97,20 @@ package body Aw_Ent.Query_Builders is
 	begin
 
 		-- first we gotta get all the properties for this entity
-		Properties := Aw_Ent.Entity_Registry.Get_Properties( Entity_Type'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity_Type'Tag );
 
 		-- and now we try to find out which one is a foreign key
-		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
+		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 	end Append;
 
 
 	-- 
-	-- Aw_Ent.Id_Type
+	-- KOW_Ent.Id_Type
 
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     String;
-				Value	: in     Aw_Ent.Id_Type;
+				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
 				Operator: in     Logic_Operator := Operator_Equals
 			) is
@@ -127,7 +127,7 @@ package body Aw_Ent.Query_Builders is
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     Unbounded_String;
-				Value	: in     Aw_Ent.Id_Type;
+				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
 				Operator: in     Logic_Operator := Operator_Equals
 			) is
@@ -224,7 +224,7 @@ package body Aw_Ent.Query_Builders is
 		Append(
 			Q	=> Q,
 			Column	=> Column,
-			Value	=> Aw_Ent.Calculate_Hash( Value ),
+			Value	=> KOW_Ent.Calculate_Hash( Value ),
 			Appender=> Appender,
 			Operator=> Operator
 		);
@@ -403,7 +403,7 @@ package body Aw_Ent.Query_Builders is
 			end;
 		end Runner;
 	begin
-		APQ_Provider.Run( Aw_Ent.My_Provider.all, Runner'Access );
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
 	
 		return Results;
 	end Get_All;
@@ -433,7 +433,7 @@ package body Aw_Ent.Query_Builders is
 			end;
 		end Runner;
 	begin
-		APQ_Provider.Run( Aw_Ent.My_Provider.all, Runner'Access );
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
 
 		return Result;
 	exception
@@ -441,4 +441,4 @@ package body Aw_Ent.Query_Builders is
 			raise NO_ENTITY with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
 
 	end Get_First;
-end Aw_Ent.Query_Builders;
+end KOW_Ent.Query_Builders;

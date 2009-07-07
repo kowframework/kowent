@@ -4,19 +4,19 @@
 --                                                                          --
 --                                Ada Works                                 --
 --                                                                          --
---                                 B o d y                                  --
+--                                 S p e c                                  --
 --                                                                          --
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -47,62 +47,37 @@ with Ada.Containers.Vectors;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Ent;
-with Aw_Ent.Properties;
+with KOW_Ent;
+with KOW_Ent.Properties;
+with KOW_Ent.Query_Builders;
 
 
 
-package body Aw_Ent.Relations is
+package KOW_Ent.Relations is
 
 
-	package body One_To_Many_Relation_Handlers is
+
+	generic
+		type From_Entity_Type is new Entity_Type with private;
+		type To_Entity_Type is new Entity_Type with private;
+		with procedure Set_Foreign_Key( Entity : in out To_Entity_Type; Key_From : in KOW_Ent.Entity_Type'Class );
+	package One_to_Many_Relation_Handlers is
 		
-		-- package Related_Entity_Vectors is new Ada.Containers.Vectors(
+		package Related_Entity_Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => To_Entity_Type );
 
-		function Get_Query( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Query_Type is
-			use Related_Entity_Query_Builders;
-			Query : Query_Type;
-		begin
-			Append(
-				Q		=> Query,
-				Foreign_Key	=> Entity,
-				Appender	=> Appender_And,
-				Operator	=> Operator_Equals
-			);
-			return Query;
-		end Get_Query;
-
-
-		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Vectors.Vector is
-		begin
-			return Related_Entity_Query_Builders.Get_All( Q => Get_Query( Entity ) );
-		end get_All;
+		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Vectors.Vector;
 		
-		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type is
-		begin
-			return Related_Entity_Query_Builders.Get_First( Q => Get_Query( Entity ), Unique => False );
-		end get_First;
+		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type;
 
 		procedure Store_All(
 				Entity			: in out From_Entity_Type;
 				Related_Entities	: in out Related_Entity_Query_Builders.Entity_Vectors.Vector
-			) is
-			
-			use Related_Entity_Query_Builders.Entity_Vectors;
-
-			procedure Iterator( C: in Cursor ) is
-				E : To_entity_Type := Element( C );
-			begin
-				Set_Foreign_Key( Entity => E, Key_From => Entity );
-				Aw_Ent.Store( E );
-				Replace_Element( Related_Entities, C, E );
-			end Iterator;
-		begin
-			Aw_Ent.Store( Entity );
-			Iterate( Related_Entities, Iterator'Access );
-		end Store_All;
-
+			);
 	end One_To_Many_Relation_Handlers;
 
 
-end Aw_Ent.Relations;
+
+private
+	
+
+end KOW_Ent.Relations;

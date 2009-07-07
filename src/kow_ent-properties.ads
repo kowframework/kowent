@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -44,11 +44,11 @@
 -- Ada Works --
 ---------------
 with APQ;
-with Aw_Ent;
-with Aw_Lib.Locales;
+with KOW_Ent;
+with KOW_Lib.Locales;
 
 
-package Aw_Ent.Properties is
+package KOW_Ent.Properties is
 
 	-----------------
 	-- Foreign Key --
@@ -56,11 +56,11 @@ package Aw_Ent.Properties is
 	
 	-- this is used to map a foreign key for the entity
 	type ID_Getter_Type is not null access function(
-				Entity	: in Aw_Ent.Entity_Type'Class
-			) return Aw_Ent.ID_Type;
+				Entity	: in KOW_Ent.Entity_Type'Class
+			) return KOW_Ent.ID_Type;
 	type ID_Setter_Type is not null access procedure(
-				Entity	: in out Aw_Ent.Entity_Type'Class;
-				ID	: in     Aw_Ent.ID_Type
+				Entity	: in out KOW_Ent.Entity_Type'Class;
+				ID	: in     KOW_Ent.ID_Type
 			);
 	
 	type Foreign_Key_Property_Type is new Entity_Property_Type with record
@@ -117,10 +117,10 @@ package Aw_Ent.Properties is
 	----------------------
 
 	type Boolean_Getter_Type is not null access function(
-				Entity	: in Aw_Ent.Entity_Type'Class
+				Entity	: in KOW_Ent.Entity_Type'Class
 			) return Boolean;
 	type Boolean_Setter_Type is not null access procedure(
-				Entity	: in out Aw_Ent.Entity_Type'Class;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
 				ID	: in     Boolean
 			);
 	
@@ -175,11 +175,11 @@ package Aw_Ent.Properties is
 	-- Locale Property --
 	---------------------
 	type Locale_Getter_Type is not null access function(
-				Entity : in Aw_ent.Entity_Type'Class
-			) return Aw_Lib.Locales.Locale;
+				Entity : in KOW_ent.Entity_Type'Class
+			) return KOW_Lib.Locales.Locale;
 	type Locale_Setter_Type is not null access procedure(
-				Entity : in out Aw_Ent.Entity_Type'Class;
-				Locale : in     Aw_Lib.Locales.Locale
+				Entity : in out KOW_Ent.Entity_Type'Class;
+				Locale : in     KOW_Lib.Locales.Locale
 			);
 
 
@@ -238,10 +238,10 @@ package Aw_Ent.Properties is
 	-------------------------------
 
 	type UString_Getter_Type is not null access function(
-				Entity	: in Aw_Ent.Entity_Type'Class
+				Entity	: in KOW_Ent.Entity_Type'Class
 			) return Unbounded_String;
 	type UString_Setter_Type is not null access procedure(
-				Entity	: in out Aw_Ent.Entity_Type'Class;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
 				Value	: in     Unbounded_String
 			);
 
@@ -302,11 +302,11 @@ package Aw_Ent.Properties is
 	-----------------------
 
 	type Password_Getter_Type is not null access function(
-				Entity	: in Aw_Ent.Entity_Type'Class
+				Entity	: in KOW_Ent.Entity_Type'Class
 			) return Unbounded_String;
 
 	type Password_Setter_Type is access procedure(
-				Entity	: in out Aw_Ent.Entity_Type'Class;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
 				Password: in     Unbounded_String
 			);
 	-- NOTE:: the password setter type CAN be null!
@@ -374,6 +374,6 @@ package Aw_Ent.Properties is
 				Setter		: in     Password_Setter_Type := null
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
-	-- when Setter is NULL, aw_view-entity_forms won't work for this property
+	-- when Setter is NULL, KOW_view-entity_forms won't work for this property
 
-end Aw_Ent.Properties;
+end KOW_Ent.Properties;

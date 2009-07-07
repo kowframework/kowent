@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -45,7 +45,7 @@ with Ada.Strings.Hash;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Ent;
+with KOW_Ent;
 
 
 ---------
@@ -54,7 +54,7 @@ with Aw_Ent;
 with APQ;
 
 
-package body Aw_Ent.Properties is
+package body KOW_Ent.Properties is
 
 
 	-----------------
@@ -71,8 +71,8 @@ package body Aw_Ent.Properties is
 		-- Set the property into the Entity.
 		Column : String := To_String( Property.Column_Name );
 		Index  : APQ.Column_Index_Type := APQ.Column_Index( Q, Column );
-		Value  : APQ.APQ_Bigserial := Aw_Ent.ID_Value( Q, Index );
-		Key    : Aw_Ent.Id_Type;
+		Value  : APQ.APQ_Bigserial := KOW_Ent.ID_Value( Q, Index );
+		Key    : KOW_Ent.Id_Type;
 	begin
 		Key.Value := Value;
 		Key.My_Tag := Property.Related_Entity_Tag;
@@ -90,9 +90,9 @@ package body Aw_Ent.Properties is
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
-		Key : Aw_Ent.ID_Type := Property.Getter.All( Entity );
+		Key : KOW_Ent.ID_Type := Property.Getter.All( Entity );
 	begin
-		Aw_Ent.ID_Append( Query, Key.Value  );
+		KOW_Ent.ID_Append( Query, Key.Value  );
 	end Get_Property;
 
 
@@ -104,7 +104,7 @@ package body Aw_Ent.Properties is
 				Value		: in     String				-- the String representation of this value
 			) is
 		-- Set the property from a String representation of the value
-		Key : Aw_Ent.Id_Type;
+		Key : KOW_Ent.Id_Type;
 	begin
 		Key.Value  := APQ.APQ_Bigserial'Value( Value );
 		Key.My_Tag := Property.Related_Entity_Tag;
@@ -119,7 +119,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Foreign_Key_Property_Type;	-- the property worker
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String is
-		Value	: Aw_Ent.ID_Type := Property.Getter.All( Entity );
+		Value	: KOW_Ent.ID_Type := Property.Getter.All( Entity );
 	begin
 		return APQ.APQ_Bigserial'Image( Value.Value );
 	end Get_Property;
@@ -240,7 +240,7 @@ package body Aw_Ent.Properties is
 	begin
 		Property.Setter.all(
 				Entity,
-				Aw_Lib.Locales.Get_Locale( To_Unbounded_String( Locale_Code ) )
+				KOW_Lib.Locales.Get_Locale( To_Unbounded_String( Locale_Code ) )
 			);
 
 	end Set_Property;
@@ -253,7 +253,7 @@ package body Aw_Ent.Properties is
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
 			) is
-		Locale : Aw_Lib.Locales.Locale := Property.Getter.All( Entity );
+		Locale : KOW_Lib.Locales.Locale := Property.Getter.All( Entity );
 	begin
 		APQ.Append_Quoted( Query, Connection, To_String( Locale.CODE ) );
 	end Get_Property;
@@ -269,7 +269,7 @@ package body Aw_Ent.Properties is
 	begin
 		Property.Setter.all(
 				Entity,
-				Aw_Lib.Locales.Get_Locale( To_Unbounded_String( Value ) )
+				KOW_Lib.Locales.Get_Locale( To_Unbounded_String( Value ) )
 			);
 	end Set_Property;
 	
@@ -278,7 +278,7 @@ package body Aw_Ent.Properties is
 				Property	: in     Locale_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String is
-		Locale : Aw_Lib.Locales.Locale := Property.Getter.all( Entity );
+		Locale : KOW_Lib.Locales.Locale := Property.Getter.all( Entity );
 	begin
 		return To_String( Locale.CODE );
 	end Get_Property;
@@ -390,7 +390,7 @@ package body Aw_Ent.Properties is
 			if Str = Null_Unbounded_String then
 				return "";
 			else
-				return Aw_Ent.Calculate_Hash(
+				return KOW_Ent.Calculate_Hash(
 						To_String( Str )
 					);
 			end if;
@@ -461,4 +461,4 @@ package body Aw_Ent.Properties is
 			);
 	end New_Password_Property;
 
-end Aw_Ent.Properties;
+end KOW_Ent.Properties;

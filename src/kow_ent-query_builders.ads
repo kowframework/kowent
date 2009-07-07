@@ -9,14 +9,14 @@
 --               Copyright (C) 2007-2009, Ada Works Project                 --
 --                                                                          --
 --                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
+-- KOW_Lib is free library;  you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
+-- sion. KOW_Lib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
+-- Public License  distributed with KOW_Lib; see file COPYING. If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -44,12 +44,12 @@ with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Ent;
+with KOW_Ent;
 with APQ;
 
 generic
-	type Entity_Type is new Aw_Ent.Entity_Type with private;
-package Aw_Ent.Query_Builders is
+	type Entity_Type is new KOW_Ent.Entity_Type with private;
+package KOW_Ent.Query_Builders is
 	
 	-----------------------------------
 	-- Generic Package Instantiation --
@@ -95,20 +95,20 @@ package Aw_Ent.Query_Builders is
 	--
 	procedure Append(
 				Q		: in out Query_Type;
-				Foreign_Key	: in     Aw_Ent.Entity_Type'Class;
+				Foreign_Key	: in     KOW_Ent.Entity_Type'Class;
 				Appender	: in     Logic_Appender := Appender_AND;
 				Operator	: in     Logic_Operator := Operator_Equals
 			);
 	-- append a query element based on foreign key
 	
 	--
-	-- Aw_Ent.ID_Type
+	-- KOW_Ent.ID_Type
 	--
 
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     String;
-				Value	: in     Aw_Ent.Id_Type;
+				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
 				Operator: in     Logic_Operator := Operator_Equals
 			);
@@ -117,7 +117,7 @@ package Aw_Ent.Query_Builders is
 	procedure Append(
 				Q	: in out Query_Type;
 				Column	: in     Unbounded_String;
-				Value	: in     Aw_Ent.Id_Type;
+				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
 				Operator: in     Logic_Operator := Operator_Equals
 			);
@@ -256,4 +256,4 @@ private
 		Operators	: Operator_Vectors.Vector;
 	end record;
 
-end Aw_Ent.Query_Builders;
+end KOW_Ent.Query_Builders;
