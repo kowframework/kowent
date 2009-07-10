@@ -14,7 +14,7 @@ with "kowconfig-text";
 with "kowlib";
 
 
-with "adaworks_setup";
+with "kow_framework_setup";
 
 project KOWEnt is
 
@@ -32,7 +32,7 @@ project KOWEnt is
 	-- LIBRARY
 	for Library_Dir use "lib";
 	for Library_Name use "kowent";
-	for Library_Kind use AdaWorks_Setup'Library_Kind;
+	for Library_Kind use kow_framework_Setup'Library_Kind;
 	for Library_Version use "libkowent.so." & Version;
 	
 	
