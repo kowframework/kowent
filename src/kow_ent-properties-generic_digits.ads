@@ -1,16 +1,31 @@
 
 
 
+-- Generic package for handling floating point numbers
 
 
--- This type should be used to 
+with APQ;
+
 
 generic
-	type Private_Type is private;
+	type Val_Type is digits <>;
 	with function To_String( Element : in Private_Type ) return String;
+	with function From_String( Element : in String ) return Element_Type;
 	Null_Value : constant Numeric_Type;
-package KOW_ENT.Generic_Properties is
+package KOW_ENT.Properties.Generic_Digits is
 
+
+	-------------------------------------
+	-- Instances for generics from APQ --
+	-------------------------------------
+
+	procedure Append is new APQ.Append_Float( Val_Type => Val_Type );
+	function Value is new APQ.Float_Value( Val_Type => Val_Type );
+
+
+	-----------------------
+	-- Getter and Setter --
+	-----------------------
 
 	type Getter_Type is access function(
 			Entity	: in KOW_Ent.Entity_Type'Class
@@ -21,6 +36,10 @@ package KOW_ENT.Generic_Properties is
 			Value	: in Private_Type
 		);
 
+
+	------------------
+	-- The Property --
+	------------------
 
 	type Property_Type is new KOW_Ent.Entity_Property_Type with record
 		Getter	: Getter_Type;
@@ -73,4 +92,4 @@ package KOW_ENT.Generic_Properties is
 	-- useful to track if the user password has been changed and need to be stored back or not
 	-- Default :: true
 
-end KOW_Ent.Generic_Properties;
+end KOW_Ent.Properties.Generic_Digits;
