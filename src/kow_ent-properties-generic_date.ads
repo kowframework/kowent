@@ -1,23 +1,26 @@
--- Generic package for handling decimal numbers
+-- Generic package for handling date types
 
+
+
+with Ada.Calendar;
 
 with APQ;
 
 
 generic
-	type Val_Type is delta <> digits <>;
+	type Val_Type is new Ada.Calendar.Time;
 	with function To_String( Element : in Val_Type ) return String;
 	with function From_String( Element : in String ) return Val_Type;
 	Null_Value : Val_Type;
-package KOW_ENT.Properties.Generic_Decimal is
+package KOW_ENT.Properties.Generic_Date is
 
 
 	-------------------------------------
 	-- Instances for generics from APQ --
 	-------------------------------------
 
-	procedure Append is new APQ.Append_Decimal( Val_Type => Val_Type );
-	function Value is new APQ.Decimal_Value( Val_Type => Val_Type );
+	procedure Append is new APQ.Append_Date( Val_Type => Val_Type );
+	function Value is new APQ.Date_Value( Val_Type => Val_Type );
 
 
 	-----------------------
@@ -77,4 +80,4 @@ package KOW_ENT.Properties.Generic_Decimal is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
-end KOW_Ent.Properties.Generic_Decimal;
+end KOW_Ent.Properties.Generic_Date;

@@ -1,7 +1,4 @@
-
-
-
--- Generic package for handling floating point numbers
+-- Generic package for handling fixed point numbers
 
 
 with APQ;

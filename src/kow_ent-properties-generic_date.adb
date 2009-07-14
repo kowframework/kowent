@@ -1,7 +1,7 @@
 with APQ;
 
 
-package body KOW_ENT.Properties.Generic_Decimal is
+package body KOW_ENT.Properties.Generic_Date is
 
 
 	------------------
@@ -69,4 +69,4 @@ package body KOW_ENT.Properties.Generic_Decimal is
 	begin
 		return To_String( Property.Getter.all( Entity ) );
 	end Get_property;
-end KOW_Ent.Properties.Generic_Decimal;
+end KOW_Ent.Properties.Generic_Date;
