@@ -7,44 +7,12 @@
 with APQ;
 
 
-generic
-	type Val_Type is digits <>;
-	with function To_String( Element : in Val_Type ) return String;
-	with function From_String( Element : in String ) return Val_Type;
-	Null_Value : Val_Type;
-package KOW_ENT.Properties.Generic_Digits is
-
-
-	-------------------------------------
-	-- Instances for generics from APQ --
-	-------------------------------------
-
-	procedure Append is new APQ.Append_Float( Val_Type => Val_Type );
-	function Value is new APQ.Float_Value( Val_Type => Val_Type );
-
-
-	-----------------------
-	-- Getter and Setter --
-	-----------------------
-
-	type Getter_Type is access function(
-			Entity	: in KOW_Ent.Entity_Type'Class
-		) return Val_Type;
-
-	type Setter_Type is access procedure(
-			Entity	: in out KOW_Ent.Entity_Type'Class;
-			Value	: in     Val_Type 
-		);
+package body KOW_ENT.Properties.Generic_Digits is
 
 
 	------------------
 	-- The Property --
 	------------------
-
-	type Property_Type is new KOW_Ent.Entity_Property_Type with record
-		Getter	: Getter_Type;
-		Setter	: Setter_Type;
-	end record;
 
 
 	overriding
@@ -53,8 +21,24 @@ package KOW_ENT.Properties.Generic_Digits is
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
 				Connection	: in out APQ.Root_Connection_Type'Class -- the connection that belongs the query
+			) is
+		-- Set the property from the query into the Entity.
+		Column : String := To_String( Property.Column_Name );
+		Index  : APQ.Column_Index_Type := APQ.Column_Index( Q, Column );
+	begin
+		Property.Setter.all(
+				Entity,
+				Value( Q, Index )
 			);
-	-- Set the property from the query into the Entity.
+		exception
+			when APQ.Null_Value =>
+				Property.Setter.all(
+						Entity,
+						Null_Value
+					);
+	end Set_Property;
+
+
 
 	overriding
 	procedure Get_Property(
@@ -62,8 +46,12 @@ package KOW_ENT.Properties.Generic_Digits is
 				Entity		: in     Entity_Type'Class;		-- the entity
 				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
 				Connection	: in out APQ.Root_Connection_Type'Class	-- the connection that belongs the query
-			);
-	-- Append into a query being created by the main KOW_ent engine.
+			) is
+		-- Append into a query being created by the main KOW_ent engine.
+	begin
+		Append( Query, Property.Getter.all( Entity ) );
+	end Get_Property;
+
 
 
 	overriding
@@ -71,13 +59,20 @@ package KOW_ENT.Properties.Generic_Digits is
 				Property	: in     Property_Type;		-- the property worker
 				Entity		: in out Entity_Type'Class;		-- the entity
 				Value		: in     String				-- the String representation of this value
-			);
-	-- Set the property from a String representation of the value
-	
+			) is
+		-- Set the property from a String representation of the value
+	begin
+		Property.Setter.all( Entity, From_String( Value ) );
+	end Set_Property;
+
+
+
 	overriding
 	function Get_Property(
 				Property	: in     Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class		-- the entity
-			) return String;
-
+			) return String is
+	begin
+		return To_String( Property.Getter.all( Entity ) );
+	end Get_property;
 end KOW_Ent.Properties.Generic_Digits;
