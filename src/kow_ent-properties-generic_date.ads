@@ -80,4 +80,11 @@ package KOW_ENT.Properties.Generic_Date is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
+	function New_Property(
+					Column_Name	: in String;
+					Getter		: in Getter_Type;
+					Setter		: in Setter_Type
+			) return KOW_Ent.Entity_Property_Ptr;
+
+
 end KOW_Ent.Properties.Generic_Date;

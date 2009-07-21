@@ -69,4 +69,20 @@ package body KOW_ENT.Properties.Generic_Date is
 	begin
 		return To_String( Property.Getter.all( Entity ) );
 	end Get_property;
+
+
+
+	function New_Property(
+					Column_Name	: in String;
+					Getter		: in Getter_Type;
+					Setter		: in Setter_Type
+			) return KOW_Ent.Entity_Property_Ptr is
+	begin
+		return new Property_Type'(
+					Column_Name	=> To_Unbounded_String( Column_Name ),
+					Getter		=> Getter,
+					Setter		=> Setter
+				);
+	end New_Property;
+
 end KOW_Ent.Properties.Generic_Date;
