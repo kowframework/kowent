@@ -31,11 +31,6 @@
 
 
 -- This package contains all from factory supported property type handlers.
--- 
---
--- TODO: implement support for delta types (maybe in another - generic - package)
--- TODO: implement support for integer types (maybe in another - generic - package)
--- TODO: implement support for float types (maybe in another - generic - package)
 --
 -- TODO: think about changin all the above implementation into generic packages, one for each
 -- property type and then instanciate all of them here for the lazy ones
@@ -375,5 +370,26 @@ package KOW_Ent.Properties is
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
 	-- when Setter is NULL, KOW_view-entity_forms won't work for this property
+
+
+
+	-------------------
+	-- File Location --
+	-------------------
+
+--	NOTE: for now I'm gonna implement file upload using pure Ada structures with 1 file from DB entry
+--	-- TODO :: desenhar a parte de file upload e IMPLEMENTAR
+--	type File_Location_Property is new UString_Property with record
+--		Root_Path : Unbounded_String;
+--		-- where the files should be stored
+--		--
+--		-- on the KOW framework files aren't stored in the database backend.
+--		-- Even though storing in the database is easier and more portable
+--		-- storing on the file system should be easier to handle.
+--		--
+--		-- More than that, there are also default getter and setter.
+--
+--		Default_Extension : Unbounded_String;
+--	end record;
 
 end KOW_Ent.Properties;
