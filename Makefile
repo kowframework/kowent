@@ -9,9 +9,15 @@
 ifndef ($(PREFIX))
 	PREFIX=/usr/local
 endif
-INCLUDE_PREFIX=$(PREFIX)/include/kowent
-LIB_PREFIX=$(PREFIX)/lib
-GPR_PREFIX=$(LIB_PREFIX)/gnat
+ifndef ($(INCLUDE_PREFIX))
+	INCLUDE_PREFIX=$(PREFIX)/include/kowent
+endif
+ifndef ($(LIB_PREFIX))
+	LIB_PREFIX=$(PREFIX)/lib
+endif
+ifndef ($(GPR_PREFIX)) 
+	GPR_PREFIX=$(LIB_PREFIX)/gnat 
+endif
 
 
 
@@ -36,6 +42,8 @@ gprfile:
 	@echo "Preparing GPR file.."
 	@echo version:=\"$(VERSION)\" > gpr/kowent.def
 	@echo prefix:=\"$(PREFIX)\" >> gpr/kowent.def
+	@echo lib_prefix:=\"$(LIB_PREFIX)\" >> gpr/kowent.def
+	@echo include_prefix:=\"$(INCLUDE_PREFIX)\" >> gpr/kowent.def
 	@gnatprep gpr/kowent.gpr.in gpr/kowent.gpr gpr/kowent.def
 
 gprclean:
