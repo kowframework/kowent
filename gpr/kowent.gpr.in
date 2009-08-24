@@ -14,20 +14,18 @@ with "kowconfig-text";
 with "kowlib";
 
 
-with "kow_framework_setup";
-
 project KOWEnt is
 
-	version := KOWLib.Version;
+	version := $version;
 	
 	
-	for Source_Dirs use ( $include_prefix );
+	for Source_Dirs use ( $include_path );
 	
 	
 	-- LIBRARY
-	for Library_Dir use $lib_prefix;
+	for Library_Dir use $lib_path;
 	for Library_Name use "kowent";
-	for Library_Kind use kow_framework_Setup'Library_Kind;
+	for Library_Kind use KOWLib'Library_Kind;
 	for Library_Version use "libkowent.so." & Version;
 	for Externally_Built use "true";
 	
