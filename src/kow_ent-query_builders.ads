@@ -90,6 +90,9 @@ package KOW_Ent.Query_Builders is
 	type Query_Ptr is access Query_Type;
 
 
+	procedure Clear( Q : in out Query_Type );
+	-- clear the query for reuse
+
 	--
 	-- Foreign Key
 	--

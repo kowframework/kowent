@@ -73,11 +73,37 @@ package body KOW_Ent.Relations is
 		end Get_Query;
 
 
+		function get_All(
+					Entity		: in From_Entity_Type;
+					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+				) return Related_Entity_Query_Builders.Entity_Vectors.Vector is
+			-- Get all the related To_Entity_Type with the extra_filters
+			Q : Related_Entity_Query_Builders.Query_Type := Get_Query( Entity );
+		begin
+			Related_Entity_Query_Builders.Append( Q, Extra_Filters );
+			return Related_Entity_Query_Builders.Get_All( Q => Q );
+		end get_All;
+
+
+
 		function get_All( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Vectors.Vector is
 		begin
 			return Related_Entity_Query_Builders.Get_All( Q => Get_Query( Entity ) );
 		end get_All;
 		
+
+		function get_First(
+					Entity		: in From_Entity_Type;
+					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+				) return To_Entity_Type is
+			-- Get the first related To_Entity_Type with extra_filters
+			Q : Related_Entity_Query_Builders.Query_Type := Get_Query( Entity );
+		begin
+			Related_Entity_Query_Builders.Append( Q, Extra_Filters );
+			return Related_Entity_Query_Builders.Get_First( Q => Q, Unique => False );
+		end get_First;
+
+
 		function get_First( Entity : in From_Entity_Type ) return To_Entity_Type is
 		begin
 			return Related_Entity_Query_Builders.Get_First( Q => Get_Query( Entity ), Unique => False );

@@ -55,6 +55,12 @@ package body KOW_Ent.Query_Builders is
 	-- Query Management --
 	----------------------
 	
+	procedure Clear( Q : in out Query_Type ) is
+		-- clear the query for reuse
+	begin
+		Operator_Vectors.Clear( Q.Operators );
+	end Clear;
+
 	--
 	-- Foreign Key
 	--
