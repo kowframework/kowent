@@ -49,7 +49,7 @@
 --------------
 with Ada.Containers;
 with Ada.Containers.Doubly_Linked_Lists;
-with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 with Ada.Tags;					use Ada.Tags;
 
@@ -390,13 +390,13 @@ package KOW_Ent is
 
 
 	
-	package Entity_Information_Maps is new Ada.Containers.Hashed_Maps(
-				Key_Type	=> Ada.Strings.Unbounded.Unbounded_String,
-				Element_Type	=> Entity_Information_Type,
-				Hash		=> Hash,
-				Equivalent_Keys	=> Ada.Strings.Unbounded."="
+	package Entity_Information_Maps is new Ada.Containers.Ordered_Maps(
+				Key_Type	=> Unbounded_String,
+				Element_Type	=> Entity_Information_Type
 			);
 	-- this is used to map an entity tag to it's properties
+	-- Hashed_Maps could give us better performance, but I've encountered
+	-- two strings with the exact same hash already
 
 
 
