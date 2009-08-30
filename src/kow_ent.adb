@@ -660,9 +660,9 @@ package body KOW_Ent is
 	procedure Save( Entity : in out Entity_Type'Class ) is
 		-- save the existing entity into the database Backend
 
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 
 			First_Element	: Boolean := True;
@@ -719,6 +719,17 @@ package body KOW_Ent is
 			);
 		end Runner;
 	begin
+		if Info.Id_Generator /= null then
+			-- check if the user didn't temper with the ID
+			declare
+				use APQ;
+				TMP_Id : Id_Type := Info.Id_Generator.All( Entity );
+			begin
+				if TMP_Id.Value /= Entity.Id.Value then
+					raise CONSTRAINT_ERROR with "trying to temper with code generated entity ID";
+				end if;
+			end;
+		end if;
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Save;
 	
