@@ -292,7 +292,7 @@ package body KOW_Ent.Query_Builders is
 		-- append another query as a child query :: () stuff
 		Handler : Operator_Handler_Type;
 	begin
-		Handler.Child_Query := new Query_Type'( Q );
+		Handler.Child_Query := new Query_Type'( Child_Q );
 		Handler.Appender := Appender;
 		Handler.Operation_Type := Q_Operator;
 
@@ -377,7 +377,7 @@ package body KOW_Ent.Query_Builders is
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query, Connection );
 
-		--Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 
 
 		APQ.Execute( Query, Connection );
