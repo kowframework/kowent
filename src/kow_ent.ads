@@ -150,6 +150,16 @@ package KOW_Ent is
 	-- as default, return the ID as String.
 	-- Should be overriden to something that makes more sence
 
+	function Describe( Entity : in Entity_Type ) return String;
+	-- get a detailed description of this entity...
+	-- as default return "Entity represented by """ & To_String( Entity ) & """"
+	
+	function Image_URL( Entity : in Entity_Type ) return String;
+	-- get a URI (http://, https://, file://) with a image file representing the entity
+	-- as default return "", representing there is no graphic representation of the given entity
+	--
+	-- this is quite usefull in gravatar interaction provided by kow_sec-entities package
+
 
 	procedure Set_Values_From_Query(
 				Entity		: in out Entity_Type'Class;

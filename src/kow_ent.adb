@@ -159,6 +159,26 @@ package body KOW_Ent is
 		return To_String( Entity.Id );
 	end To_String;
 
+
+	function Describe( Entity : in Entity_Type ) return String is
+		-- get a detailed description of this entity...
+		-- as default return "Entity represented by """ & To_String( Entity ) & """"
+	begin
+		return "Entity represented by """ & To_String( Entity ) & """";
+	end Describe;
+
+	
+	function Image_URL( Entity : in Entity_Type ) return String is
+		-- get a URI (http://, https://, file://) with a image file representing the entity
+		-- as default return "", representing there is no graphic representation of the given entity
+		--
+		-- this is quite usefull in gravatar interaction provided by kow_sec-entities package
+	begin
+		return "";
+	end Image_URL;
+
+
+
 	procedure Set_Values_From_Query(
 				Entity		: in out Entity_Type'Class;
 				Query		: in out APQ.Root_Query_Type'Class;
