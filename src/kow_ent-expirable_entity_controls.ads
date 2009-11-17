@@ -52,7 +52,7 @@ package KOW_Ent.Expirable_Entity_Controls is
 
 	type Validation_Timestamp is new Ada.Calendar.Time;
 
-	No_Validation_Timestamp : constant Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
+	No_Validation : constant Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
 	-- todo :: change it to a decent implementation
 
 

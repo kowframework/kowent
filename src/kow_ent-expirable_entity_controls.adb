@@ -49,18 +49,37 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	------------------------------------
 	
 
+	
 
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
 		-- check if the entity is in a valid period
+		Validation : Validation_Type;
+		Now : Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
 	begin
-		return false;
+		Validation := Last_Validation( Entity );
+		return Validation.From_Date < Now AND ( Validation.To_Date > Now OR Validation.To_Date = No_Validation );
+	exception
+		when INVALID_PERIOD => 
+			return false;
 	end is_valid;
 
 	procedure New_Validation_Period( Entity : in Entity_Type; From_Date, To_Date : in Validation_Timestamp ) is
 		-- set the new validation period.
 		-- raise INVALID_PERIOD when From_Date > To_Date or Is_Valid == true
+		Validation : Validation_Type;
 	begin
-		null;
+		if To_Date /= No_Validation AND THEN From_Date > To_Date then
+			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date!";
+		elsif Is_Valid( Entity ) then
+			raise INVALID_PERIOD with "Can't set period when the entity is already valid";
+		end if;
+
+		Validation.From_Date := From_Date;
+		Validation.To_Date := To_Date;
+		Validation.Owner_Id := Entity.ID;
+
+		Store( Validation );
+
 	end New_Validation_Period;
 
 
