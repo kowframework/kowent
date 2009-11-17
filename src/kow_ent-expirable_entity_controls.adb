@@ -35,6 +35,8 @@
 ------------------------------------------------------------------------------
 
 
+with Ada.Containers;
+
 
 -- Some information:
 -- 	there can be only 1 validation period active act the time.
@@ -134,17 +136,38 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	
 	function Last_Validation( Entity : in Entity_Type ) return Validation_Type is
 		-- get the last validation in the database backend
-		Ret : Validation_Type;
+		Validations : Validation_Array := Get_Validations( Entity );
+		-- TODO :: implement Last_Validation using Query_Builders
 	begin
-		return Ret;
+		return Validations( Validations'Last );
 	end Last_Validation;
 
 
 
 	function Get_Validations( Entity : in Entity_Type ) return Validation_Array is
 		-- get all the registered validation entities
-		Ret : Validation_Array( 1 .. 1 );
+		Ret	: Validation_Array( 1 .. 1 );
+		Query	: Query_Builders.Query_Type;
+		Results	: Query_Builders.Entity_Vectors.Vector;
+
+		use Query_Builders;
 	begin
+		Append( Q => Query, Foreign_key => Entity );
+		Append_Order( Q => Query, Column => "from_date" );
+
+		Results := Get_All( Query );
+
+
+		declare
+			Count : Integer := Integer( Query_Builders.Entity_Vectors.Length( Results ) );
+			Ret   : Validation_Array( 1 .. Count );
+		begin
+			for i in 1 .. count loop
+				Ret( i ) := Query_Builders.Entity_Vectors.Element( Results, i );
+			end loop;
+
+			return Ret;
+		end;
 		return Ret;
 	end Get_Validations;
 

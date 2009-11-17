@@ -36,8 +36,17 @@
 
 
 
+--------------
+-- Ada 2005 --
+--------------
 with Ada.Calendar;
 with Ada.Containers.Vectors;
+
+
+-------------------
+-- KOW Framework --
+-------------------
+with KOW_Ent.Query_Builders;
 
 
 -- Some information:
@@ -113,5 +122,10 @@ package KOW_Ent.Expirable_Entity_Controls is
 
 	function Get_Validations( Entity : in Entity_Type ) return Validation_Array;
 	-- get all the registered validation entities
+
+
+
+	package Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => Validation_Type );
+
 
 end KOW_Ent.Expirable_Entity_Controls;

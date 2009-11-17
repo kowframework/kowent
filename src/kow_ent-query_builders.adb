@@ -320,6 +320,19 @@ package body KOW_Ent.Query_Builders is
 	end Append_Order;
 
 
+	procedure Append_Order(
+				Q		: in out Query_Type;
+				Column		: in     String;
+				Ordenation	: in     Ordenation_Type := ASCENDING
+		 	) is
+	begin
+		Append_Order(
+				Q		=> Q,
+				Column		=> To_Unbounded_String( Column ),
+				Ordenation	=> Ordenation
+			);
+	end Append_Order;
+
 
 	--------------------
 	-- IMPLEMENTATION --

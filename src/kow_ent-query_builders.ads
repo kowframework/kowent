@@ -219,6 +219,12 @@ package KOW_Ent.Query_Builders is
 				Column		: in     Unbounded_String;
 				Ordenation	: in     Ordenation_Type := ASCENDING
 		 	);
+	procedure Append_Order(
+				Q		: in out Query_Type;
+				Column		: in     String;
+				Ordenation	: in     Ordenation_Type := ASCENDING
+		 	);
+
 
 	--------------------
 	-- IMPLEMENTATION --
