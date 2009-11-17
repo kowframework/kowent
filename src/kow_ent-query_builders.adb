@@ -389,6 +389,35 @@ package body KOW_Ent.Query_Builders is
 		end if;
 	end Append_to_APQ_Query;
 
+	procedure Append_Order_by_to_APQ_Query(
+				Q		: in     Query_Type;
+				APQ_Q		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			) is
+		Order_By_Str : Unbounded_String;
+
+		First_Element : Boolean := true;
+		procedure Iterator( C : in Order_By_Vectors.Cursor ) is
+			O : Order_By_Type := Order_By_Vectors.Element( C );
+		begin
+			if First_Element then
+				First_Element := False;
+			else
+				Order_by_Str := Order_by_Str & ',';
+			end if;
+			Order_By_Str := Order_By_Str & "ORDER BY " & O.Column;
+
+			case O.Ordenation is
+				when ASCENDING => Order_By_Str := Order_by_Str & " ASC";
+				when DESCENDING => Order_By_Str := Order_by_Str & " DESC";
+			end case;
+		end Iterator;
+	begin
+		Order_By_Vectors.Iterate( Q.Order_By, Iterator'Access );
+		if Order_by_Str /= "" then
+			APQ.Append( APQ_Q, To_String( Order_By_Str ) );
+		end if;
+	end Append_Order_by_to_APQ_Query;
 
 
 	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
@@ -401,6 +430,8 @@ package body KOW_Ent.Query_Builders is
 		Append_Column_Names_For_Read( Query, Info.Properties );
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query, Connection );
+		APQ.Append( Query, " " );
+		Append_Order_By_to_APQ_Query( Q, Query, Connection );
 
 		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 

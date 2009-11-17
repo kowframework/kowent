@@ -230,6 +230,11 @@ package KOW_Ent.Query_Builders is
 				Connection	: in out APQ.Root_Connection_Type'Class
 			);
 
+	procedure Append_Order_by_to_APQ_Query(
+				Q		: in     Query_Type;
+				APQ_Q		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			);
 
 	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector;
 	-- get all results from the query
