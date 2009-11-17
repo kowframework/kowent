@@ -69,7 +69,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 		Validation : Validation_Type;
 	begin
 		if To_Date /= No_Validation AND THEN From_Date > To_Date then
-			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date!";
+			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date";
 		elsif Is_Valid( Entity ) then
 			raise INVALID_PERIOD with "Can't set period when the entity is already valid";
 		end if;
@@ -87,8 +87,13 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	procedure Expire( Entity : in Entity_Type; To_Date : in Validation_Timestamp ) is
 		-- expire in the given date..
 		-- raise invalid_period when To_Date < the last validation period
+		Validation : Validation_Type := Last_Validation( Entity );
 	begin
-		null;
+		if Validation.To_Date /= No_Validation AND THEN Validation.To_Date < To_Date then
+			raise INVALID_PERIOD with "Invalidating an already invalid entity";
+		end if;
+		Validation.To_Date := To_Date;
+		Store( Validation );
 	end Expire;
 
 
@@ -96,8 +101,18 @@ package body KOW_Ent.Expirable_Entity_Controls is
 		-- validate from the given date..
 		--
 		-- raise invalid_period if Is_Valid = TRUE
+		Validation : Validation_Type;
 	begin
-		null;
+		if Is_Valid( Entity ) then
+			raise INVALID_PERIOD with "Trying to validate an already valid entity";
+		end if;
+
+		Validation.From_Date := From_Date;
+		Validation.To_Date := No_Validation;
+		Validation.Owner_Id := Entity.ID;
+
+		Store( Validation );
+
 	end Validate;
 
 
@@ -106,14 +121,14 @@ package body KOW_Ent.Expirable_Entity_Controls is
 		-- expire now
 		-- raise INVALID_PERIOD if Is_Valid = FALSE
 	begin
-		null;
+		Expire( Entity, Validation_Timestamp( Ada.Calendar.Clock ) );
 	end Expire_Now;
 
 
 	procedure Validate_Now( Entity : in Entity_Type ) is
 		-- raise invalid_period if Is_Valid = TRUE
 	begin
-		null;
+		Validate( Entity, Validation_Timestamp( Ada.Calendar.Clock ) );
 	end Validate_Now;
 
 	

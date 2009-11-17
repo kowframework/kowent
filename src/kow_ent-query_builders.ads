@@ -206,6 +206,19 @@ package KOW_Ent.Query_Builders is
 	-- append another query as a child query :: () stuff
 	
 
+	-- -------- --
+	-- Order By --
+	-- -------- --
+
+	type Ordenation_Type is ( ASCENDING, DESCENDING );
+	-- order ascending or descending?
+
+	
+	procedure Append_Order(
+				Q		: in out Query_Type;
+				Column		: in     Unbounded_String;
+				Ordenation	: in     Ordenation_Type := ASCENDING
+		 	);
 
 	--------------------
 	-- IMPLEMENTATION --
@@ -229,6 +242,10 @@ package KOW_Ent.Query_Builders is
 	-- if no results, raise NO_ENTITY
 
 private
+
+	-- --------- --
+	-- Operators --
+	-- --------- --
 
 	type Control_Operation_Type is (
 			L_Operator,	-- Logical Operator
@@ -255,8 +272,26 @@ private
 	-- used to store operators in the query
 
 
+
+
+	-- -------- --
+	-- Order By --
+	-- -------- --
+	
+
+	type Order_By_Type is record
+		Column		: Unbounded_String;
+		Ordenation	: Ordenation_Type;
+	end record;
+
+	package Order_by_Vectors is new Ada.Containers.Vectors(
+			Element_Type	=> Order_By_Type,
+			Index_Type	=> Positive
+		);
+
 	type Query_Type is record
 		Operators	: Operator_Vectors.Vector;
+		Order_By	: Order_By_Vectors.Vector;
 	end record;
 
 end KOW_Ent.Query_Builders;

@@ -300,6 +300,31 @@ package body KOW_Ent.Query_Builders is
 	end Append;
 
 
+	-- -------- --
+	-- Order By --
+	-- -------- --
+
+	procedure Append_Order(
+				Q		: in out Query_Type;
+				Column		: in     Unbounded_String;
+				Ordenation	: in     Ordenation_Type := ASCENDING
+		 	) is
+	begin
+		Order_By_Vectors.Append(
+				Q.Order_By,
+				(
+					Column		=> Column,
+					Ordenation	=> Ordenation
+				)
+			);
+	end Append_Order;
+
+
+
+	--------------------
+	-- IMPLEMENTATION --
+	--------------------
+
 	procedure Append_to_APQ_Query(
 				Q		: in     Query_Type;
 				APQ_Q		: in out APQ.Root_Query_Type'Class;
