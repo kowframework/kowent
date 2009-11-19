@@ -275,20 +275,15 @@ begin
 
 	
 
---	KOW_Ent.Entity_Registry.Add_Property(
---			Entity_Tag	=> Validation_Type'Tag,
---			Property	=> KOW_Ent.Properties.New_Foreign_Key_Property(
---							Column_Name		=> "owner_id",
---							Related_Entity_Tag	=> Entity_Type'Tag,
---							Getter			=> Get_Owner_Id'Access,
---							Setter			=> Set_Owner_Id'Access
---						)
---		);
--- TODO :: getter/setter must be anonymous access in order to be valid for generic bodies..
-
-
-
-
+	KOW_Ent.Entity_Registry.Add_Property(
+			Entity_Tag	=> Validation_Type'Tag,
+			Property	=> KOW_Ent.Properties.New_Foreign_Key_Property(
+							Column_Name		=> "owner_id",
+							Related_Entity_Tag	=> Entity_Type'Tag,
+							Getter			=> Get_Owner_Id'Access,
+							Setter			=> Set_Owner_Id'Access
+						)
+		);
 
 
 
