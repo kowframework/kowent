@@ -49,19 +49,10 @@ package KOW_Ent.Properties is
 	-- Foreign Key --
 	-----------------
 	
-	-- this is used to map a foreign key for the entity
-	type ID_Getter_Type is not null access function(
-				Entity	: in KOW_Ent.Entity_Type'Class
-			) return KOW_Ent.ID_Type;
-	type ID_Setter_Type is not null access procedure(
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				ID	: in     KOW_Ent.ID_Type
-			);
-	
 	type Foreign_Key_Property_Type is new Entity_Property_Type with record
 		Related_Entity_Tag	: Ada.Tags.Tag;
-		Getter			: ID_Getter_Type;
-		Setter			: ID_Setter_Type;
+		Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+		Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
 	end record;
 
 
@@ -102,8 +93,8 @@ package KOW_Ent.Properties is
 	function New_Foreign_Key_Property(
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
-				Getter			: in ID_Getter_Type;
-				Setter			: in ID_Setter_Type
+				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type )
 			) return Entity_Property_Ptr;
 
 
