@@ -129,16 +129,17 @@ package body KOW_Ent.Properties is
 	function New_Foreign_Key_Property(
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
-				Getter			: in ID_Getter_Type;
-				Setter			: in ID_Setter_Type
+				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type )
 			) return Entity_Property_Ptr is
+		FK : Foreign_Key_property_Type;
 	begin
-		return new Foreign_Key_Property_Type'(
-				Column_Name		=> To_Unbounded_String( Column_Name ),
-				Related_Entity_Tag	=> Related_Entity_Tag,
-				Getter			=> Getter,
-				Setter			=> Setter
-				);
+		FK.Column_Name		:= To_Unbounded_String( Column_Name );
+		FK.Related_Entity_Tag	:= Related_Entity_Tag;
+		FK.Getter		:= Getter;
+		FK.Setter		:= Setter;
+
+		return new Foreign_Key_Property_Type'( FK );
 
 	end New_Foreign_Key_Property;
 
@@ -209,15 +210,15 @@ package body KOW_Ent.Properties is
 
 	function New_Boolean_Property(
 				Column_Name		: in String;
-				Getter			: in Boolean_Getter_Type;
-				Setter			: in Boolean_Setter_Type
+				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean )
 			) return Entity_Property_Ptr is
+		Bool : Boolean_Property_Type;
 	begin
-		return new Boolean_Property_Type'(
-				Column_Name	=> To_Unbounded_String( Column_Name ),
-				Getter		=> Getter,
-				Setter		=> Setter
-			);
+		Bool.Column_Name	:= To_Unbounded_String( Column_Name );
+		Bool.Getter		:= Getter;
+		Bool.Setter		:= Setter;
+		return new Boolean_Property_Type'( Bool );
 	end New_Boolean_Property;
 
 

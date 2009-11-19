@@ -51,8 +51,8 @@ package KOW_Ent.Properties is
 	
 	type Foreign_Key_Property_Type is new Entity_Property_Type with record
 		Related_Entity_Tag	: Ada.Tags.Tag;
-		Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-		Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+		Getter			: access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+		Setter			: access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
 	end record;
 
 
@@ -102,17 +102,9 @@ package KOW_Ent.Properties is
 	-- Boolean Property --
 	----------------------
 
-	type Boolean_Getter_Type is not null access function(
-				Entity	: in KOW_Ent.Entity_Type'Class
-			) return Boolean;
-	type Boolean_Setter_Type is not null access procedure(
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				ID	: in     Boolean
-			);
-	
 	type Boolean_Property_Type is new Entity_Property_Type with record
-		Getter			: Boolean_Getter_Type;
-		Setter			: Boolean_Setter_Type;
+		Getter			: access function( Entity : in KOW_Ent.Entity_Type'Class ) return Boolean;
+		Setter			: access procedure( Entity : in out KOW_ent.Entity_Type'Class; Value : in Boolean );
 	end record;
 
 
@@ -151,8 +143,8 @@ package KOW_Ent.Properties is
 
 	function New_Boolean_Property(
 				Column_Name		: in String;
-				Getter			: in Boolean_Getter_Type;
-				Setter			: in Boolean_Setter_Type
+				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean )
 			) return Entity_Property_Ptr;
 
 
