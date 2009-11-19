@@ -450,16 +450,16 @@ package body KOW_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: in     Password_Getter_Type;
-				Setter		: in     Password_Setter_Type := null
+				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of password properties.
+		Pwd : Password_Property_Type;
 	begin
-		return new Password_Property_Type'(
-				Column_Name	=> To_Unbounded_String( Column_Name ),
-				Getter		=> Getter,
-				Setter		=> Setter
-			);
+		Pwd.Column_name		:= To_Unbounded_String( Column_Name );
+		Pwd.Getter		:= Getter;
+		Pwd.Setter		:= Setter;
+		return new Password_Property_Type'( Pwd );
 	end New_Password_Property;
 
 end KOW_Ent.Properties;

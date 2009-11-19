@@ -286,11 +286,11 @@ package KOW_Ent.Properties is
 		-- it's only used to set a new password.
 		--
 		-- The stored password is Hashed.
-		Getter : Password_Getter_Type;
+		Getter : access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
 		-- get the non-hashed password
 
 
-		Setter : Password_Setter_Type;
+		Setter : access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
 	end record;
 
 
@@ -339,8 +339,8 @@ package KOW_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: in     Password_Getter_Type;
-				Setter		: in     Password_Setter_Type := null
+				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
 	-- when Setter is NULL, KOW_view-entity_forms won't work for this property
