@@ -43,10 +43,19 @@ with Ada.Calendar;
 with Ada.Containers.Vectors;
 
 
+---------
+-- APQ --
+---------
+with APQ;
+
+
 -------------------
 -- KOW Framework --
 -------------------
 with KOW_Ent.Query_Builders;
+
+
+
 
 
 -- Some information:
@@ -56,13 +65,9 @@ with KOW_Ent.Query_Builders;
 
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private;
+	Table_Name : String;
 package KOW_Ent.Expirable_Entity_Controls is
 
-
-	type Validation_Timestamp is new Ada.Calendar.Time;
-
-	No_Validation : constant Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
-	-- todo :: change it to a decent implementation
 
 
 	package Entity_Vectors is new Ada.Containers.Vectors(
@@ -70,17 +75,34 @@ package KOW_Ent.Expirable_Entity_Controls is
 				Index_Type	=> Positive
 			);
 
-
-	
 	INVALID_PERIOD : Exception;
 	-- raised when there is an incosistence in the validation period
 
+	-- -------------------- --
+	-- Validation Timestamp --
+	-- -------------------- --
+
+	type Validation_Timestamp is new Ada.Calendar.Time;
+
+
+        function Timestamp_To_String is new APQ.Timestamp_String( Val_Type => Validation_Timestamp );
+
+	function String_to_Timestamp is new APQ.Convert_To_Timestamp( Val_Type => Validation_Timestamp );
+
+
+	No_Validation : constant Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
+	-- todo :: change it to a decent implementation
+
+
 
 	
 
-	------------------------------------
-	-- General Purpose Query Entities --
-	------------------------------------
+
+	
+
+	-- --------------------- --
+	-- Validation Management --
+	-- --------------------- --
 	
 
 

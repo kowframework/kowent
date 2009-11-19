@@ -35,8 +35,18 @@
 ------------------------------------------------------------------------------
 
 
+
+--------------
+-- Ada 2005 --
+--------------
 with Ada.Containers;
 
+
+-------------------
+-- KOW Framework --
+-------------------
+with KOW_Ent;
+with KOW_Ent.Properties;
 
 -- Some information:
 -- 	there can be only 1 validation period active act the time.
@@ -46,11 +56,10 @@ with Ada.Containers;
 package body KOW_Ent.Expirable_Entity_Controls is
 
 
-	------------------------------------
-	-- General Purpose Query Entities --
-	------------------------------------
-	
 
+	-- --------------------- --
+	-- Validation Management --
+	-- --------------------- --
 	
 
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
@@ -146,7 +155,6 @@ package body KOW_Ent.Expirable_Entity_Controls is
 
 	function Get_Validations( Entity : in Entity_Type ) return Validation_Array is
 		-- get all the registered validation entities
-		Ret	: Validation_Array( 1 .. 1 );
 		Query	: Query_Builders.Query_Type;
 		Results	: Query_Builders.Entity_Vectors.Vector;
 
@@ -168,7 +176,122 @@ package body KOW_Ent.Expirable_Entity_Controls is
 
 			return Ret;
 		end;
-		return Ret;
 	end Get_Validations;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	--
+	-- now the private entity handling part of this package :)
+	--
+
+
+	--
+	-- the factory
+	--
+	function Validation_Factory return KOW_Ent.Entity_Type'Class is
+		E : Validation_Type;
+	begin
+		return E;
+	end Validation_Factory;
+
+	--
+	-- from date
+	--
+	function get_From_Date( E : in KOW_Ent.Entity_Type'Class ) return Validation_Timestamp is
+	begin
+		return Validation_Type( E ).From_Date;
+	end get_From_Date;
+
+	procedure set_From_Date( E : in out KOW_Ent.Entity_Type'Class; From_Date : in Validation_Timestamp ) is
+	begin
+		Validation_Type( E ).From_Date := From_Date;
+	end set_From_Date;
+
+	--
+	-- to date
+	--
+	function get_To_Date( E : in KOW_Ent.Entity_Type'Class ) return Validation_Timestamp is
+	begin
+		return Validation_Type( E ).To_Date;
+	end get_To_Date;
+
+	procedure set_To_Date( E : in out KOW_Ent.Entity_Type'Class; To_Date : in Validation_Timestamp ) is
+	begin
+		Validation_Type( E ).To_Date := To_Date;
+	end set_To_Date;
+
+	--
+	-- owner id
+	--
+	function get_Owner_Id( E : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type is
+	begin
+		return Validation_Type( E ).Owner_Id;
+	end get_Owner_Id;
+
+	procedure set_Owner_Id( E : in out KOW_Ent.Entity_Type'Class; Owner_ID : in KOW_Ent.Id_Type ) is
+	begin
+		Validation_Type( E ).Owner_ID := Owner_ID;
+	end set_Owner_Id;
+	
+
+
+
+begin
+
+
+
+
+
+	KOW_Ent.Entity_Registry.Register(
+			Entity_Tag	=> Validation_Type'Tag,
+			Table_Name	=> Table_Name,
+			Id_Generator	=> null,
+			Factory		=> Validation_Factory'Access
+		);
+
+
+	
+
+--	KOW_Ent.Entity_Registry.Add_Property(
+--			Entity_Tag	=> Validation_Type'Tag,
+--			Property	=> KOW_Ent.Properties.New_Foreign_Key_Property(
+--							Column_Name		=> "owner_id",
+--							Related_Entity_Tag	=> Entity_Type'Tag,
+--							Getter			=> Get_Owner_Id'Access,
+--							Setter			=> Set_Owner_Id'Access
+--						)
+--		);
+-- TODO :: getter/setter must be anonymous access in order to be valid for generic bodies..
+
+
+
+
+
+
+
+
 
 end KOW_Ent.Expirable_Entity_Controls;

@@ -425,7 +425,7 @@ package KOW_Ent is
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
 					Id_Generator	: in Id_Generator_Type := Null;
-					Factory		: in Entity_Factory_Type := Null );
+					Factory		: access function return Entity_Type'Class := Null );
 		-- register an Entity into the KOW_Ent engine
 		-- Table_Name is the table name to be used.
 	
@@ -469,7 +469,7 @@ package KOW_Ent is
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 				Table_Name	: in String;
 				Id_Generator	: in Id_Generator_Type := Null;
-				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
+				Factory		: access function return Entity_Type'Class ) renames Entity_Registry.Register;
 	-- register an Entity into the KOW_Ent engine
 	-- Table_Name is the table name to be used.
 
