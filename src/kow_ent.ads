@@ -373,7 +373,6 @@ package KOW_Ent is
 	-- Where the entity is described..
 	--
 	
-	type Entity_Factory_Type is access function return Entity_Type'Class;
 	type Entity_Information_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		-- just for internal reference (maybe we'll need it at some point?).
@@ -392,7 +391,7 @@ package KOW_Ent is
 		-- They are stored in a doubly linked list because of better memory usage than vector
 		-- and because we only query this list in a sequential (be it forward or backward) way
 
-		Factory		: Entity_Factory_Type;
+		Factory		: access function return Entity_Type'CLass;
 	end record;
 
 	function Hash(Key : Ada.Strings.Unbounded.Unbounded_String ) return Ada.Containers.Hash_Type;
@@ -431,7 +430,7 @@ package KOW_Ent is
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Id_Generator	: in Id_Generator_Type := Null;
-					Factory		: in Entity_Factory_Type := Null );
+					Factory		: access function return Entity_Type'Class := Null );
 		-- register an Entity into the KOW_Ent engine
 		-- Auto generate the table name (using the Tag)
 
@@ -475,7 +474,7 @@ package KOW_Ent is
 
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 				Id_Generator	: in Id_Generator_Type := Null;
-				Factory		: in Entity_Factory_Type ) renames Entity_Registry.Register;
+				Factory		: access function return Entity_Type'Class ) renames Entity_Registry.Register;
 	-- register an Entity into the KOW_Ent engine
 	-- Auto generate the table name (using the Tag)
 

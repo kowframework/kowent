@@ -569,7 +569,7 @@ package body KOW_Ent is
 			Info.Entity_Tag   := Entity_Tag;
 			Info.Table_Name	  := To_Unbounded_String( Table_Name );
 			Info.Id_Generator := Id_Generator;
-			Info.Factory      := Entity_Factory_Type( Factory );
+			Info.Factory      := Factory;
 
 			Entity_Information_Maps.Insert(
 				Container	=> My_Entities,
@@ -584,7 +584,7 @@ package body KOW_Ent is
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Id_Generator	: in Id_Generator_Type := Null;
-					Factory		: in Entity_Factory_Type := Null ) is
+					Factory		: access function return Entity_Type'Class := Null ) is
 			-- register an Entity into the KOW_Ent engine
 			-- Auto generate the table name (using the Tag)
 		begin
