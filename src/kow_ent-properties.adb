@@ -288,13 +288,13 @@ package body KOW_Ent.Properties is
 	function New_Locale_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale )
 			) return Entity_Property_Ptr is
 		Loc : Locale_Property_Type;
 	begin
 		Loc.Column_Name	:= to_Unbounded_String( Column_Name );
-		Getter		:= Getter;
-		Setter		:= Setter;
+		Loc.Getter	:= Getter;
+		Loc.Setter	:= Setter;
 		return new Locale_Property_Type'( Loc );
 	end New_Locale_Property;
 
