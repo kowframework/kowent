@@ -23,27 +23,13 @@ package KOW_ENT.Properties.Generic_Timestamp is
 	function Value is new APQ.Timestamp_Value( Val_Type => Val_Type );
 
 
-	-----------------------
-	-- Getter and Setter --
-	-----------------------
-
-	type Getter_Type is access function(
-			Entity	: in KOW_Ent.Entity_Type'Class
-		) return Val_Type;
-
-	type Setter_Type is access procedure(
-			Entity	: in out KOW_Ent.Entity_Type'Class;
-			Value	: in     Val_Type 
-		);
-
-
 	------------------
 	-- The Property --
 	------------------
 
 	type Property_Type is new KOW_Ent.Entity_Property_Type with record
-		Getter	: Getter_Type;
-		Setter	: Setter_Type;
+		Getter	: access function( Entity : in Entity_Type'Class ) return Val_Type;
+		Setter	: access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
 	end record;
 
 
@@ -82,8 +68,8 @@ package KOW_ENT.Properties.Generic_Timestamp is
 
 	function New_Property(
 					Column_Name	: in String;
-					Getter		: in Getter_Type;
-					Setter		: in Setter_Type
+					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
+					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type )
 			) return KOW_Ent.Entity_Property_Ptr;
 
 
