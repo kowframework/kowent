@@ -359,18 +359,18 @@ package body KOW_Ent.Properties is
 
 	function New_UString_Property(
 				Column_Name	: in     String;
-				Getter		: in     UString_Getter_Type;
-				Setter		: in     UString_Setter_Type;
+				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
 				Default_Value	: in     String := "N/A"
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of UString properties.
+		UStr : UString_Property_Type;
 	begin
-		return new UString_Property_Type'(
-				Column_Name	=> To_Unbounded_String( Column_Name ),
-				Getter		=> Getter,
-				Setter		=> Setter,
-				Default_Value	=> To_Unbounded_String( Default_Value )
-				);
+		UStr.Column_Name	:= To_Unbounded_String( Column_Name );
+		UStr.Getter		:= Getter;
+		UStr.Setter		:= Setter;
+		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
+		return new UString_Property_Type'( UStr );
 	end New_UString_Property;
 
 	-----------------------

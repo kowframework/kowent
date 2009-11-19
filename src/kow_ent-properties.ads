@@ -215,8 +215,8 @@ package KOW_Ent.Properties is
 			);
 
 	type UString_Property_Type is new Entity_Property_Type with record
-		Getter		: UString_Getter_Type;
-		Setter		: UString_Setter_Type;
+		Getter		: access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
+		Setter		: access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
 		Default_Value	: Unbounded_String;
 	end record;
 
@@ -258,8 +258,8 @@ package KOW_Ent.Properties is
 
 	function New_UString_Property(
 				Column_Name	: in     String;
-				Getter		: in     UString_Getter_Type;
-				Setter		: in     UString_Setter_Type;
+				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
 				Default_Value	: in     String := "N/A"
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
