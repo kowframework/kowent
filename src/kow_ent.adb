@@ -689,7 +689,7 @@ package body KOW_Ent is
 			procedure Update_Appender( C : Property_Lists.Cursor ) is
 				Property: Entity_Property_Ptr := Property_Lists.Element( C );
 			begin
-				if Should_Store( Property.all, Entity ) then
+				if Should_Store( Property.all, Entity ) and not Property.Immutable then
 					if not First_Element then
 						APQ.Append( Query, "," );
 					else

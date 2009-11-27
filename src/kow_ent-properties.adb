@@ -130,7 +130,8 @@ package body KOW_Ent.Properties is
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
 				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type )
+				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		FK : Foreign_Key_property_Type;
 	begin
@@ -138,6 +139,7 @@ package body KOW_Ent.Properties is
 		FK.Related_Entity_Tag	:= Related_Entity_Tag;
 		FK.Getter		:= Getter;
 		FK.Setter		:= Setter;
+		FK.Immutable		:= Immutable;
 
 		return new Foreign_Key_Property_Type'( FK );
 
@@ -211,13 +213,15 @@ package body KOW_Ent.Properties is
 	function New_Boolean_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean )
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		Bool : Boolean_Property_Type;
 	begin
 		Bool.Column_Name	:= To_Unbounded_String( Column_Name );
 		Bool.Getter		:= Getter;
 		Bool.Setter		:= Setter;
+		Bool.Immutable		:= Immutable;
 		return new Boolean_Property_Type'( Bool );
 	end New_Boolean_Property;
 
@@ -288,13 +292,15 @@ package body KOW_Ent.Properties is
 	function New_Locale_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale )
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		Loc : Locale_Property_Type;
 	begin
 		Loc.Column_Name	:= to_Unbounded_String( Column_Name );
 		Loc.Getter	:= Getter;
 		Loc.Setter	:= Setter;
+		Loc.Immutable	:= Immutable;
 		return new Locale_Property_Type'( Loc );
 	end New_Locale_Property;
 
@@ -361,7 +367,8 @@ package body KOW_Ent.Properties is
 				Column_Name	: in     String;
 				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
 				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
-				Default_Value	: in     String := "N/A"
+				Default_Value	: in     String := "N/A";
+				Immutable	: Boolean := False
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of UString properties.
 		UStr : UString_Property_Type;
@@ -370,6 +377,7 @@ package body KOW_Ent.Properties is
 		UStr.Getter		:= Getter;
 		UStr.Setter		:= Setter;
 		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
+		UStr.Immutable		:= Immutable;
 		return new UString_Property_Type'( UStr );
 	end New_UString_Property;
 
@@ -451,7 +459,8 @@ package body KOW_Ent.Properties is
 	function New_Password_Property(
 				Column_Name	: in     String;
 				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null
+				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null;
+				Immutable	: Boolean := False
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of password properties.
 		Pwd : Password_Property_Type;
@@ -459,6 +468,7 @@ package body KOW_Ent.Properties is
 		Pwd.Column_name		:= To_Unbounded_String( Column_Name );
 		Pwd.Getter		:= Getter;
 		Pwd.Setter		:= Setter;
+		Pwd.Immutable		:= Immutable;
 		return new Password_Property_Type'( Pwd );
 	end New_Password_Property;
 

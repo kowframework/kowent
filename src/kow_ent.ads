@@ -311,7 +311,9 @@ package KOW_Ent is
 		-- 	2. when extending this package it must be clear the developer MUST use this variable.
 		-- 		* Set_property should use this variable
 		--
-		--
+		
+		Immutable	: Boolean := False;
+		-- when true, the database value won't ever be updated.
 
 	end record;
 

@@ -81,7 +81,8 @@ package body KOW_ENT.Properties.Generic_Delta is
 	function New_Property(
 					Column_Name	: in String;
 					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
-					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type )
+					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
+					Immutable	: in Boolean := False
 			) return KOW_Ent.Entity_Property_Ptr is
 
 		PT : Property_Type;
@@ -89,6 +90,7 @@ package body KOW_ENT.Properties.Generic_Delta is
 		PT.Column_Name	:= To_Unbounded_String( Column_Name );
 		PT.Getter	:= Getter;
 		PT.Setter	:= Setter;
+		PT.Immutable	:= Immutable;
 		return new Property_Type'( PT );
 	end New_Property;
 

@@ -94,7 +94,8 @@ package KOW_Ent.Properties is
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
 				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type )
+				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
 
@@ -144,7 +145,8 @@ package KOW_Ent.Properties is
 	function New_Boolean_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean )
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
 
@@ -196,7 +198,8 @@ package KOW_Ent.Properties is
 	function New_Locale_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale )
+				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
 
@@ -260,7 +263,8 @@ package KOW_Ent.Properties is
 				Column_Name	: in     String;
 				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
 				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
-				Default_Value	: in     String := "N/A"
+				Default_Value	: in     String := "N/A";
+				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL
@@ -340,7 +344,8 @@ package KOW_Ent.Properties is
 	function New_Password_Property(
 				Column_Name	: in     String;
 				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null
+				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null;
+				Immutable	: Boolean := False
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
 	-- when Setter is NULL, KOW_view-entity_forms won't work for this property

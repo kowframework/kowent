@@ -66,7 +66,8 @@ package KOW_ENT.Properties.Generic_Delta is
 	function New_Property(
 					Column_Name	: in String;
 					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
-					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type )
+					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
+					Immutable	: in Boolean := False
 			) return KOW_Ent.Entity_Property_Ptr;
 
 
