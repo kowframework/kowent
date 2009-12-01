@@ -772,6 +772,22 @@ package body KOW_Ent is
 				end if;
 			end;
 		end if;
+
+
+		if Entity in Entity_Extension_Interface'Class then
+			declare
+				Parent : Entity_Type'Class := Cast_From_Extension(
+							Entity_Extension_Interface'Class(
+								Entity
+							)
+						);
+			begin
+				Parent.ID.My_Tag := Parent'Tag;
+				Save( Parent );
+			end;
+		end if;
+
+			
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Save;
 	
