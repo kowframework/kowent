@@ -426,14 +426,18 @@ package KOW_Ent is
 	--
 	
 
+	package Tag_Lists is new Ada.Containers.Doubly_Linked_Lists(
+				Element_Type	=> Ada.Tags.Tag
+			);
+
 	type ID_Generator_Type is access function( Entity: in Entity_Type'Class ) return ID_Type;
 	type Entity_Information_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		-- just for internal reference (maybe we'll need it at some point?).
 
 		Id_Generator	: Id_Generator_Type;
-	-- The ID generator is used to help KOW_Ent generate IDs.
-	-- When it's NULL the id generation is task for the database backend
+		-- The ID generator is used to help KOW_Ent generate IDs.
+		-- When it's NULL the id generation is task for the database backend
 
 		-- how the id is generated.
 		-- if it's null, let the database generate the ID;
@@ -449,6 +453,15 @@ package KOW_Ent is
 		-- and because we only query this list in a sequential (be it forward or backward) way
 
 		Factory		: access function return Entity_Type'CLass;
+
+
+		-- TODO :: finish the entity extension implementation
+
+		Extension_Of	: Ada.Tags.Tag;
+		-- used to track what this entity has extended..
+
+		Extensions	: Tag_Lists.List;
+		-- list all the available extensions for this entity
 	end record;
 
 	function Hash(Key : Ada.Strings.Unbounded.Unbounded_String ) return Ada.Containers.Hash_Type;
@@ -502,11 +515,13 @@ package KOW_Ent is
 		function Get_Information( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Information_Type;
 		-- retrieve the entity information by it's tag's expanded name
 
-		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List;
+		function Get_Properties( Entity_Tag : in Ada.Tags.Tag; Force_All : Boolean := False ) return Property_Lists.List;
 		-- retrieve the property list for the given entity;
+		-- if Force_All = true then get the properties from all the parents of this entity
 
-		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List;
+		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; Force_All : Boolean := False ) return Property_Lists.List;
 		-- retrieve the property list for the given entity;
+		-- if Force_All = true then get the properties from all the parents of this entity
 
 		function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class;
 		-- produce a new entity
@@ -543,10 +558,10 @@ package KOW_Ent is
 	function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type renames Entity_Registry.Get_Information;
 	-- retrieve the entity information by it's tag
 
-	function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List renames Entity_Registry.Get_Properties;
+	function Get_Properties( Entity_Tag : in Ada.Tags.Tag; Force_All : Boolean := False ) return Property_Lists.List renames Entity_Registry.Get_Properties;
 	-- retrieve the property list for the given entity;
 
-	function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List renames Entity_Registry.Get_Properties;
+	function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; Force_All : Boolean := False ) return Property_Lists.List renames Entity_Registry.Get_Properties;
 
 	function New_Entity( Entity_Tag : in Ada.Tags.Tag ) return Entity_Type'Class renames Entity_Registry.New_Entity;
 	-- creates a new entity object returning it

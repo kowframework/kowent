@@ -653,13 +653,13 @@ package body KOW_Ent is
 				raise Constraint_Error with "Unknown entity :: """ &  To_String ( Entity_Tag ) & """";
 		end Get_Information;
 
-		function Get_Properties( Entity_Tag : in Ada.Tags.Tag ) return Property_Lists.List is
+		function Get_Properties( Entity_Tag : in Ada.Tags.Tag; Force_All : Boolean := False ) return Property_Lists.List is
 			-- retrieve the property list for the given entity;
 		begin
 			return Get_Information( Entity_Tag ).Properties;
 		end Get_Properties;
 		
-		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Property_Lists.List is
+		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; Force_All : Boolean := False ) return Property_Lists.List is
 			-- retrieve the property list for the given entity;
 		begin
 			return Get_Information( Entity_Tag ).Properties;
