@@ -251,6 +251,25 @@ package body KOW_Ent is
 		end Runner;
 
 	begin
+		
+		if Entity in Entity_Extension_Interface'Class then
+			declare
+				Parent : Entity_Type'Class := Cast_From_Extension(
+							Entity_Extension_Interface'Class(
+								Entity
+							)
+						);
+			begin
+				Parent.ID.My_Tag := Parent'Tag;
+				Load( Parent, ID );
+
+				Load_From_Parent(
+						Entity_Extension_Interface'Class( Entity ),
+						Parent
+					);
+			end;
+		end if;
+
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 
 	end Load;
@@ -762,6 +781,9 @@ package body KOW_Ent is
 		-- if it's a new entity, create a new entry and generates an ID for it.
 		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 		-- after it has been saved
+		
+
+		Parent_ID : ID_Type;
 
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			ID	: Id_Type;
@@ -792,7 +814,7 @@ package body KOW_Ent is
 			end Insert_Appender;
 
 		begin
-
+			
 			---------------
 			-- SQL Setup --
 			---------------
@@ -804,7 +826,7 @@ package body KOW_Ent is
 
 			Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 
-			if Info.Id_Generator /= NULL then
+			if Info.Id_Generator /= NULL or Entity in Entity_Extension_Interface'Class then
 				APQ.Append(
 					Query,
 					",id"
@@ -815,6 +837,7 @@ package body KOW_Ent is
 
 			Property_Lists.Iterate( Info.Properties, Insert_Appender'Access );
 
+
 			if Info.Id_Generator /= NULL then
 				ID := Info.Id_Generator.all( Entity );
 				APQ.Append(
@@ -824,6 +847,15 @@ package body KOW_Ent is
 				ID_Append(
 					Query,
 					ID.Value
+				);
+			elsif Entity in Entity_Extension_Interface'Class then
+				APQ.Append(
+					Query,
+					","
+				);
+				ID_Append(
+					Query,
+					Parent_ID.Value
 				);
 			end if;
 
@@ -850,6 +882,21 @@ package body KOW_Ent is
 			end if;
 		end Runner;
 	begin
+
+		if Entity in Entity_Extension_Interface'Class then
+			declare
+				Parent : Entity_Type'Class := Cast_From_Extension(
+							Entity_Extension_Interface'Class(
+								Entity
+							)
+						);
+			begin
+				Parent.ID.My_Tag := Parent'Tag;
+				Insert( Parent, True );
+				Parent_ID := Parent.ID;
+			end;
+		end if;
+
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Insert;
 

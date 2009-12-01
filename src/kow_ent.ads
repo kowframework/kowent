@@ -182,6 +182,56 @@ package KOW_Ent is
 	-- after it has been saved.
 	
 
+
+	----------------------
+	-- Entity Extension --
+	----------------------
+
+	type Entity_Extension_Interface is interface;
+	-- entity extension is our counterpart for OOP-like programming in the database.
+	--
+	--
+	-- one entity can have it's properties extended into multiple tables; each extension can be extended itself.
+	--
+	-- the main data is stored in the main table; not all data there need to belong to an extended entity
+	-- each extension's data is stored into other tables... you can extend the entity in multiple levels.
+	--
+	-- the entity must have the same ID in all extensions as in the main table.
+	--
+	--
+	-- Example:
+	--
+	-- Product_Type		: | ID | Name |
+	-- Book_Type    	: |    |      | Author_ID |
+	-- Translated_Book_type	: |    |      |           | Translator_ID
+	--
+	--
+	-- A translated_Book_Type must have the data:
+	--
+	-- translated_books table:
+	-- 	| 2 | 10 |
+	--
+	-- books
+	-- 	| 2 | 33209 |
+	--
+	-- products
+	-- 	| 2 | some name |
+	--
+	--
+	-- KOW_Ent load all the data as needed.
+
+
+	function Cast_From_Extension( Extended_Entity : in Entity_Extension_Interface ) return Entity_Type'Class is abstract;
+	-- used to get the object inthe parent form when needed
+	-- it's used internally by the framework (by the load, stored and related functions).
+
+
+	procedure Load_From_Parent( Extended_Entity : in out Entity_Extension_Interface; Parent : in Entity_Type'Class ) is abstract;
+	-- used to get the object from the parent into the extended entity
+	-- it's used internally by the framework (by the load, stored and related functions).
+
+
+
 	------------------------
 	-- Query All Elements --
 	------------------------
@@ -280,10 +330,6 @@ package KOW_Ent is
 
 
 
-	type Id_Generator_Type is access function( Entity: in Entity_Type'Class )
-		return ID_Type;
-	-- The ID generator is used to help KOW_Ent generate IDs.
-	-- When it's NULL the id generation is task for the database backend
 
 
 	function To_ID( ID: in Natural ) return ID_Type;
@@ -379,11 +425,16 @@ package KOW_Ent is
 	-- Where the entity is described..
 	--
 	
+
+	type ID_Generator_Type is access function( Entity: in Entity_Type'Class ) return ID_Type;
 	type Entity_Information_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		-- just for internal reference (maybe we'll need it at some point?).
 
 		Id_Generator	: Id_Generator_Type;
+	-- The ID generator is used to help KOW_Ent generate IDs.
+	-- When it's NULL the id generation is task for the database backend
+
 		-- how the id is generated.
 		-- if it's null, let the database generate the ID;
 
@@ -429,13 +480,13 @@ package KOW_Ent is
 
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 					Table_Name	: in String;
-					Id_Generator	: in Id_Generator_Type := Null;
+					Id_Generator	: Id_Generator_Type := Null;
 					Factory		: access function return Entity_Type'Class := Null );
 		-- register an Entity into the KOW_Ent engine
 		-- Table_Name is the table name to be used.
 	
 		procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-					Id_Generator	: in Id_Generator_Type := Null;
+					Id_Generator	: Id_Generator_Type := Null;
 					Factory		: access function return Entity_Type'Class := Null );
 		-- register an Entity into the KOW_Ent engine
 		-- Auto generate the table name (using the Tag)
@@ -473,13 +524,13 @@ package KOW_Ent is
 	--------------------------------
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
 				Table_Name	: in String;
-				Id_Generator	: in Id_Generator_Type := Null;
+				Id_Generator	: Id_Generator_Type := Null;
 				Factory		: access function return Entity_Type'Class ) renames Entity_Registry.Register;
 	-- register an Entity into the KOW_Ent engine
 	-- Table_Name is the table name to be used.
 
 	procedure Register(	Entity_Tag	: in Ada.Tags.Tag;
-				Id_Generator	: in Id_Generator_Type := Null;
+				Id_Generator	: Id_Generator_Type := Null;
 				Factory		: access function return Entity_Type'Class ) renames Entity_Registry.Register;
 	-- register an Entity into the KOW_Ent engine
 	-- Auto generate the table name (using the Tag)
