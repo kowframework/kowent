@@ -286,6 +286,9 @@ package body KOW_Ent is
 
 
 
+	------------------------
+	-- Query All Elements --
+	------------------------
 	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type is
 		-- get all IDs from a given entity
 

@@ -182,6 +182,10 @@ package KOW_Ent is
 	-- after it has been saved.
 	
 
+	------------------------
+	-- Query All Elements --
+	------------------------
+	
 	type ID_Array_Type is Array( Natural range <> ) of ID_Type;
 	-- used to list IDs for any entity type
 	
