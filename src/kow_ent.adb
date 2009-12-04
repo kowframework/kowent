@@ -118,11 +118,14 @@ package body KOW_Ent is
 		-- or the connection will be trashed..
 	begin
 		APQ.Execute( Query, Connection );
+
+		begin
 			loop
-			APQ.Fetch( Query );
-		end loop;
-	exception
-		when APQ.No_Tuple => null;
+				APQ.Fetch( Query );
+			end loop;
+		exception
+			when others => null;
+		end;
 	end Run_And_Fetch;
 
 
