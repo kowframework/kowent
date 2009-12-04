@@ -584,6 +584,9 @@ package KOW_Ent is
 		function New_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String ) return Entity_Type'Class;
 		-- produce a new entity
 
+		
+		function Get_Informations_Map return Entity_Information_Maps.Map;
+
 	private
 		My_Entities	: Entity_Information_Maps.Map;
 	end Entity_Registry;

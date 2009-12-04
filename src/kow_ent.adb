@@ -34,6 +34,7 @@
 -- Ada 2005 --
 --------------
 with Ada.Characters.Handling;
+with Ada.Characters.Latin_1;
 with Ada.Containers;
 with Ada.Strings;
 with Ada.Strings.Fixed;
@@ -721,8 +722,50 @@ package body KOW_Ent is
 
 	function Get_Create( Append_Dump_if_Exists : Boolean := False ) return String is
 		-- get the table creation SQL for every entity in the entity registry using APQ Provider
+		
+
+		All_Entities : Entity_Information_Maps.Map := Entity_Registry.Get_Informations_Map;
+
+		Buffer : Unbounded_String;
+
+		Line_Break : constant Character := Ada.Characters.Latin_1.LF;
+
+
+		procedure Iterator( C : in Entity_Information_Maps.Cursor ) is
+			Key	: Unbounded_String := Entity_Information_Maps.Key( C );
+			Element : Entity_Information_Type := Entity_Information_Maps.Element( C );
+		begin
+			if Append_Dump_If_Exists then
+				Append(
+						Buffer,
+						"DROP TABLE IF EXISTS "
+					);
+				Append( Buffer, Element.Table_Name );
+				Append( Buffer, ";" & Line_Break );
+			end if;
+
+			Append( Buffer, Get_Create_For_Entity( Key ) & Line_Break );
+			-- TODO :: implement a get_Create_for_entity using the entity information type...
+
+		end Iterator;
+			
 	begin
-		return ""; -- todo
+
+		Buffer := To_UString(
+				"-- This code has been generated automatically by the KOW Ent framework." &
+				Line_Break &
+				Line_Break &
+				Line_Break
+			);
+
+		Entity_Information_Maps.Iterate(
+				All_Entities,
+				Iterator'Access
+			);
+
+
+		return To_String( Buffer );
+
 	end Get_Create;
 
 
@@ -854,6 +897,13 @@ package body KOW_Ent is
 
 			return Info.Factory.all;
 		end New_Entity;
+
+
+
+		function Get_Informations_Map return Entity_Information_Maps.Map is
+		begin
+			return My_Entities;
+		end Get_Informations_Map;
 
 	end Entity_Registry;
 
