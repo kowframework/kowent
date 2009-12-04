@@ -66,6 +66,14 @@ package KOW_ENT.Properties.Generic_Timestamp is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
+
+	overriding
+	procedure Append_Create_Table(
+				Property	: in     Property_Type;
+				Query		: in out APQ.Root_Query_Type'Class
+			);
+
+
 	function New_Property(
 					Column_Name	: in String;
 					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;

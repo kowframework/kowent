@@ -87,6 +87,9 @@ package KOW_Ent.Properties is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
+	overriding
+	procedure Append_Create_Table( Property : in Foreign_Key_Property_Type; Query : in out APQ.Root_Query_Type'Class );
+
 
 
 
@@ -140,6 +143,8 @@ package KOW_Ent.Properties is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
+	overriding
+	procedure Append_Create_Table( Property : in Boolean_Property_Type; Query : in out APQ.Root_Query_Type'Class );
 
 
 	function New_Boolean_Property(
@@ -193,6 +198,9 @@ package KOW_Ent.Properties is
 			) return String;
 
 
+	overriding
+	procedure Append_Create_Table( Property : in Locale_Property_Type; Query : in out APQ.Root_Query_Type'Class );
+
 
 
 	function New_Locale_Property(
@@ -221,6 +229,7 @@ package KOW_Ent.Properties is
 		Getter		: access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
 		Setter		: access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
 		Default_Value	: Unbounded_String;
+		Length		: Positive;
 	end record;
 
 
@@ -258,13 +267,18 @@ package KOW_Ent.Properties is
 			) return String;
 
 
+	overriding
+	procedure Append_Create_Table( Property : in UString_Property_Type; Query : in out APQ.Root_Query_Type'Class );
+
 
 	function New_UString_Property(
 				Column_Name	: in     String;
 				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
 				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
 				Default_Value	: in     String := "N/A";
-				Immutable		: Boolean := False
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
+
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL
@@ -339,6 +353,11 @@ package KOW_Ent.Properties is
 	overriding
 	function Should_Store( Property : in Password_Property_Type; Entity : in Entity_Type'Class ) return Boolean;
 	-- The password should only be stored when changed
+
+
+
+	overriding
+	procedure Append_Create_Table( Property : in Password_Property_Type; Query : in out APQ.Root_Query_Type'Class );
 
 
 	function New_Password_Property(

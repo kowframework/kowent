@@ -71,6 +71,38 @@ package body KOW_ENT.Properties.Generic_Decimal is
 	end Get_property;
 
 
+	function Get_Precision( P : in Val_Type ) return Integer is
+	begin
+		if P > 0.1 then
+			return 0;
+		elsif P = 0.1 then
+			return 1;
+		else
+			return 1 + Get_Precision( P => P * 10.0 );
+		end if;
+	end Get_Precision;
+
+	overriding
+	procedure Append_Create_Table(
+				Property	: in     Property_Type;
+				Query		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) &
+					" DECIMAL(" &
+						Integer'Image( Val_Type'Digits ) &
+						"," &
+						Integer'Image( Get_Precision( Val_Type'Delta ) ) &
+					") NOT NULL"
+			);
+
+	end Append_Create_Table;
+
+
+
+
 	function New_Property(
 					Column_Name	: in String;
 					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;

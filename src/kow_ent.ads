@@ -411,6 +411,16 @@ package KOW_Ent is
 	-- useful to track if the user password has been changed and need to be stored back or not
 	-- Default :: true
 
+
+
+	--
+	-- SQL Creation Framework
+	--
+
+	procedure  Append_Create_Table( Property : in Entity_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is abstract;
+	-- generate the SQL for creating this column in the database for MySQL
+	-- TODO :: do it for multiple database backends...
+
 	--------------------------------
 	-- Generic Packages Instances --
 	--------------------------------

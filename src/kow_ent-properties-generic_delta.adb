@@ -77,6 +77,60 @@ package body KOW_ENT.Properties.Generic_Delta is
 	end Get_property;
 
 
+	function Bigger( L, R : in Val_Type ) return Val_Type is
+		AL : Val_type := abs L;
+		AR : Val_Type := abs R;
+	begin
+		if AL > AR then
+			return AL;
+		else
+			return AR;
+		end if;
+	end Bigger;
+
+	function Get_Digits( D : in Val_type ) return Integer is
+	begin
+		if D < 10.0 then
+			return 1;
+		else
+			return 1 + Get_Digits( D / 10.0 );
+		end if;
+	end Get_Digits;
+
+
+
+
+	function Get_Precision( P : in Val_Type ) return Integer is
+	begin
+		if P > 0.1 then
+			return 0;
+		elsif P = 0.1 then
+			return 1;
+		else
+			return 1 + Get_Precision( P => P * 10.0 );
+		end if;
+	end Get_Precision;
+
+
+	overriding
+	procedure Append_Create_Table(
+				Property	: in     Property_Type;
+				Query		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) &
+					" DECIMAL(" &
+						Integer'Image( Get_Digits( Bigger( Val_type'First, Val_type'Last ) )) &
+						"," &
+						Integer'Image( Get_Precision( Val_Type'Delta ) ) &
+					") NOT NULL"
+			);
+
+	end Append_Create_Table;
+
+
 
 	function New_Property(
 					Column_Name	: in String;

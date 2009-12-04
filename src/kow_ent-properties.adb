@@ -126,6 +126,19 @@ package body KOW_Ent.Properties is
 
 
 
+
+	overriding
+	procedure Append_Create_Table( Property : in Foreign_Key_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) & " int(11) NOT NULL"
+			);
+	end Append_Create_Table;
+
+
+
+
 	function New_Foreign_Key_Property(
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
@@ -146,6 +159,8 @@ package body KOW_Ent.Properties is
 	end New_Foreign_Key_Property;
 
 
+
+			
 
 
 
@@ -208,6 +223,15 @@ package body KOW_Ent.Properties is
 	end Get_Property;
 
 
+
+	overriding
+	procedure Append_Create_Table( Property : in Boolean_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) & " tinyint(4) NOT NULL"
+			);
+	end Append_Create_Table;
 
 
 	function New_Boolean_Property(
@@ -289,6 +313,21 @@ package body KOW_Ent.Properties is
 	end Get_Property;
 
 
+
+
+	overriding
+	procedure Append_Create_Table( Property : in Locale_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) & " VARCHAR(8) NOT NULL"
+			);
+	end Append_Create_Table;
+
+
+
+
+
 	function New_Locale_Property(
 				Column_Name		: in String;
 				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
@@ -363,12 +402,27 @@ package body KOW_Ent.Properties is
 	end Get_Property;
 
 
+	overriding
+	procedure Append_Create_Table( Property : in UString_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) &
+						" VARCHAR(" &
+						Positive'Image( Property.Length ) &
+						" ) NOT NULL"
+			);
+	end Append_Create_Table;
+
+
+
 	function New_UString_Property(
 				Column_Name	: in     String;
 				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
 				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
 				Default_Value	: in     String := "N/A";
-				Immutable	: Boolean := False
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of UString properties.
 		UStr : UString_Property_Type;
@@ -454,6 +508,14 @@ package body KOW_Ent.Properties is
 	end Should_Store;
 
 
+	overriding
+	procedure Append_Create_Table( Property : in Password_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) & " VARCHAR(20) NOT NULL DEFAULT 'x'"
+			);
+	end Append_Create_Table;
 
 
 	function New_Password_Property(

@@ -71,6 +71,22 @@ package body KOW_ENT.Properties.Generic_Range is
 	end Get_property;
 
 
+
+
+	overriding
+	procedure Append_Create_Table(
+				Property	: in     Property_Type;
+				Query		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		APQ.Append(
+				Query,
+				To_String( Property.Column_Name ) & "INT(10) NOT NULL"
+			);
+	end Append_Create_Table;
+
+
+
 	function New_Property(
 					Column_Name	: in String;
 					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
