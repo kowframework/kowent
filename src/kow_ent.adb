@@ -82,6 +82,35 @@ package body KOW_Ent is
 			);
 
 
+	function To_UString( Str : in String ) return Unbounded_String is
+	begin
+		return Ada.Strings.Unbounded.To_Unbounded_String(
+				Ada.Characters.Handling.To_Lower(
+					Ada.Strings.Fixed.Trim(
+							Str,
+							Ada.Strings.Both
+						)
+					)
+				);
+	end To_UString;
+
+
+	function To_UString( T : in Ada.Tags.Tag ) return Unbounded_String is
+		Str : String := Ada.Tags.Expanded_Name( T );
+	begin
+		return To_UString( Str );
+	end To_UString;
+
+	function To_UString( U : in Ada.Strings.Unbounded.Unbounded_String ) return Unbounded_String is
+		Str : String := Ada.Strings.Unbounded.To_String( U );
+	begin
+
+		return To_UString( Str );
+	end To_UString;
+
+
+
+
 
 	-------------------------
 	-- Database Management --
@@ -546,36 +575,173 @@ package body KOW_Ent is
 	end Should_Store;
 
 
+	----------------------------
+	-- SQL Creation Framework --
+	----------------------------
+
+
+	--
+	-- Entity kind related methods...
+	--
+
+	procedure Prepare_Create_For_Entity(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Tag	: in     Ada.Tags.Tag
+			) is
+		-- prepare the query for the given entity
+	begin
+		Prepare_Create_For_Entity(
+				Query	=> Query,
+				Tag	=> To_UString( Tag )
+			);
+	end prepare_Create_For_Entity;
+
+
+
+	procedure Prepare_Create_For_Entity(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Tag	: in     Unbounded_String
+			) is
+		-- prepare the query for the given entity
+		use APQ;
+
+
+		Info : Entity_Information_Type := Entity_Registry.Get_Information( Tag );
+
+
+
+		procedure Iterator( C : Property_Lists.Cursor ) is
+		begin
+			Append_Create_Table(
+					Property	=> Property_lists.Element( C ).all,
+					Query		=> Query
+				);
+			Append( Query, "," );
+		end Iterator;
+
+
+
+
+	begin
+		Prepare(
+				Query,
+				"CREATE TABLE " & To_String( Info.Table_Name ) & "("
+			);
+
+		Append(
+				Query,
+				"`id` int(11) NOT NULL auto_increment,"
+			);
+
+
+		Property_Lists.Iterate( Info.Properties, Iterator'Access );
+
+		Append(
+				Query,
+				"PRIMARY KEY  (`id`)" &
+				") ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
+			);
+		
+	end Prepare_Create_For_Entity;
+	
+
+
+	function Get_Create_For_Entity( Tag : in Ada.Tags.Tag ) return String is
+		-- get the SQL string for creating the given entity using APQ Provider
+	begin
+		return Get_Create_For_Entity( To_UString( Tag ) );
+	end Get_Create_For_Entity;
+
+
+	
+	function Get_Create_For_Entity( Tag : in Unbounded_String ) return String is
+	-- get the SQL string for creating the given entity using APQ Provider
+		Buffer : Unbounded_String;
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			-- the only thing we do here is to create the query and
+			-- then run the SQL creation procedure for the given entity
+			-- storing it in the buffer..
+			--
+			--
+			-- then we return it.
+
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+
+			Prepare_Create_For_Entity(
+					Query,
+					Tag
+				);
+			Buffer := To_Unbounded_String( APQ.To_String( Query ) );
+		end Runner;
+			
+		
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
+
+
+		return To_String( Buffer );
+	end Get_Create_For_Entity;
+
+
+
+	procedure Run_Create_For_Entity( Tag : in Ada.Tags.Tag ) is
+		-- create and run the query for the given entity using APQ Provider
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			-- the only thing we do here is to create the query and
+			-- then run the SQL creation procedure for the given entity
+			-- storing it in the buffer..
+			--
+			--
+			-- then we return it.
+
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+
+			Prepare_Create_For_Entity(
+					Query,
+					Tag
+				);
+
+			APQ.Execute(
+					Query,
+					Connection
+				);
+		end Runner;
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
+	end Run_Create_For_Entity;
+
+
+	--
+	-- global methods
+	--
+
+	function Get_Create( Append_Dump_if_Exists : Boolean := False ) return String is
+		-- get the table creation SQL for every entity in the entity registry using APQ Provider
+	begin
+		return ""; -- todo
+	end Get_Create;
+
+
+	procedure Run_Create( Dump_If_Exists : Boolean := False ) is
+		-- create the entire DB structure using APQ Provider
+	begin
+		null;
+	end Run_Create;
+
+
+
+
+
+
 	-------------------------
 	-- Entity Registration --
 	-------------------------
 
 
-	function To_UString( Str : in String ) return Unbounded_String is
-	begin
-		return Ada.Strings.Unbounded.To_Unbounded_String(
-				Ada.Characters.Handling.To_Lower(
-					Ada.Strings.Fixed.Trim(
-							Str,
-							Ada.Strings.Both
-						)
-					)
-				);
-	end To_UString;
-
-
-	function To_UString( T : in Ada.Tags.Tag ) return Unbounded_String is
-		Str : String := Ada.Tags.Expanded_Name( T );
-	begin
-		return To_UString( Str );
-	end To_UString;
-
-	function To_UString( U : in Ada.Strings.Unbounded.Unbounded_String ) return Unbounded_String is
-		Str : String := Ada.Strings.Unbounded.To_String( U );
-	begin
-
-		return To_UString( Str );
-	end To_UString;
 
 
 	protected body Entity_Registry is

@@ -413,13 +413,58 @@ package KOW_Ent is
 
 
 
-	--
-	-- SQL Creation Framework
-	--
+	----------------------------
+	-- SQL Creation Framework --
+	----------------------------
 
+
+	--
+	-- Property Related Methods..
+	--
+	
 	procedure  Append_Create_Table( Property : in Entity_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is abstract;
 	-- generate the SQL for creating this column in the database for MySQL
 	-- TODO :: do it for multiple database backends...
+
+
+	--
+	-- Entity kind related methods...
+	--
+
+	procedure Prepare_Create_For_Entity(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Tag	: in     Ada.Tags.Tag
+			);
+	-- prepare the query for the given entity
+
+	procedure Prepare_Create_For_Entity(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Tag	: in     Unbounded_String
+			);
+	-- prepare the query for the given entity
+
+	
+
+	function Get_Create_For_Entity( Tag : in Ada.Tags.Tag ) return String;
+	-- get the SQL string for creating the given entity using APQ Provider
+
+	function Get_Create_For_Entity( Tag : in Unbounded_String ) return String;
+	-- get the SQL string for creating the given entity using APQ Provider
+
+	procedure Run_Create_For_Entity( Tag : in Ada.Tags.Tag );
+	-- create and run the query for the given entity using APQ Provider
+
+
+	--
+	-- global methods
+	--
+
+	function Get_Create( Append_Dump_if_Exists : Boolean := False ) return String;
+	-- get the table creation SQL for every entity in the entity registry using APQ Provider
+
+	procedure Run_Create( Dump_If_Exists : Boolean := False );
+	-- create the entire DB structure using APQ Provider
+
 
 	--------------------------------
 	-- Generic Packages Instances --
