@@ -432,6 +432,7 @@ package body KOW_Ent.Properties is
 		UStr.Setter		:= Setter;
 		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
 		UStr.Immutable		:= Immutable;
+		UStr.Length		:= Length;
 		return new UString_Property_Type'( UStr );
 	end New_UString_Property;
 

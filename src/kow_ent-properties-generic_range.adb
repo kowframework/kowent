@@ -81,7 +81,7 @@ package body KOW_ENT.Properties.Generic_Range is
 	begin
 		APQ.Append(
 				Query,
-				To_String( Property.Column_Name ) & "INT(10) NOT NULL"
+				To_String( Property.Column_Name ) & " INT(10) NOT NULL"
 			);
 	end Append_Create_Table;
 
