@@ -455,6 +455,9 @@ package KOW_Ent is
 	-- create and run the query for the given entity using APQ Provider
 
 
+	procedure Run_Create_For_Entity( Tag : in Unbounded_String );
+	-- create and run the query for the given entity using APQ Provider
+
 	--
 	-- global methods
 	--

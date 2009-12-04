@@ -110,6 +110,21 @@ package body KOW_Ent is
 	end To_UString;
 
 
+	procedure Run_And_Fetch(
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			) is
+		-- when we run a query, we gotta fetch all results..
+		-- or the connection will be trashed..
+	begin
+		APQ.Execute( Query, Connection );
+			loop
+			APQ.Fetch( Query );
+		end loop;
+	exception
+		when APQ.No_Tuple => null;
+	end Run_And_Fetch;
+
 
 
 
@@ -689,6 +704,13 @@ package body KOW_Ent is
 
 	procedure Run_Create_For_Entity( Tag : in Ada.Tags.Tag ) is
 		-- create and run the query for the given entity using APQ Provider
+	begin
+		Run_Create_For_Entity( To_UString( Tag ) );
+	end Run_Create_For_Entity;
+
+
+	procedure Run_Create_For_Entity( Tag : in Unbounded_String ) is
+		-- create and run the query for the given entity using APQ Provider
 
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			-- the only thing we do here is to create the query and
@@ -706,7 +728,7 @@ package body KOW_Ent is
 					Tag
 				);
 
-			APQ.Execute(
+			Run_And_Fetch(
 					Query,
 					Connection
 				);
@@ -771,8 +793,43 @@ package body KOW_Ent is
 
 	procedure Run_Create( Dump_If_Exists : Boolean := False ) is
 		-- create the entire DB structure using APQ Provider
+		All_Entities : Entity_Information_Maps.Map := Entity_Registry.Get_Informations_Map;
+
+		procedure Iterator( C : in Entity_Information_Maps.Cursor ) is
+			Key	: Unbounded_String := Entity_Information_Maps.Key( C );
+			Element : Entity_Information_Type := Entity_Information_Maps.Element( C );
+
+
+
+
+			procedure Dump_Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+				Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			begin
+				APQ.Prepare(
+						Query,
+						"DROP TABLE IF EXISTS " &
+							To_String( Element.Table_Name )
+					);
+
+				Run_And_Fetch(
+						Query,
+						Connection
+					);
+			end Dump_Runner;
+
+		begin
+			if Dump_If_Exists then
+				APQ_Provider.Run( My_Provider.all, Dump_Runner'Access );
+			end if;
+
+			Run_Create_For_Entity( Key );
+		end Iterator;
+			
 	begin
-		null;
+		Entity_Information_Maps.Iterate(
+				All_Entities,
+				Iterator'Access
+			);
 	end Run_Create;
 
 
