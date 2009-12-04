@@ -90,8 +90,14 @@ package KOW_Ent.Expirable_Entity_Controls is
 	function String_to_Timestamp is new APQ.Convert_To_Timestamp( Val_Type => Validation_Timestamp );
 
 
-	No_Validation : constant Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
-	-- todo :: change it to a decent implementation
+	No_Validation : constant Validation_Timestamp := Validation_Timestamp(
+						Ada.Calendar.Time_Of(
+								Year	=> 1948,
+								Month	=> 1,
+								Day	=> 30
+							)
+				);
+	-- date of Mohandas Karamchand Gandhi's death
 
 
 
