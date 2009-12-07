@@ -648,7 +648,7 @@ package body KOW_Ent is
 		
 			Append(
 					Query,
-					"UNIQUE KEY `" & CN & "` (`" & CN & "`)"
+					", UNIQUE KEY `" & CN & "` (`" & CN & "`)"
 				);
 		end Unique_Keys_Iterator;
 
