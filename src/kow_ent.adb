@@ -639,6 +639,18 @@ package body KOW_Ent is
 		end Iterator;
 
 
+	
+
+
+		procedure Unique_Keys_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
+			CN : String := To_String( KOW_Lib.UString_Vectors.Element( C ) );
+		begin
+		
+			Append(
+					Query,
+					"UNIQUE KEY `" & CN & "` (`" & CN & "`)"
+				);
+		end Unique_Keys_Iterator;
 
 
 	begin
@@ -657,7 +669,15 @@ package body KOW_Ent is
 
 		Append(
 				Query,
-				"PRIMARY KEY  (`id`)" &
+				"PRIMARY KEY  (`id`)"
+			);
+
+		
+		KOW_Lib.UString_Vectors.Iterate( Info.Unique_Keys, Unique_Keys_Iterator'Access );
+
+
+		Append(
+				Query,
 				") ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 			);
 		
@@ -889,7 +909,8 @@ package body KOW_Ent is
 	
 	
 		procedure Add_Property( Entity_Tag	: in Ada.Tags.Tag;
-					Property	: in Entity_Property_Ptr ) is
+					Property	: in Entity_Property_Ptr;
+					Is_Unique	: in Boolean := False) is
 			-- add another property to this entity
 			Info : Entity_Information_Type;
 		begin
@@ -897,6 +918,13 @@ package body KOW_Ent is
 			Property_Lists.Append( Info.Properties, Property );
 			-- we add the entity to the list we retrieved.
 
+			if Is_Unique then
+				KOW_Lib.UString_Vectors.Append(
+							Info.Unique_Keys,
+							Property.Column_Name
+						);
+			end if;
+			
 			Entity_Information_Maps.Include( My_Entities, To_UString( Entity_Tag ), Info );
 			-- and now we replace the existing entity registry
 		exception
