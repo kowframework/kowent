@@ -168,6 +168,14 @@ package body KOW_Ent is
 	-------------------
 	-- ID Management --
 	-------------------
+	
+
+	function "<"( L, R : in ID_Type ) return Boolean is
+		use APQ;
+	begin
+		return L.Value < R.Value;
+	end "<";
+
 	function ID_Value( Query : APQ.Root_Query_Type'Class; CX : APQ.Column_Index_Type) return APQ.APQ_Bigserial is
 		-- get the ID value from a query
 		i : Integer := APQ.Value( Query, CX );
@@ -402,6 +410,14 @@ package body KOW_Ent is
 			Free( My_Ids );
 			return My_Inner_Ids_Again;
 		end;
+	exception
+		when APQ.No_Tuple => 
+		declare
+			Ret : ID_Array_Type( 1 .. 0 );
+		begin
+			return Ret;
+		end;
+
 	end Get_All_IDs;
 	
 	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type is
@@ -445,7 +461,13 @@ package body KOW_Ent is
 			Free( My_ids );
 			return My_Inner_ids;
 		end;
-
+	exception
+		when APQ.No_Tuple => 
+		declare
+			Ret : ID_Array_Type( 1 .. 0 );
+		begin
+			return Ret;
+		end;
 	end Get_All_IDs;
 
 

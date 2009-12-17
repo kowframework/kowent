@@ -115,6 +115,7 @@ package KOW_Ent is
 		-- It's set in Load() and Insert() procedures
 	end record;
 
+	function "<"( L, R : in ID_Type ) return Boolean;
 
 	function To_String( ID: in Id_Type ) return String;
 	-- get the ID value as a String
