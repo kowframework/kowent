@@ -59,6 +59,7 @@ package body KOW_Ent.Query_Builders is
 		-- clear the query for reuse
 	begin
 		Operator_Vectors.Clear( Q.Operators );
+		Order_By_Vectors.Clear( Q.Order_By );
 	end Clear;
 
 	--
