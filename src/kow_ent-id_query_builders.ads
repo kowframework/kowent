@@ -89,6 +89,11 @@ package KOW_Ent.ID_Query_Builders is
 	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Unbounded_String );
 	-- clear the query and set it up for the given entity tag
 
+
+
+	function New_Query( Entity_Tag : in Ada.Tags.Tag ) return Query_Type;
+	function New_Query( Entity_Tag : in Unbounded_String ) return Query_Type;
+
 	--
 	-- Foreign Key
 	--

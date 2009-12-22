@@ -83,6 +83,23 @@ package body KOW_Ent.ID_Query_Builders is
 		Q.Entity_Tag := Entity_Tag;
 	end Prepare;
 
+
+
+
+	function New_Query( Entity_Tag : in Ada.Tags.Tag ) return Query_Type is
+	begin
+		return New_Query( To_Unbounded_String( Ada.Tags.Expanded_Name( Entity_Tag ) ) );
+	end New_Query;
+
+	function New_Query( Entity_Tag : in Unbounded_String ) return Query_Type is
+		Q : Query_Type;
+	begin
+		Q.Entity_Tag := Entity_Tag;
+
+		return Q;
+	end New_Query;
+
+
 	--
 	-- Foreign Key
 	--
