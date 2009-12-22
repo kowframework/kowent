@@ -142,7 +142,8 @@ package body KOW_Ent.ID_Query_Builders is
 	begin
 
 		-- first we gotta get all the properties for this entity
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity_Type'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Q.Entity_Tag );
+
 
 		-- and now we try to find out which one is a foreign key
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
@@ -495,7 +496,7 @@ package body KOW_Ent.ID_Query_Builders is
 		-- get all results from the query
 	
 
-		Tons_OF_Ids	: KOW_Ent.ID_Array_Type( 1 .. 100_000 );
+		Tons_OF_Ids	: KOW_Ent.ID_Array_Type( 1 .. 100 );
 		Last_ID		: Natural := Natural'First;
 		
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
