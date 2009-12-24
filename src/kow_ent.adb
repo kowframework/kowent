@@ -50,6 +50,7 @@ with KOW_Lib.Log;
 with KOW_Lib.String_Util;
 with KOW_Lib.UString_Vectors;
 
+with KOW_Ent.Properties;
 
 package body KOW_Ent is
 
@@ -358,6 +359,40 @@ package body KOW_Ent is
 		
 		-- Construct_SQL( Table_Name( Entity'Tag ), Keys, Values );
 	end Store;
+
+
+	procedure Set_Foreign_Key(
+				Entity		: in out Entity_Type'Class;
+				Related_Entity	: in     Entity_Type'Class
+			) is
+		-- using the Foreign_Key_property_Type declared in KOW_Ent.Properties,
+		-- set the foreign key for the given entity
+
+		Properties : Property_Lists.List := Entity_Registry.Get_Properties(
+								Entity_Tag	=> Entity'Tag, 
+								Force_all	=> True
+							);
+
+		procedure Iterator( C : Property_Lists.Cursor ) is
+			Ptr : Entity_Property_Ptr := Property_Lists.Element( C );
+		begin
+			if	Ptr /= null and then
+				Ptr.all in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
+
+				declare
+					use KOW_Ent.Properties;
+					P : Foreign_Key_Property_Type'Class :=
+						Foreign_Key_property_Type'Class( Ptr.all );
+				begin
+					if P.Related_Entity_Tag = Related_Entity'Tag then
+						P.Setter.all( Entity, Related_Entity.ID );
+					end if;
+				end;
+			end if;
+		end Iterator;
+	begin
+		Property_Lists.Iterate( Properties, Iterator'Access );
+	end Set_Foreign_Key;
 
 
 

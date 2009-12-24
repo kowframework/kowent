@@ -184,6 +184,13 @@ package KOW_Ent is
 	
 
 
+	procedure Set_Foreign_Key(
+				Entity		: in out Entity_Type'Class;
+				Related_Entity	: in     Entity_Type'Class
+			);
+	-- using the Foreign_Key_property_Type declared in KOW_Ent.Properties,
+	-- set the foreign key for the given entity
+	
 	----------------------
 	-- Entity Extension --
 	----------------------
