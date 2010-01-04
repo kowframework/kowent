@@ -128,6 +128,23 @@ package KOW_Ent is
 	-- get the ID value from a query
 
 
+	------------------------
+	-- Query All Elements --
+	------------------------
+	
+	type ID_Array_Type is Array( Natural range <> ) of ID_Type;
+	-- used to list IDs for any entity type
+	
+	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type;
+	-- get all IDs from a given entity
+
+	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type;
+	-- get all IDs from a given entity
+
+
+
+
+
 	-----------------------
 	-- Entity Management --
 	-----------------------
@@ -191,6 +208,12 @@ package KOW_Ent is
 	-- using the Foreign_Key_property_Type declared in KOW_Ent.Properties,
 	-- set the foreign key for the given entity
 	
+	function Get_Related_IDs(
+				Related_To	: in Entity_Type'Class;
+				Entity_Tag	: in String
+			) return ID_Array_Type;
+	-- get the IDs for all related entities...
+
 	----------------------
 	-- Entity Extension --
 	----------------------
@@ -238,20 +261,6 @@ package KOW_Ent is
 	-- used to get the object from the parent into the extended entity
 	-- it's used internally by the framework (by the load, stored and related functions).
 
-
-
-	------------------------
-	-- Query All Elements --
-	------------------------
-	
-	type ID_Array_Type is Array( Natural range <> ) of ID_Type;
-	-- used to list IDs for any entity type
-	
-	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type;
-	-- get all IDs from a given entity
-
-	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type;
-	-- get all IDs from a given entity
 
 
 

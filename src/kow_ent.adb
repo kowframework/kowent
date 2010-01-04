@@ -184,6 +184,119 @@ package body KOW_Ent is
 		return APQ.APQ_Bigserial( i );
 	end ID_Value;
 
+
+
+	------------------------
+	-- Query All Elements --
+	------------------------
+	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type is
+		-- get all IDs from a given entity
+
+		My_Ids : Id_Array_Ptr;
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+
+
+			function Inner_Get_All_Ids return ID_Array_Type is
+				Ret : ID_Array_Type( 1 .. 1 );
+				TMP_Id : Integer;
+				ID : ID_Type;
+				
+			begin
+				APQ.Fetch( Query );
+	
+				TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
+				ID := To_ID( TMP_Id );
+				ID.My_Tag := Entity_Tag;
+				Ret( 1 ) := ID;
+	
+				return Ret & Inner_Get_All_Ids;
+			exception
+				when APQ.No_Tuple => return Ret( 1 .. 0 );
+			end Inner_Get_All_Ids;
+		begin
+			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+			APQ.Execute( Query, Connection );
+	
+			declare
+				My_Inner_Ids : Id_Array_Type := Inner_Get_All_Ids;
+			begin
+				My_Ids := new Id_Array_Type'( My_Inner_Ids );
+			end;
+		end Runner;
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
+
+		declare
+			My_Inner_Ids_Again : Id_Array_Type := My_Ids.all;
+		begin
+			Free( My_Ids );
+			return My_Inner_Ids_Again;
+		end;
+	exception
+		when APQ.No_Tuple => 
+		declare
+			Ret : ID_Array_Type( 1 .. 0 );
+		begin
+			return Ret;
+		end;
+
+	end Get_All_IDs;
+	
+	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type is
+		-- get all IDs from a given entity
+
+		My_Ids : Id_Array_Ptr;
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+
+
+			function Inner_Get_All_Ids return ID_Array_Type is
+				Ret : ID_Array_Type( 1 .. 1 );
+				TMP_Id : Integer;
+				ID : ID_Type;
+			
+			begin
+				APQ.Fetch( Query );
+	
+				TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
+				ID := To_ID( TMP_Id );
+				Ret( 1 ) := ID;
+	
+				return Ret & Inner_Get_All_Ids;
+			exception
+				when APQ.No_Tuple => return Ret( 1 .. 0 );
+			end Inner_Get_All_Ids;
+		begin
+			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+			APQ.Execute( Query, Connection );
+
+			My_Ids := new Id_Array_Type'( Inner_Get_All_Ids );
+		end Runner;
+	begin
+		APQ_Provider.Run( My_Provider.all, Runner'Access );
+
+		declare
+			My_Inner_Ids : Id_Array_Type := My_Ids.all;
+		begin
+			Free( My_ids );
+			return My_Inner_ids;
+		end;
+	exception
+		when APQ.No_Tuple => 
+		declare
+			Ret : ID_Array_Type( 1 .. 0 );
+		begin
+			return Ret;
+		end;
+	end Get_All_IDs;
+
+
+
 	-----------------------
 	-- Entity Management --
 	-----------------------
@@ -396,73 +509,37 @@ package body KOW_Ent is
 
 
 
-	------------------------
-	-- Query All Elements --
-	------------------------
-	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type is
-		-- get all IDs from a given entity
+	function Get_Related_IDs(
+				Related_To	: in Entity_Type'Class;
+				Entity_Tag	: in String
+			) return ID_Array_Type is
+		-- get the IDs for all related entities...
+		Properties : Property_Lists.List := Entity_Registry.Get_Properties(
+								Entity_Tag	=> To_Unbounded_String( Entity_Tag ),
+								Force_All	=> True
+							);
+
+		Column_Name : Unbounded_String;
+		procedure Iterator( C : Property_Lists.Cursor ) is
+			Ptr : Entity_property_Ptr := Property_Lists.Element( C );
+		begin
+			if Ptr /= null then
+				if Ptr.all in KOW_ent.Properties.Foreign_key_Property_Type'Class then
+					if KOW_ent.Properties.Foreign_key_Property_Type'Class( Ptr.all ).Related_Entity_Tag = Related_To'Tag then
+						Column_Name := Ptr.Column_Name;
+					end if;
+				end if;
+			end if;
+		end iterator;
+
+
+
 
 		My_Ids : Id_Array_Ptr;
 
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
-
-
-			function Inner_Get_All_Ids return ID_Array_Type is
-				Ret : ID_Array_Type( 1 .. 1 );
-				TMP_Id : Integer;
-				ID : ID_Type;
-				
-			begin
-				APQ.Fetch( Query );
-	
-				TMP_Id := APQ.Value( Query, APQ.Column_Index( Query, "id" ) );
-				ID := To_ID( TMP_Id );
-				ID.My_Tag := Entity_Tag;
-				Ret( 1 ) := ID;
-	
-				return Ret & Inner_Get_All_Ids;
-			exception
-				when APQ.No_Tuple => return Ret( 1 .. 0 );
-			end Inner_Get_All_Ids;
-		begin
-			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
-			APQ.Execute( Query, Connection );
-	
-			declare
-				My_Inner_Ids : Id_Array_Type := Inner_Get_All_Ids;
-			begin
-				My_Ids := new Id_Array_Type'( My_Inner_Ids );
-			end;
-		end Runner;
-	begin
-		APQ_Provider.Run( My_Provider.all, Runner'Access );
-
-		declare
-			My_Inner_Ids_Again : Id_Array_Type := My_Ids.all;
-		begin
-			Free( My_Ids );
-			return My_Inner_Ids_Again;
-		end;
-	exception
-		when APQ.No_Tuple => 
-		declare
-			Ret : ID_Array_Type( 1 .. 0 );
-		begin
-			return Ret;
-		end;
-
-	end Get_All_IDs;
-	
-	function Get_All_IDs( Entity_Tag : Unbounded_String ) return ID_Array_Type is
-		-- get all IDs from a given entity
-
-		My_Ids : Id_Array_Ptr;
-
-		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( To_Unbounded_String( Entity_Tag ) );
 
 
 			function Inner_Get_All_Ids return ID_Array_Type is
@@ -483,11 +560,20 @@ package body KOW_Ent is
 			end Inner_Get_All_Ids;
 		begin
 			APQ.Prepare( Query, "SELECT id FROM " & To_String( Info.Table_Name ) );
+			APQ.Append( Query, " WHERE " & To_String( Column_Name ) );
+			APQ.Append( Query, "=" & To_String( Related_To.ID ) );
 			APQ.Execute( Query, Connection );
 
 			My_Ids := new Id_Array_Type'( Inner_Get_All_Ids );
 		end Runner;
 	begin
+
+		Property_Lists.Iterate( Properties, Iterator'Access );
+
+		if Column_Name = Null_Unbounded_String then
+			raise CONSTRAINT_ERROR with "can't find related entity";
+		end if;
+
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 
 		declare
@@ -503,7 +589,10 @@ package body KOW_Ent is
 		begin
 			return Ret;
 		end;
-	end Get_All_IDs;
+
+	end Get_Related_IDs;
+
+
 
 
 
