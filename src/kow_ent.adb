@@ -1158,6 +1158,9 @@ package body KOW_Ent is
 
 
 			First_Element	: Boolean := True;
+			Should_Run	: Boolean := False;
+			-- when updating a entity what has only read only properties....
+			-- well, we shouldn't run the execute method... that's why it's here.
 			procedure Update_Appender( C : Property_Lists.Cursor ) is
 				Property: Entity_Property_Ptr := Property_Lists.Element( C );
 			begin
@@ -1174,6 +1177,7 @@ package body KOW_Ent is
 							Query,
 							To_String( Property.all.Column_Name ) & "="
 						);
+						Should_Run := True;
 					
 	
 						Get_Property( Property.all, Entity, Query, Connection );
@@ -1205,10 +1209,12 @@ package body KOW_Ent is
 				Entity.ID.Value
 			);
 
-			APQ.Execute(
-				Query,
-				Connection
-			);
+			if Should_Run then
+				APQ.Execute(
+						Query,
+						Connection
+					);
+			end if;
 		end Runner;
 	begin
 		if Info.Id_Generator /= null then
