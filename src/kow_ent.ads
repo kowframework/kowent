@@ -586,6 +586,12 @@ package KOW_Ent is
 					Is_Unique	: in Boolean := False );
 		-- add another property to this entity
 
+		procedure Replace_Property(
+					Entity_Tag	: in Ada.Tags.Tag;
+					Property	: in Entity_Property_Ptr
+				);
+		-- replace an existing property by the column_name and maintaining the unicity parameter
+
 		function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type;
 		-- retrieve the entity information by it's tag
 
@@ -636,6 +642,12 @@ package KOW_Ent is
 				Is_Unique	: in Boolean := False ) renames Entity_Registry.Add_Property;
 	-- add another property to this entity
 	-- if is_unique is true, add a unique key to this property column_name
+
+	procedure Replace_Property(
+				Entity_Tag	: in Ada.Tags.Tag;
+				Property	: in Entity_Property_Ptr
+			) renames Entity_Registry.Replace_Property;
+	-- replace an existing entity *by the column name* maintaining the unicity parameter
 
 	function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type renames Entity_Registry.Get_Information;
 	-- retrieve the entity information by it's tag

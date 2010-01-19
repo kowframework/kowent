@@ -1079,6 +1079,34 @@ package body KOW_Ent is
 		end Add_Property;
 
 
+		procedure Replace_Property(
+					Entity_Tag	: in Ada.Tags.Tag;
+					Property	: in Entity_Property_Ptr
+				) is
+			-- replace an existing property by the column_name and maintaining the unicity parameter
+
+			Property_Position : Property_Lists.Cursor;
+			Info : Entity_Information_Type;
+
+
+			procedure Iterator( C : in Property_Lists.Cursor ) is
+			begin
+				if Property_Lists.Element( C ).Column_Name = Property.Column_Name then
+					Property_Position := C;
+				end if;
+			end Iterator;
+		begin
+			Info := Entity_Information_Maps.Element( My_Entities, To_UString( Entity_Tag ) );
+
+			Property_lists.Iterate( Info.Properties, Iterator'Access );
+		exception
+			when Constraint_Error =>
+				raise Constraint_Error with "Trying to replace an unknown property :: """ &
+								To_String( Property.Column_Name ) & " of entity " &
+								Expanded_name( Entity_Tag );
+		end Replace_Property;
+
+
 		function Get_Information( Entity_Tag : in Ada.Tags.Tag ) return Entity_Information_Type is
 		begin
 			return Entity_Information_Maps.Element( My_Entities, To_UString( Entity_Tag ) );
