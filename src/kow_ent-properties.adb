@@ -405,13 +405,36 @@ package body KOW_Ent.Properties is
 	overriding
 	procedure Append_Create_Table( Property : in UString_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
 	begin
-		APQ.Append(
-				Query,
-				To_String( Property.Column_Name ) &
-						" VARCHAR(" &
-						Positive'Image( Property.Length ) &
-						" ) NOT NULL"
-			);
+		if Property.Length <= 255 then
+			APQ.Append(
+					Query,
+					To_String( Property.Column_Name ) &
+							" VARCHAR(" &
+							Positive'Image( Property.Length ) &
+							" ) NOT NULL"
+				);
+		elsif Property.Length <= 65_535 then
+			APQ.Append(
+					Query,
+					To_String( Property.Column_Name ) & " TEXT NOT NULL "
+				);
+		elsif Property.Length <= 16_777_215 then
+			APQ.Append(
+					Query,
+					To_String( Property.COlumn_Name ) & " MEDIUMTEXT NOT NULL"
+				);
+
+		else
+			-- it would be a long text..
+			-- 4,294,967,295
+			-- " LONGTEXT NOT NULL"
+			--
+			-- but its way TOO BIG (4G of information....)
+			-- so, we raise this exception:
+			raise PROGRAM_ERROR with "The property pointed by the column " & To_String( Property.Column_Name ) &
+				" in a given table, is a way to big unbounded string! Please, fix that...";
+		end if;
+			
 	end Append_Create_Table;
 
 
