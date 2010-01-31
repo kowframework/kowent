@@ -179,6 +179,16 @@ package KOW_Ent is
 	-- this is quite usefull in gravatar interaction provided by kow_sec-entities package
 
 
+	-- The following procedures are triggers you can override.
+
+	procedure Will_Insert ( Entity : in out Entity_Type ) is null;
+	procedure Was_Inserted( Entity : in out Entity_Type ) is null;
+	procedure Will_Update ( Entity : in out Entity_Type ) is null;
+	procedure Was_Updated ( Entity : in out Entity_Type ) is null;
+	procedure Will_Load   ( Entity : in out Entity_Type ) is null;
+	-- this will be called _AFTER_ the entity ID was set
+	procedure Was_Loaded  ( Entity : in out Entity_Type ) is null;
+
 	procedure Set_Values_From_Query(
 				Entity		: in out Entity_Type'Class;
 				Query		: in out APQ.Root_Query_Type'Class;

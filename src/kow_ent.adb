@@ -385,6 +385,8 @@ package body KOW_Ent is
 			Entity.ID.My_Tag := Entity'Tag;
 			-- and now we set the tag of the entity into it's ID
 
+			Will_Load( Entity );
+			
 			----------------------
 			-- SQL Construction --
 			----------------------
@@ -409,6 +411,8 @@ package body KOW_Ent is
 			---------------------
 
 			Set_Values_From_Query( Entity, Query, Connection );
+
+			Was_Loaded( Entity );
 
 			begin
 				loop
@@ -464,10 +468,14 @@ package body KOW_Ent is
 	begin
 		if Entity.ID.My_Tag = No_Tag then
 			Log( "inserting entity" );
+			Will_Insert( Entity );
 			Insert( Entity, Recover_ID );
+			Was_Inserted( Entity );
 		else
+			Will_Update( Entity );
 			Log( "updating entity" );
 			Save( Entity );
+			Was_Updated( Entity );
 		end if;
 		
 		-- Construct_SQL( Table_Name( Entity'Tag ), Keys, Values );
