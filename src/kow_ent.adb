@@ -1379,12 +1379,14 @@ package body KOW_Ent is
 			if Recover_ID then
 				if Info.Id_Generator /= NULL then
 					Entity.ID := ID;
+					Entity.ID.My_Tag := Entity'Tag;
 				else
 					declare
 						OID : APQ.Row_Id_Type;
 					begin
 						OID := APQ.Command_OID( Query );
 						Entity.ID := To_Id( Natural( OID ) );
+						Entity.ID.My_Tag := Entity'Tag;
 					end;
 				end if;
 			end if;
