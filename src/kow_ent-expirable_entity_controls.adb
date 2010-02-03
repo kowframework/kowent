@@ -39,6 +39,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Calendar;		use Ada.Calendar;
 with Ada.Containers;
 
 
@@ -64,7 +65,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
 		-- check if the entity is in a valid period
-		Validation : Validation_Type;
+		Validation : Validation_Entity;
 		Now : Validation_Timestamp := Validation_Timestamp( Ada.Calendar.Clock );
 	begin
 		Validation := Last_Validation( Entity );
@@ -77,7 +78,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	procedure New_Validation_Period( Entity : in Entity_Type; From_Date, To_Date : in Validation_Timestamp ) is
 		-- set the new validation period.
 		-- raise INVALID_PERIOD when From_Date > To_Date or Is_Valid == true
-		Validation : Validation_Type;
+		Validation : Validation_Entity;
 	begin
 		if To_Date /= No_Validation AND THEN From_Date > To_Date then
 			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date";
@@ -98,7 +99,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	procedure Expire( Entity : in Entity_Type; To_Date : in Validation_Timestamp ) is
 		-- expire in the given date..
 		-- raise invalid_period when To_Date < the last validation period
-		Validation : Validation_Type := Last_Validation( Entity );
+		Validation : Validation_Entity := Last_Validation( Entity );
 	begin
 		if Validation.To_Date /= No_Validation AND THEN Validation.To_Date < To_Date then
 			raise INVALID_PERIOD with "Invalidating an already invalid entity";
@@ -112,7 +113,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 		-- validate from the given date..
 		--
 		-- raise invalid_period if Is_Valid = TRUE
-		Validation : Validation_Type;
+		Validation : Validation_Entity;
 	begin
 		if Is_Valid( Entity ) then
 			raise INVALID_PERIOD with "Trying to validate an already valid entity";
@@ -143,7 +144,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	end Validate_Now;
 
 	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Type is
+	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity is
 		-- get the last validation in the database backend
 		Validations : Validation_Array := Get_Validations( Entity );
 		-- TODO :: implement Last_Validation using Query_Builders
@@ -212,7 +213,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	-- the factory
 	--
 	function Validation_Factory return KOW_Ent.Entity_Type'Class is
-		E : Validation_Type;
+		E : Validation_Entity;
 	begin
 		return E;
 	end Validation_Factory;
@@ -222,12 +223,12 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	--
 	function get_From_Date( E : in KOW_Ent.Entity_Type'Class ) return Validation_Timestamp is
 	begin
-		return Validation_Type( E ).From_Date;
+		return Validation_Entity( E ).From_Date;
 	end get_From_Date;
 
 	procedure set_From_Date( E : in out KOW_Ent.Entity_Type'Class; From_Date : in Validation_Timestamp ) is
 	begin
-		Validation_Type( E ).From_Date := From_Date;
+		Validation_Entity( E ).From_Date := From_Date;
 	end set_From_Date;
 
 	--
@@ -235,12 +236,12 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	--
 	function get_To_Date( E : in KOW_Ent.Entity_Type'Class ) return Validation_Timestamp is
 	begin
-		return Validation_Type( E ).To_Date;
+		return Validation_Entity( E ).To_Date;
 	end get_To_Date;
 
 	procedure set_To_Date( E : in out KOW_Ent.Entity_Type'Class; To_Date : in Validation_Timestamp ) is
 	begin
-		Validation_Type( E ).To_Date := To_Date;
+		Validation_Entity( E ).To_Date := To_Date;
 	end set_To_Date;
 
 	--
@@ -248,15 +249,14 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	--
 	function get_Owner_Id( E : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type is
 	begin
-		return Validation_Type( E ).Owner_Id;
+		return Validation_Entity( E ).Owner_Id;
 	end get_Owner_Id;
 
 	procedure set_Owner_Id( E : in out KOW_Ent.Entity_Type'Class; Owner_ID : in KOW_Ent.Id_Type ) is
 	begin
-		Validation_Type( E ).Owner_ID := Owner_ID;
+		Validation_Entity( E ).Owner_ID := Owner_ID;
 	end set_Owner_Id;
 	
-
 
 
 begin
@@ -266,17 +266,35 @@ begin
 
 
 	KOW_Ent.Entity_Registry.Register(
-			Entity_Tag	=> Validation_Type'Tag,
+			Entity_Tag	=> Validation_Entity'Tag,
 			Table_Name	=> Table_Name,
 			Id_Generator	=> null,
 			Factory		=> Validation_Factory'Access
 		);
 
 
+	KOW_Ent.Entity_Registry.Add_Property(
+			Entity_Tag	=> Validation_Entity'Tag,
+			Property	=> KOW_Ent.Extra_Properties.Timestamp_Properties.New_Property(
+							Column_Name		=> "from_date",
+							Getter			=> Get_From_Date'Access,
+							Setter			=> Set_From_Date'Access
+						)
+		);
+
+	KOW_Ent.Entity_Registry.Add_Property(
+			Entity_Tag	=> Validation_Entity'Tag,
+			Property	=> KOW_Ent.Extra_Properties.Timestamp_Properties.New_Property(
+							Column_Name		=> "to_date",
+							Getter			=> Get_To_Date'Access,
+							Setter			=> Set_To_Date'Access
+						)
+		);
+
 	
 
 	KOW_Ent.Entity_Registry.Add_Property(
-			Entity_Tag	=> Validation_Type'Tag,
+			Entity_Tag	=> Validation_Entity'Tag,
 			Property	=> KOW_Ent.Properties.New_Foreign_Key_Property(
 							Column_Name		=> "owner_id",
 							Related_Entity_Tag	=> Entity_Type'Tag,
@@ -284,6 +302,8 @@ begin
 							Setter			=> Set_Owner_Id'Access
 						)
 		);
+
+
 
 
 

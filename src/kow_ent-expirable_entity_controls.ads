@@ -52,6 +52,7 @@ with APQ;
 -------------------
 -- KOW Framework --
 -------------------
+with KOW_Ent.Extra_Properties;
 with KOW_Ent.Query_Builders;
 
 
@@ -82,23 +83,10 @@ package KOW_Ent.Expirable_Entity_Controls is
 	-- Validation Timestamp --
 	-- -------------------- --
 
-	type Validation_Timestamp is new Ada.Calendar.Time;
+	subtype Validation_Timestamp is KOW_Ent.Extra_Properties.Timestamp;
 
 
-        function Timestamp_To_String is new APQ.Timestamp_String( Val_Type => Validation_Timestamp );
-
-	function String_to_Timestamp is new APQ.Convert_To_Timestamp( Val_Type => Validation_Timestamp );
-
-
-	No_Validation : constant Validation_Timestamp := Validation_Timestamp(
-						Ada.Calendar.Time_Of(
-								Year	=> 1948,
-								Month	=> 1,
-								Day	=> 30,
-								Seconds	=> 13.13
-							)
-				);
-	-- date of Mohandas Karamchand Gandhi's death
+	No_Validation : constant Validation_Timestamp := KOW_Ent.Extra_Properties.No_Timestamp;
 
 
 
@@ -137,24 +125,24 @@ package KOW_Ent.Expirable_Entity_Controls is
 	procedure Validate_Now( Entity : in Entity_Type );
 	-- raise invalid_period if Is_Valid = TRUE
 
-	type Validation_Type is new KOW_Ent.Entity_Type with record
-		From_Date	: Validation_Timestamp;
-		To_Date		: Validation_Timestamp;
+	type Validation_Entity is new KOW_Ent.Entity_Type with record
+		From_Date	: Validation_Timestamp := No_Validation;
+		To_Date		: Validation_Timestamp := No_Validation;
 		Owner_ID	: KOW_Ent.ID_Type;
 	end record;
 	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Type;
+	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity;
 	-- get the last validation in the database backend
 
 
-	type Validation_Array is Array( Positive range <> ) of Validation_Type;
+	type Validation_Array is Array( Positive range <> ) of Validation_Entity;
 
 	function Get_Validations( Entity : in Entity_Type ) return Validation_Array;
 	-- get all the registered validation entities
 
 
 
-	package Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => Validation_Type );
+	package Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => Validation_Entity );
 
 
 end KOW_Ent.Expirable_Entity_Controls;

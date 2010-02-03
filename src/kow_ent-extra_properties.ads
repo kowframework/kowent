@@ -93,6 +93,18 @@ package KOW_Ent.Extra_Properties is
 
 	subtype Timestamp is Ada.Calendar.Time;
 
+
+	No_Timestamp : constant Timestamp := Timestamp(
+						Ada.Calendar.Time_Of(
+								Year	=> 1948,
+								Month	=> 1,
+								Day	=> 30,
+								Seconds	=> 13.13
+							)
+				);
+	-- date of Mohandas Karamchand Gandhi's death
+
+
 	function Timestamp_To_String( D : in Timestamp ) return String;
 	-- format using YYYY-MM-DD hh:mm:ss
 	
