@@ -63,6 +63,27 @@ package body KOW_Ent.Expirable_Entity_Controls is
 	-- --------------------- --
 	
 
+	overriding
+	procedure Will_Insert( Validation : in out Validation_Entity ) is
+		-- make sure the validation period is actually valid..
+	begin
+
+		if Validation.From_Date = No_Validation OR Validation.To_Date = No_Validation then
+			return;
+		elsif Validation.From_Date > Validation.To_Date then
+			raise KOW_Ent.Data_Validation_Error with "invalid period!";
+		end if;
+	end Will_Insert;
+
+	overriding
+	procedure Will_Update( Validation : in out Validation_Entity ) is
+		-- make sure the validation period is actually valid..
+	begin
+		Will_Insert( Validation );
+	end Will_Update;
+
+
+
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
 		-- check if the entity is in a valid period
 		Validation : Validation_Entity;

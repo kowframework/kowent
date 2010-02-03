@@ -130,6 +130,14 @@ package KOW_Ent.Expirable_Entity_Controls is
 		To_Date		: Validation_Timestamp := No_Validation;
 		Owner_ID	: KOW_Ent.ID_Type;
 	end record;
+
+	overriding
+	procedure Will_Insert( Validation : in out Validation_Entity );
+	-- make sure the validation period is actually valid..
+	
+	overriding
+	procedure Will_Update( Validation : in out Validation_Entity );
+	-- make sure the validation period is actually valid..
 	
 	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity;
 	-- get the last validation in the database backend
