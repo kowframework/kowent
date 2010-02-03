@@ -126,8 +126,8 @@ package KOW_Ent.Expirable_Entity_Controls is
 	-- raise invalid_period if Is_Valid = TRUE
 
 	type Validation_Entity is new KOW_Ent.Entity_Type with record
-		From_Date	: Validation_Timestamp := No_Validation;
-		To_Date		: Validation_Timestamp := No_Validation;
+		From_Date	: Validation_Timestamp := Ada.Calendar.Clock;
+		To_Date		: Validation_Timestamp := Ada.Calendar.Clock;
 		Owner_ID	: KOW_Ent.ID_Type;
 	end record;
 
