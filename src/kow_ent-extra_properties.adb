@@ -4,10 +4,13 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Calendar;
 with Ada.Calendar.Formatting;
+with Ada.Calendar.Time_Zones;
 with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Tags;
+with Ada.Text_IO;	use Ada.Text_IO;
 
 
 -------------------
@@ -108,7 +111,8 @@ package body KOW_Ent.Extra_Properties is
 	-- The Timestamp Type --
 	------------------------
 	
-	function Timestamp_To_String( D : in Timestamp ) return String is
+
+	function lixo_dois( D : in timestamp ) return string is
 		-- format using YYYY-MM-DD hh:mm:ss
 		use Ada.Calendar;
 		use Ada.Strings;
@@ -139,44 +143,24 @@ package body KOW_Ent.Extra_Properties is
 			Time_Str	: String := Hour_Str & ':' & Minut_Str & ':' & Sec_Str;
 		begin
 
+			Put_Line( Date_Str & ' ' & Time_Str );
+			
 			return Date_Str & ' ' & Time_Str;
 		end;
+	end lixo_dois;
+
+
+
+	function Timestamp_To_String( D : in Timestamp ) return String is
+	begin
+		return Ada.Calendar.Formatting.Image( D );
 	end Timestamp_to_String;
 
 
 
 	function Timestamp_From_String( Str_D : in String ) return Timestamp is
-		-- parse a string in the form YYYY-MM-DD
-		-- simply assume it's in the right format and try parsing it... :D
-		-- it's a little bit naieve, but works
-		-- TODO :: reimplementar usando KOW_Lib.Calendar.Parse( Str_D );
-		-- NOTE :: KOW_Lib.Calendar.Parse( Str_D ) precisa ser implementada
-		Year	: Ada.Calendar.Year_Number;
-		Month	: Ada.Calendar.Month_Number;
-		Day	: Ada.Calendar.Day_Number;
-		Seconds	: Ada.Calendar.Day_Duration;
-		F	: Integer := Str_D'First;
 	begin
-		Year	:= Ada.Calendar.Year_Number'Value( Str_D( F .. F + 3 ) );
-		Month	:= Ada.Calendar.Month_Number'Value( Str_D( F + 5 .. F + 6 ) );
-		Day	:= Ada.Calendar.Day_Number'Value( Str_D( F + 8 .. F + 9 ) );
-
-		declare
-			use Ada.Calendar.Formatting;
-
-			Hour	: Hour_Number	:= Hour_Number'Value(   Str_D( F + 11 .. F + 12 ) );
-			Minute	: Minute_Number := Minute_Number'Value( Str_D( F + 14 .. F + 15 ) );
-			Second	: Second_Number := Second_Number'Value( Str_D( F + 17 .. F + 18 ) );
-		begin
-			Seconds := Ada.Calendar.Formatting.Seconds_of( Hour, Minute, Second );
-		end;
-
-		return Ada.Calendar.Time_of( Year, Month, Day, Seconds );
-	exception
-
---		return KOW_Lib.Calendar.Parse( D );
-		when CONSTRAINT_ERROR =>
-			raise CONSTRAINT_ERROR with "timestamp """ & Str_D & """ not in the expected format ""YYYY-MM-DD hh:mm:ss""";
+		return Ada.Calendar.Formatting.Value( Str_D );
 	end Timestamp_From_String;
 
 
