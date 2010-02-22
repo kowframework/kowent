@@ -859,10 +859,19 @@ package body KOW_Ent is
 				"CREATE TABLE " & To_String( Info.Table_Name ) & "("
 			);
 
-		Append(
-				Query,
-				"`id` int(11) NOT NULL auto_increment,"
-			);
+		if Ada.Tags.Parent_Tag( Info.Entity_Tag ) = Entity_Type'Tag AND Info.Id_Generator = null then
+			Append(
+					Query,
+					"`id` int(11) NOT NULL auto_increment,"
+				);
+		else
+			Append(
+					Query,
+					"'id' int(11) NOT NULL,"
+				);
+		end if;
+
+
 		Append(
 				Query,
 				"`original_tag` varchar(255) NOT NULL,"
