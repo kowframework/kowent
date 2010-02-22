@@ -867,7 +867,7 @@ package body KOW_Ent is
 		else
 			Append(
 					Query,
-					"'id' int(11) NOT NULL,"
+					"`id` int(11) NOT NULL,"
 				);
 		end if;
 
