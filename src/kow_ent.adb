@@ -366,11 +366,11 @@ package body KOW_Ent is
 	procedure Set_Values_From_Query(
 				Entity		: in out Entity_Type'Class;
 				Query		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Info		: in     Entity_Information_Type
 			) is
 		-- set all the values from the resulting query
 
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 
 		procedure Set_Value( C : in Property_Lists.Cursor ) is
 		begin
@@ -408,8 +408,8 @@ package body KOW_Ent is
 			-- SQL Construction --
 			----------------------
 		
-			APQ.Prepare( Query, "SELECT id," );
-			Append_Column_Names_For_Read( Query, Info.Properties );
+			APQ.Prepare( Query, "SELECT id" );
+			Append_Column_Names_For_Read( Query, Info.Properties, "," );
 			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 			APQ.Append( Query, " WHERE id=" );
 			ID_Append( Query, Entity.ID.Value );
@@ -427,7 +427,7 @@ package body KOW_Ent is
 			-- Data Processing --
 			---------------------
 
-			Set_Values_From_Query( Entity, Query, Connection );
+			Set_Values_From_Query( Entity, Query, Connection, Info );
 
 			Was_Loaded( Entity );
 
@@ -1401,13 +1401,15 @@ package body KOW_Ent is
 				"INSERT INTO " & To_String( Info.Table_Name ) & "("
 			);
 
-			Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 
 			if Info.Id_Generator /= NULL or Ada.Tags.Parent_Tag( Info.Entity_Tag ) /= Entity_Type'Tag then
+				Append_Column_Names_For_Store( Query, Info.Properties, Entity, "," );
 				APQ.Append(
 					Query,
-					",id"
+					"id"
 				);
+			else
+				Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 			end if;
 	
 			APQ.Append( Query, ") VALUES(" );
@@ -1417,19 +1419,23 @@ package body KOW_Ent is
 
 			if Info.Id_Generator /= NULL then
 				ID := Info.Id_Generator.all( Entity );
-				APQ.Append(
-					Query,
-					","
-				);
+				if not First_Element then
+					APQ.Append(
+						Query,
+						","
+					);
+				end if;
 				ID_Append(
 					Query,
 					ID.Value
 				);
 			elsif Ada.Tags.Parent_Tag( Info.Entity_Tag ) /= Entity_Type'Tag then
-				APQ.Append(
-					Query,
-					","
-				);
+				if not First_Element then
+					APQ.Append(
+						Query,
+						","
+					);
+				end if;
 				ID_Append(
 					Query,
 					Parent_ID.Value
@@ -1486,7 +1492,7 @@ package body KOW_Ent is
 	-- Other Auxiliar Functions --
 	------------------------------
 
-	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List ) is
+	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Before : in String := "" ) is
 		-- this procedure is used internally to set a column of values in the fashion of:
 		-- a,b,c,d
 		-- where a, b, c and d are columns of this entity
@@ -1502,6 +1508,7 @@ package body KOW_Ent is
 				if not First_Property then
 					APQ.Append( Query, "," );
 				else
+					APQ.Append( Query, Before );
 					First_Property := False;
 				end if;
 
@@ -1514,11 +1521,13 @@ package body KOW_Ent is
 	end Append_Column_Names_For_Read;
 
 
-	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class ) is
+	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class; After: in String := "" ) is
 		-- this procedure is used internally to set a column of values in the fashion of:
 		-- a,b,c,d
 		-- where a, b, c and d are columns of this entity
 		-- implementation is at the end of the file
+		--
+		-- append "after" only if has elements
 
 		First_Property: Boolean := True;
 
@@ -1539,6 +1548,10 @@ package body KOW_Ent is
 
 	begin
 		Property_Lists.Iterate( Properties, Set_Column_Names'Access );
+
+		if not First_Property then
+			APQ.Append( Query, After );
+		end if;
 	end Append_Column_Names_For_Store;
 
 

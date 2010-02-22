@@ -32,6 +32,9 @@
 -- This is a generic package to assist building queries for retrieving your
 -- data from the Database
 --
+-- TODO :: make it support extended entity types.. so far it works fine for
+-- types derived from the KOW_Ent.Entity_Type directly!
+--
 -- @author Marcelo C. de Freitas <marcelo@kow.com.br>
 
 

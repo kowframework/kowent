@@ -193,12 +193,6 @@ package KOW_Ent is
 	-- this will be called _AFTER_ the entity ID was set
 	procedure Was_Loaded  ( Entity : in out Entity_Type ) is null;
 
-	procedure Set_Values_From_Query(
-				Entity		: in out Entity_Type'Class;
-				Query		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class
-				);
-	-- set all the values from the resulting query
 
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type );
 	-- load the entity from the default database Backend
@@ -535,6 +529,16 @@ package KOW_Ent is
 
 
 
+	procedure Set_Values_From_Query(
+				Entity		: in out Entity_Type'Class;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Info		: in     Entity_Information_Type
+				);
+	-- set all the values from the resulting query
+
+
+
 	-------------------------
 	-- Entity Registration --
 	-------------------------
@@ -661,16 +665,20 @@ private
 	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 
-	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List); 
+	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Before : in String := ""); 
 	-- this procedure is used internally to set a column of values in the fashion of:
 	-- a,b,c,d
 	-- where a, b, c and d are columns of this entity
 	-- This respect the Should_Read method for the property
+	--
+	-- insert before before everything if there is something to add
 
-	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class );
+	procedure Append_Column_Names_For_Store( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Entity : in Entity_Type'Class; After: in String := ""  );
 	-- this procedure is used internally to set a column of values in the fashion of:
 	-- a,b,c,d
 	-- where a, b, c and d are columns of this entity
+	--
+	-- append "after" only if has elements
 
 	------------------------
 	-- Type Specification --

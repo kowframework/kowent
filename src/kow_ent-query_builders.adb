@@ -469,7 +469,7 @@ package body KOW_Ent.Query_Builders is
 					declare
 						E: Entity_Type;
 					begin
-						Set_Values_From_Query( E, Query, Connection );
+						Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
 						Entity_Vectors.Append( Results, E );
 					end;
 		
@@ -495,7 +495,7 @@ package body KOW_Ent.Query_Builders is
 		begin
 			Prepare_And_Run_Query( Q, Query, Connection );
 			APQ.Fetch( Query );
-			Set_Values_From_Query( Result, Query, Connection );
+			Set_Values_From_Query( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
 			begin
 				loop
 					APQ.Fetch( Query );
