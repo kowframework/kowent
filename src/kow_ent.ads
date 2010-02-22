@@ -161,8 +161,8 @@ package KOW_Ent is
 
 
 
-
-		-- Original_Tag	: Ada.Tags.Tag;
+		Original_Tag	: Unbounded_String;
+		-- the expanded name of the tag of the entity originally created
 		-- this is to be queried internally by Narrow() and Store()
 	end record;
 
@@ -208,6 +208,14 @@ package KOW_Ent is
 	-- after it has been saved.
 	
 
+	function Narrow( Entity : in Entity_Type'Class ) return Entity_Type'Class;
+	-- return an entity in it's complete form.
+	-- ie, supose the following:
+	-- 	type translated_book is new book 
+	--
+	-- 	store( a_translated_book ) will create a record in the book entity table as well.
+	-- 	
+	-- 	narrow( a_book ) could return a translated_book entity
 
 	procedure Set_Foreign_Key(
 				Entity		: in out Entity_Type'Class;

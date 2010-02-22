@@ -380,6 +380,7 @@ package body KOW_Ent is
 	begin
 		Entity.ID		:= To_ID( TMP_Id );
 		Entity.ID.My_Tag	:= Entity'Tag;
+		Entity.Original_Tag	:= APQ.Value( Query, APQ.Column_Index( Query, "original_tag" ) );
 
 		Property_Lists.Iterate( Info.Properties, Set_Value'Access );
 	end Set_Values_From_Query;
@@ -408,7 +409,7 @@ package body KOW_Ent is
 			-- SQL Construction --
 			----------------------
 		
-			APQ.Prepare( Query, "SELECT id" );
+			APQ.Prepare( Query, "SELECT id,original_tag" );
 			Append_Column_Names_For_Read( Query, Info.Properties, "," );
 			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 			APQ.Append( Query, " WHERE id=" );
@@ -498,6 +499,25 @@ package body KOW_Ent is
 		
 		-- Construct_SQL( Table_Name( Entity'Tag ), Keys, Values );
 	end Store;
+
+
+
+	function Narrow( Entity : in Entity_Type'Class ) return Entity_Type'Class is
+		-- return an entity in it's complete form.
+		-- ie, supose the following:
+		-- 	type translated_book is new book 
+		--
+		-- 	store( a_translated_book ) will create a record in the book entity table as well.
+		-- 	
+		-- 	narrow( a_book ) could return a translated_book entity
+
+
+		Result : Entity_Type'Class := Entity_Registry.New_Entity( Entity.Original_Tag );
+	begin
+		Load( Result, Entity.ID );
+	
+		return Result;
+	end Narrow;
 
 
 	procedure Set_Foreign_Key(
@@ -834,6 +854,10 @@ package body KOW_Ent is
 		Append(
 				Query,
 				"`id` int(11) NOT NULL auto_increment,"
+			);
+		Append(
+				Query,
+				"`original_tag` varchar(255) NOT NULL,"
 			);
 
 
@@ -1406,10 +1430,14 @@ package body KOW_Ent is
 				Append_Column_Names_For_Store( Query, Info.Properties, Entity, "," );
 				APQ.Append(
 					Query,
-					"id"
+					"id,original_tag"
 				);
 			else
-				Append_Column_Names_For_Store( Query, Info.Properties, Entity );
+				Append_Column_Names_For_Store( Query, Info.Properties, Entity, "," );
+				APQ.Append(
+					Query,
+					"original_tag"
+				);
 			end if;
 	
 			APQ.Append( Query, ") VALUES(" );
@@ -1435,12 +1463,27 @@ package body KOW_Ent is
 						Query,
 						","
 					);
+				else
+					First_Element := False;
 				end if;
 				ID_Append(
 					Query,
 					Parent_ID.Value
 				);
 			end if;
+
+			if not First_Element then
+				APQ.Append(
+					Query,
+					","
+				);
+			end if;
+			APQ.Append_Quoted(
+				Query,
+				Connection,
+				Ada.Tags.Expanded_Name( Entity'Tag )
+			);
+			Entity.Original_Tag := To_Unbounded_String( Ada.Tags.Expanded_Name( Entity'Tag ) );
 
 			APQ.Append( Query, ")" );
 
