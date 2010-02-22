@@ -376,9 +376,12 @@ package body KOW_Ent is
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type ) is
 		-- load the entity from the database Backend
 
+		package L renames Entity_Information_Lists;
+	
+		Infos		: L.List;
+		Info		: Entity_Information_Type;
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 		begin
 
 			Entity.ID := ID;
@@ -424,27 +427,28 @@ package body KOW_Ent is
 			end;
 		end Runner;
 
+
+
+		procedure Infos_Iterator( C : in L.Cursor ) is
+		begin
+			Info := L.Element( C );
+			APQ_Provider.Run( My_Provider.all, Runner'Access );
+		end Infos_Iterator;
+
+
+		The_Tag	: Ada.Tags.Tag := Entity'Tag;
 	begin
-		
-		if Entity in Entity_Extension_Interface'Class then
-			declare
-				Parent : Entity_Type'Class := Cast_From_Extension(
-							Entity_Extension_Interface'Class(
-								Entity
-							)
-						);
-			begin
-				Parent.ID.My_Tag := Parent'Tag;
-				Load( Parent, ID );
+		-- first we find the inheritance stuff
+		loop
+			Info := Entity_Registry.Get_Information( Entity'Tag );
 
-				Load_From_Parent(
-						Entity_Extension_Interface'Class( Entity ),
-						Parent
-					);
-			end;
-		end if;
+			L.Append( Infos, Info );
+			The_Tag := Ada.Tags.Parent_Tag( The_Tag );
+			exit when The_Tag = Entity_Type'Tag;
+		end loop;
 
-		APQ_Provider.Run( My_Provider.all, Runner'Access );
+
+		L.Reverse_Iterate( Infos, Infos_Iterator'Access );
 
 	end Load;
 
@@ -1266,19 +1270,6 @@ package body KOW_Ent is
 		end if;
 
 
-		if Entity in Entity_Extension_Interface'Class then
-			declare
-				Parent : Entity_Type'Class := Cast_From_Extension(
-							Entity_Extension_Interface'Class(
-								Entity
-							)
-						);
-			begin
-				Parent.ID.My_Tag := Parent'Tag;
-				Save( Parent );
-			end;
-		end if;
-
 			
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Save;
@@ -1334,7 +1325,7 @@ package body KOW_Ent is
 
 			Append_Column_Names_For_Store( Query, Info.Properties, Entity );
 
-			if Info.Id_Generator /= NULL or Entity in Entity_Extension_Interface'Class then
+			if Info.Id_Generator /= NULL or Ada.Tags.Parent_Tag( Info.Entity_Tag ) /= Entity_Type'Tag then
 				APQ.Append(
 					Query,
 					",id"
@@ -1356,7 +1347,7 @@ package body KOW_Ent is
 					Query,
 					ID.Value
 				);
-			elsif Entity in Entity_Extension_Interface'Class then
+			elsif Ada.Tags.Parent_Tag( Info.Entity_Tag ) /= Entity_Type'Tag then
 				APQ.Append(
 					Query,
 					","
@@ -1392,20 +1383,6 @@ package body KOW_Ent is
 			end if;
 		end Runner;
 	begin
-
-		if Entity in Entity_Extension_Interface'Class then
-			declare
-				Parent : Entity_Type'Class := Cast_From_Extension(
-							Entity_Extension_Interface'Class(
-								Entity
-							)
-						);
-			begin
-				Parent.ID.My_Tag := Parent'Tag;
-				Insert( Parent, True );
-				Parent_ID := Parent.ID;
-			end;
-		end if;
 
 		APQ_Provider.Run( My_Provider.all, Runner'Access );
 	end Insert;
