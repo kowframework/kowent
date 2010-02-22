@@ -132,6 +132,20 @@ package body KOW_Ent is
 
 
 
+
+	procedure Prepend_All( Container : in out Property_Lists.List; Source : in Property_Lists.List ) is
+		-- add all elements in Source before all elements in Container inside
+
+
+		procedure Iterator( C : in Property_Lists.Cursor ) is
+		begin
+			Property_Lists.Prepend( Container, Property_Lists.Element( C ) );
+		end Iterator;
+	begin
+		Property_Lists.Iterate( Source, Iterator'Access );
+	end Prepend_All;
+
+
 	-------------------------
 	-- Database Management --
 	-------------------------
@@ -440,7 +454,7 @@ package body KOW_Ent is
 	begin
 		-- first we find the inheritance stuff
 		loop
-			Info := Entity_Registry.Get_Information( Entity'Tag );
+			Info := Entity_Registry.Get_Information( The_Tag );
 
 			L.Append( Infos, Info );
 			The_Tag := Ada.Tags.Parent_Tag( The_Tag );
@@ -1138,14 +1152,45 @@ package body KOW_Ent is
 
 		function Get_Properties( Entity_Tag : in Ada.Tags.Tag; Force_All : Boolean := False ) return Property_Lists.List is
 			-- retrieve the property list for the given entity;
+
+			Info		: Entity_Information_Type := Get_Information( Entity_Tag );
+			The_Tag		: Ada.Tags.Tag := Ada.Tags.Parent_Tag( Info.Entity_Tag );
+			Properties	: Property_Lists.List := Info.Properties;
 		begin
-			return Get_Information( Entity_Tag ).Properties;
+
+			if Force_All then
+				loop
+					exit when The_Tag = Entity_Type'Tag;
+					Info := Get_Information( The_Tag );
+					Prepend_All( Properties, Info.Properties );
+					The_Tag := Ada.Tags.Parent_Tag( The_Tag );
+				end loop;
+			end if;
+
+
+			return Properties;
+
 		end Get_Properties;
 		
 		function Get_Properties( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; Force_All : Boolean := False ) return Property_Lists.List is
 			-- retrieve the property list for the given entity;
+
+			Info		: Entity_Information_Type := Get_Information( Entity_Tag );
+			The_Tag		: Ada.Tags.Tag := Ada.Tags.Parent_Tag( Info.Entity_Tag );
+			Properties	: Property_Lists.List := Info.Properties;
 		begin
-			return Get_Information( Entity_Tag ).Properties;
+			if Force_All then
+				loop
+					exit when The_Tag = Entity_Type'Tag;
+					Info := Get_Information( The_Tag );
+					Prepend_All( Properties, Info.Properties );
+					The_Tag := Ada.Tags.Parent_Tag( The_Tag );
+				end loop;
+			end if;
+
+
+			return Properties;
+
 		end Get_Properties;
 
 
@@ -1191,8 +1236,16 @@ package body KOW_Ent is
 
 	procedure Save( Entity : in out Entity_Type'Class ) is
 		-- save the existing entity into the database Backend
+	
+		package L renames Entity_Information_Lists;
 
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
+		Parent_ID	: ID_Type;
+		The_Tag		: Ada.Tags.Tag := Entity'Tag;
+		Info		: Entity_Information_Type;
+		Infos		: L.List;
+
+
+
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 
@@ -1256,22 +1309,42 @@ package body KOW_Ent is
 					);
 			end if;
 		end Runner;
+
+
+
+
+		procedure Infos_Iterator( C : in L.Cursor ) is
+		begin
+			Info := L.Element( C );
+			APQ_Provider.Run( My_Provider.all, Runner'Access );
+		end Infos_Iterator;
+
+
 	begin
-		if Info.Id_Generator /= null then
-			-- check if the user didn't temper with the ID
-			declare
-				use APQ;
-				TMP_Id : Id_Type := Info.Id_Generator.All( Entity );
-			begin
-				if TMP_Id.Value /= Entity.Id.Value then
-					raise CONSTRAINT_ERROR with "trying to temper with code generated entity ID";
-				end if;
-			end;
-		end if;
+		-- first we find the inheritance stuff
+		loop
+			Info := Entity_Registry.Get_Information( The_Tag );
+
+			if Info.Id_Generator /= null then
+				-- check if the user didn't temper with the ID
+				declare
+					use APQ;
+					TMP_Id : Id_Type := Info.Id_Generator.All( Entity );
+				begin
+					if TMP_Id.Value /= Entity.Id.Value then
+						raise CONSTRAINT_ERROR with "trying to temper with code generated entity ID";
+					end if;
+				end;
+			end if;
 
 
-			
-		APQ_Provider.Run( My_Provider.all, Runner'Access );
+			L.Append( Infos, Info );
+			The_Tag := Ada.Tags.Parent_Tag( The_Tag );
+			exit when The_Tag = Entity_Type'Tag;
+		end loop;
+
+		L.Reverse_Iterate( Infos, Infos_Iterator'Access );
+
 	end Save;
 	
 
@@ -1282,11 +1355,16 @@ package body KOW_Ent is
 		-- after it has been saved
 		
 
-		Parent_ID : ID_Type;
+		package L renames Entity_Information_Lists;
+
+		Parent_ID	: ID_Type;
+		The_Tag		: Ada.Tags.Tag := Entity'Tag;
+		Info		: Entity_Information_Type;
+		Infos		: L.List;
+
 
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			ID	: Id_Type;
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity'Tag );
 		
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 	
@@ -1382,9 +1460,25 @@ package body KOW_Ent is
 				end if;
 			end if;
 		end Runner;
-	begin
 
-		APQ_Provider.Run( My_Provider.all, Runner'Access );
+		procedure Infos_Iterator( C : in L.Cursor ) is
+		begin
+			Info := L.Element( C );
+			APQ_Provider.Run( My_Provider.all, Runner'Access );
+		end Infos_Iterator;
+
+
+	begin
+		-- first we find the inheritance stuff
+		loop
+			Info := Entity_Registry.Get_Information( The_Tag );
+
+			L.Append( Infos, Info );
+			The_Tag := Ada.Tags.Parent_Tag( The_Tag );
+			exit when The_Tag = Entity_Type'Tag;
+		end loop;
+
+		L.Reverse_Iterate( Infos, Infos_Iterator'Access );
 	end Insert;
 
 
