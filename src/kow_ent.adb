@@ -512,11 +512,19 @@ package body KOW_Ent is
 		-- 	narrow( a_book ) could return a translated_book entity
 
 
-		Result : Entity_Type'Class := Entity_Registry.New_Entity( Entity.Original_Tag );
 	begin
-		Load( Result, Entity.ID );
-	
-		return Result;
+		if Entity.Original_Tag = To_UString( Entity'Tag ) then
+			return Entity;
+		end if;
+
+
+		declare
+			Result : Entity_Type'Class := Entity_Registry.New_Entity( Entity.Original_Tag );
+		begin
+			Load( Result, Entity.ID );
+		
+			return Result;
+		end;
 	end Narrow;
 
 
