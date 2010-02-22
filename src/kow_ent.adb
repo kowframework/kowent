@@ -478,17 +478,16 @@ package body KOW_Ent is
 	end Load;
 
 
-	procedure Store( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True ) is
+	procedure Store( Entity : in out Entity_Type'Class ) is
 		-- save the entity into the database Backend
-		-- if it's a new entity, create a new entry and generates an ID for it.
-		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
+		-- if it's a new entity, create a new entry and generates an ID for it (recovering it if needed).
 		-- after it has been saved.
 
 	begin
 		if Entity.ID.My_Tag = No_Tag then
 			Log( "inserting entity" );
 			Will_Insert( Entity );
-			Insert( Entity, Recover_ID );
+			Insert( Entity );
 			Was_Inserted( Entity );
 		else
 			Will_Update( Entity );
@@ -1280,7 +1279,6 @@ package body KOW_Ent is
 	
 		package L renames Entity_Information_Lists;
 
-		Parent_ID	: ID_Type;
 		The_Tag		: Ada.Tags.Tag := Entity'Tag;
 		Info		: Entity_Information_Type;
 		Infos		: L.List;
@@ -1389,19 +1387,19 @@ package body KOW_Ent is
 	end Save;
 	
 
-	procedure Insert( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True ) is
+	procedure Insert( Entity : in out Entity_Type'Class ) is
 		-- save the entity into the database Backend
 		-- if it's a new entity, create a new entry and generates an ID for it.
-		-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 		-- after it has been saved
 		
 
 		package L renames Entity_Information_Lists;
 
-		Parent_ID	: ID_Type;
 		The_Tag		: Ada.Tags.Tag := Entity'Tag;
 		Info		: Entity_Information_Type;
 		Infos		: L.List;
+
+		Recover_ID	: Boolean	:= True;
 
 
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
@@ -1485,7 +1483,7 @@ package body KOW_Ent is
 				end if;
 				ID_Append(
 					Query,
-					Parent_ID.Value
+					Entity.ID.Value
 				);
 			end if;
 
@@ -1522,8 +1520,10 @@ package body KOW_Ent is
 						OID := APQ.Command_OID( Query );
 						Entity.ID := To_Id( Natural( OID ) );
 						Entity.ID.My_Tag := Entity'Tag;
+						Log( "Recovered ID :: " & KOW_Ent.To_String( Entity.ID ) );
 					end;
 				end if;
+				Recover_ID := False;
 			end if;
 		end Runner;
 

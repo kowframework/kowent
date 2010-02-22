@@ -201,10 +201,9 @@ package KOW_Ent is
 	-- load the entity from the default database Backend
 	-- it's the same as Load( Entity, To_ID( ID ) );
 	
-	procedure Store( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True );
+	procedure Store( Entity : in out Entity_Type'Class );
 	-- save the entity into the database Backend
-	-- if it's a new entity, create a new entry and generates an ID for it.
-	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
+	-- if it's a new entity, create a new entry and generates an ID for it (recovering it if needed).
 	-- after it has been saved.
 	
 
@@ -667,10 +666,9 @@ private
 	-- save the existing entity into the database Backend
 	
 
-	procedure Insert( Entity : in out Entity_Type'Class; Recover_ID: Boolean := True );
+	procedure Insert( Entity : in out Entity_Type'Class  );
 	-- save the entity into the database Backend
 	-- if it's a new entity, create a new entry and generates an ID for it.
-	-- If Recover_ID = TRUE then the ID is then loaded into the in-memory entity
 	-- after it has been saved.
 
 	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Before : in String := ""); 
