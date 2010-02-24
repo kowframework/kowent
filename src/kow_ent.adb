@@ -142,7 +142,7 @@ package body KOW_Ent is
 			Property_Lists.Prepend( Container, Property_Lists.Element( C ) );
 		end Iterator;
 	begin
-		Property_Lists.Iterate( Source, Iterator'Access );
+		Property_Lists.Reverse_Iterate( Source, Iterator'Access );
 	end Prepend_All;
 
 
