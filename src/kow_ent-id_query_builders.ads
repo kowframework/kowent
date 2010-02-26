@@ -234,7 +234,8 @@ package KOW_Ent.ID_Query_Builders is
 	procedure Append_to_APQ_Query(
 				Q		: in     Query_Type;
 				APQ_Q		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Is_Child	: in     Boolean
 			);
 
 	procedure Append_Order_by_to_APQ_Query(

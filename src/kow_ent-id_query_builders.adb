@@ -381,7 +381,8 @@ package body KOW_Ent.ID_Query_Builders is
 	procedure Append_to_APQ_Query(
 				Q		: in     Query_Type;
 				APQ_Q		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Is_Child	: in     Boolean
 			) is
 		First_Element : Boolean := True;
 
@@ -391,6 +392,9 @@ package body KOW_Ent.ID_Query_Builders is
 			-- Use while appending child queries AND operators
 		begin
 			if First_Element then
+				if not Is_Child then
+					APQ.Append( APQ_Q, " WHERE " );
+				end if;
 				First_Element := False;
 				APQ.Append( APQ_Q, " " );
 			else
@@ -427,7 +431,7 @@ package body KOW_Ent.ID_Query_Builders is
 
 				when Q_Operator =>
 					APQ.Append( APQ_Q, "(" );
-					Append_to_APQ_Query( Handler.Child_Query.all, APQ_Q, Connection );
+					Append_to_APQ_Query( Handler.Child_Query.all, APQ_Q, Connection, True );
 					APQ.Append( APQ_Q, ")" );
 			end case;
 		end Append_Operator;
@@ -481,8 +485,8 @@ package body KOW_Ent.ID_Query_Builders is
 	begin
 		APQ.Prepare( Query, "SELECT id,original_tag," );
 		Append_Column_Names_For_Read( Query, Info.Properties );
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-		Append_to_APQ_Query( Q, Query, Connection );
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
+		Append_to_APQ_Query( Q, Query, Connection, False );
 		APQ.Append( Query, " " );
 		Append_Order_By_to_APQ_Query( Q, Query, Connection );
 
