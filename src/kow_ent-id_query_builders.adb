@@ -437,13 +437,6 @@ package body KOW_Ent.ID_Query_Builders is
 		end Append_Operator;
 	begin
 		Operator_Vectors.Iterate( Q.Operators, Append_Operator'Access );
-
-
-		if First_Element then
-			-- when it's hasn't processed any element..
-			-- a dirty hack for child queries to work fine
-			APQ.Append( APQ_Q, "1=1" );
-		end if;
 	end Append_to_APQ_Query;
 
 	procedure Append_Order_by_to_APQ_Query(
