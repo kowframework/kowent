@@ -483,7 +483,7 @@ package body KOW_Ent.ID_Query_Builders is
 		APQ.Append( Query, " " );
 		Append_Order_By_to_APQ_Query( Q, Query, Connection );
 
-		 Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 
 
 		APQ.Execute( Query, Connection );

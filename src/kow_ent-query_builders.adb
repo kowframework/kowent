@@ -440,8 +440,8 @@ package body KOW_Ent.Query_Builders is
 		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
 
 	begin
-		APQ.Prepare( Query, "SELECT id,original_tag," );
-		Append_Column_Names_For_Read( Query, Info.Properties );
+		APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
+		Append_Column_Names_For_Read( Query, Info.Properties, "," );
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query, Connection );
 		APQ.Append( Query, " " );
