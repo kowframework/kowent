@@ -381,6 +381,7 @@ package body KOW_Ent is
 		Entity.ID		:= To_ID( TMP_Id );
 		Entity.ID.My_Tag	:= Entity'Tag;
 		Entity.Original_Tag	:= APQ.Value( Query, APQ.Column_Index( Query, "original_tag" ) );
+		Entity.Filter_Tags	:= APQ.Value( Query, APQ.Column_Index( Query, "filter_tags" ) );
 
 		Property_Lists.Iterate( Info.Properties, Set_Value'Access );
 	end Set_Values_From_Query;
@@ -409,7 +410,7 @@ package body KOW_Ent is
 			-- SQL Construction --
 			----------------------
 		
-			APQ.Prepare( Query, "SELECT id,original_tag" );
+			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
 			Append_Column_Names_For_Read( Query, Info.Properties, "," );
 			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 			APQ.Append( Query, " WHERE id=" );
@@ -877,6 +878,13 @@ package body KOW_Ent is
 			);
 
 
+		Append(
+				Query,
+				"`filter_tags` varchar(255) NOT NULL,"
+			);
+
+
+
 		Property_Lists.Iterate( Info.Properties, Iterator'Access );
 
 		Append(
@@ -1289,27 +1297,16 @@ package body KOW_Ent is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 
 
-			First_Element	: Boolean := True;
-			Should_Run	: Boolean := False;
-			-- when updating a entity what has only read only properties....
-			-- well, we shouldn't run the execute method... that's why it's here.
 			procedure Update_Appender( C : Property_Lists.Cursor ) is
 				Property: Entity_Property_Ptr := Property_Lists.Element( C );
 			begin
 				if Should_Store( Property.all, Entity ) and not Property.Immutable then
-					if not First_Element then
-						APQ.Append( Query, "," );
-					else
-						First_Element := False;
-					end if;
-		
 	
 					if Property /= null then
 						APQ.Append(
 							Query,
-							To_String( Property.all.Column_Name ) & "="
+							"," & To_String( Property.all.Column_Name ) & "="
 						);
-						Should_Run := True;
 					
 	
 						Get_Property( Property.all, Entity, Query, Connection );
@@ -1325,9 +1322,11 @@ package body KOW_Ent is
 				Query,
 				"UPDATE " &
 					To_String( Info.Table_Name ) &
-					" SET "
+					" SET filter_tags="
 			);
 
+			APQ.Append_Quoted( Query, Connection, Entity.Filter_Tags );
+				
 			Property_Lists.Iterate( Info.Properties, Update_Appender'Access );
 
 
@@ -1341,12 +1340,10 @@ package body KOW_Ent is
 				Entity.ID.Value
 			);
 
-			if Should_Run then
-				APQ.Execute(
-						Query,
-						Connection
-					);
-			end if;
+			APQ.Execute(
+					Query,
+					Connection
+				);
 		end Runner;
 
 
@@ -1445,13 +1442,13 @@ package body KOW_Ent is
 				Append_Column_Names_For_Store( Query, Info.Properties, Entity, "," );
 				APQ.Append(
 					Query,
-					"id,original_tag"
+					"id,original_tag,filter_tags"
 				);
 			else
 				Append_Column_Names_For_Store( Query, Info.Properties, Entity, "," );
 				APQ.Append(
 					Query,
-					"original_tag"
+					"original_tag,filter_tags"
 				);
 			end if;
 	
@@ -1497,6 +1494,15 @@ package body KOW_Ent is
 				Query,
 				Connection,
 				Ada.Tags.Expanded_Name( Entity'Tag )
+			);
+			APQ.Append(
+				Query,
+				","
+			);
+			APQ.Append_Quoted(
+				Query,
+				Connection,
+				Entity.Filter_Tags
 			);
 			Entity.Original_Tag := To_Unbounded_String( Ada.Tags.Expanded_Name( Entity'Tag ) );
 

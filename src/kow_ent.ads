@@ -160,6 +160,9 @@ package KOW_Ent is
 		-- internally to locate and iterate with entities.
 
 
+		Filter_Tags	: Unbounded_String;
+		-- keywords for searching this entity
+
 
 		Original_Tag	: Unbounded_String;
 		-- the expanded name of the tag of the entity originally created
