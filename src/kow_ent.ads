@@ -86,6 +86,8 @@ package KOW_Ent is
 	procedure Set_Connection_Provider( Provider : in APQ_Provider.Connection_Provider_Ptr );
 	-- set the current database connection provider
 
+	function Get_Connection_Provider return APQ_Provider.Connection_Provider_Ptr;
+	-- get the current database connection provider
 
 	-------------------------
 	-- Password Management --

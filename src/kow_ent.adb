@@ -156,6 +156,11 @@ package body KOW_Ent is
 	end Set_Connection_Provider;
 
 
+	function Get_Connection_Provider return APQ_Provider.Connection_Provider_Ptr is
+		-- get the current database connection provider
+	begin
+		return My_Provider;
+	end Get_Connection_Provider;
 
 	function To_String( ID: in Id_Type ) return String is
 		-- get the ID value as a String
