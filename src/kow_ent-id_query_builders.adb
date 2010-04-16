@@ -493,7 +493,7 @@ package body KOW_Ent.ID_Query_Builders is
 		-- get all results from the query
 	
 
-		Tons_OF_Ids	: KOW_Ent.ID_Array_Type( 1 .. 100 );
+		Tons_OF_Ids	: KOW_Ent.ID_Array_Type( 1 .. 10000 );
 		Last_ID		: Natural := Natural'First;
 		
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
