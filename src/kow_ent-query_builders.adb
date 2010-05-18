@@ -434,7 +434,7 @@ package body KOW_Ent.Query_Builders is
 	end Append_Order_by_to_APQ_Query;
 
 
-	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
+	procedure Prepare_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	
 
 		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
@@ -448,8 +448,11 @@ package body KOW_Ent.Query_Builders is
 		Append_Order_By_to_APQ_Query( Q, Query, Connection );
 
 		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+	end Prepare_Query;
 
-
+	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
+	begin
+		Prepare_Query( Q, Query, Connection );
 		APQ.Execute( Query, Connection );
 	end Prepare_and_Run_Query;
 
@@ -484,6 +487,97 @@ package body KOW_Ent.Query_Builders is
 		return Results;
 	end Get_All;
 	
+
+	procedure Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Natural;
+				Ammount		: in     Positive;
+				Result		:    out Entity_Vectors.Vector;
+				Total_Count	:    out Natural
+			) is
+		-- Get a page of results in the query
+	
+		Results : Entity_Vectors.Vector;
+		TC	: Natural := 0;
+
+		function Natural_Value is new APQ.Integer_Value( Val_Type => Natural );
+		
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
+			use APQ;
+		begin
+			APQ.Prepare( Query, "SELECT count(*) as TQCT,id,original_tag,filter_tags" );
+			Append_Column_Names_For_Read( Query, Info.Properties, "," );
+			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
+			Append_to_APQ_Query( Q, Query, Connection );
+			APQ.Append( Query, " " );
+			Append_Order_By_to_APQ_Query( Q, Query, Connection );
+
+			
+			if APQ.Engine_Of( Query ) = Engine_MySQL then
+				APQ.Append( Query, " limit " & natural'image( from ) & ',' & positive'image( ammount  ) );
+
+				APQ.Execute( Query, Connection );
+
+				begin
+					loop
+						APQ.Fetch( Query );
+						
+						if TC = 0 then
+							TC := Natural_Value( Query, APQ.Column_Index( Query, "TQCT" ) );
+						end if;
+	
+						declare
+							E: Entity_Type;
+						begin
+							Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+							Entity_Vectors.Append( Results, E );
+						end;
+			
+					end loop;
+				exception
+					when others => null;
+				end;
+			else
+				APQ.Execute( Query, Connection );
+				TC := Natural( APQ.Tuples( Query ) );
+
+				begin
+					for i in 1 .. From loop
+						APQ.Fetch( Query );
+					end loop;
+
+					for i in From + 1 .. From + Natural( Ammount ) loop
+						APQ.Fetch( Query );
+						declare
+							E: Entity_Type;
+						begin
+							Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+							Entity_Vectors.Append( Results, E );
+						end;
+					end loop;
+
+					loop
+						-- fetch all other results just so we don't trash the connection..
+						-- NOTE: MAYBE, just MAYBE trashing the connection isn't that bad
+						-- as APQ_Provider will manage to reconnect the next time it is needed..
+						APQ.Fetch( Query );
+					end loop;
+				exception
+					when others => null;
+				end;
+
+			end if;
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+	
+		Total_Count := TC;
+		Result := Results;
+	end Get_Some;
+
+
 
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is
 		-- get the first element from the query

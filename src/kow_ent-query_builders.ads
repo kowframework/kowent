@@ -249,6 +249,16 @@ package KOW_Ent.Query_Builders is
 	-- get all results from the query
 	-- if no results, raise NO_ENTITY
 	
+	procedure Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Natural;
+				Ammount		: in     Positive;
+				Result		:    out Entity_Vectors.Vector;
+				Total_Count	:    out Natural
+			);
+	-- get a page of results from From, presenting at max Ammount results.
+	-- also, count the total results for the user...
+
 
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;
 	-- get the first element from the query
