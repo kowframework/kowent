@@ -434,6 +434,21 @@ package body KOW_Ent.Query_Builders is
 	end Append_Order_by_to_APQ_Query;
 
 
+	procedure Prepare_Count_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
+	
+
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
+
+	begin
+		APQ.Prepare( Query, "SELECT count(*) as rowscount " );
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
+		Append_to_APQ_Query( Q, Query, Connection );
+		APQ.Append( Query, " " );
+		Append_Order_By_to_APQ_Query( Q, Query, Connection );
+
+		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+	end Prepare_Count_Query;
+
 	procedure Prepare_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	
 
@@ -449,6 +464,8 @@ package body KOW_Ent.Query_Builders is
 
 		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 	end Prepare_Query;
+
+
 
 	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	begin
@@ -504,18 +521,22 @@ package body KOW_Ent.Query_Builders is
 		
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
 			use APQ;
 		begin
-			APQ.Prepare( Query, "SELECT count(*) as TQCT,id,original_tag,filter_tags" );
-			Append_Column_Names_For_Read( Query, Info.Properties, "," );
-			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-			Append_to_APQ_Query( Q, Query, Connection );
-			APQ.Append( Query, " " );
-			Append_Order_By_to_APQ_Query( Q, Query, Connection );
-
+			Prepare_Query( Q, Query, Connection );
 			
 			if APQ.Engine_Of( Query ) = Engine_MySQL then
+				
+				declare
+					Count_Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+				begin	
+					Prepare_Count_Query( Q, Count_Query, Connection );
+					APQ.Execute( Count_Query, Connection );
+					APQ.Fetch( Count_Query );
+					TC := Natural_Value( Count_Query, APQ.Column_Index( Query, "TQCT" ) );
+				end;
+
+
 				APQ.Append( Query, " limit " & natural'image( from ) & ',' & positive'image( ammount  ) );
 
 				APQ.Execute( Query, Connection );
@@ -524,10 +545,6 @@ package body KOW_Ent.Query_Builders is
 					loop
 						APQ.Fetch( Query );
 						
-						if TC = 0 then
-							TC := Natural_Value( Query, APQ.Column_Index( Query, "TQCT" ) );
-						end if;
-	
 						declare
 							E: Entity_Type;
 						begin
