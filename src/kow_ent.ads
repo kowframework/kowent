@@ -199,6 +199,11 @@ package KOW_Ent is
 	procedure Was_Loaded  ( Entity : in out Entity_Type ) is null;
 
 
+	function Is_New( Entity : in Entity_Type ) return Boolean;
+	-- check if the entity has been stored or not..
+	-- tipically using the entity's id's tag value but can be overriden
+
+
 	procedure Load( Entity : in out Entity_Type'Class; ID : in ID_Type );
 	-- load the entity from the default database Backend
 

@@ -368,6 +368,16 @@ package body KOW_Ent is
 
 
 
+
+	function Is_New( Entity : in Entity_Type ) return Boolean is
+		-- check if the entity has been stored or not..
+		-- tipically using the entity's id's tag value but can be overriden
+	begin
+		return Entity.ID.My_Tag = No_Tag;
+	end Is_New;
+
+
+
 	procedure Set_Values_From_Query(
 				Entity		: in out Entity_Type'Class;
 				Query		: in out APQ.Root_Query_Type'Class;
@@ -484,13 +494,14 @@ package body KOW_Ent is
 	end Load;
 
 
+
 	procedure Store( Entity : in out Entity_Type'Class ) is
 		-- save the entity into the database Backend
 		-- if it's a new entity, create a new entry and generates an ID for it (recovering it if needed).
 		-- after it has been saved.
 
 	begin
-		if Entity.ID.My_Tag = No_Tag then
+		if Is_New( Entity ) then
 			Log( "inserting entity" );
 			Will_Insert( Entity );
 			Insert( Entity );
