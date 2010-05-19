@@ -533,7 +533,7 @@ package body KOW_Ent.Query_Builders is
 					Prepare_Count_Query( Q, Count_Query, Connection );
 					APQ.Execute( Count_Query, Connection );
 					APQ.Fetch( Count_Query );
-					TC := Natural_Value( Count_Query, APQ.Column_Index( Query, "TQCT" ) );
+					TC := Natural_Value( Count_Query, APQ.Column_Index( Count_Query, "rowscount" ) );
 				end;
 
 
