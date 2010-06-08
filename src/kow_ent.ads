@@ -187,6 +187,8 @@ package KOW_Ent is
 	--
 	-- this is quite usefull in gravatar interaction provided by kow_sec-entities package
 
+	function To_Json( Entity : in Entity_Type ) return String;
+	-- convert the given entity into json
 
 	-- The following procedures are triggers you can override.
 

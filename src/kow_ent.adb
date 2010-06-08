@@ -367,6 +367,46 @@ package body KOW_Ent is
 	end Image_URL;
 
 
+	function To_JSon( Entity : in Entity_Type ) return String is
+		-- convert the given entity into json
+
+		Buf	: Unbounded_String;
+		E	: Entity_Type'Class := Entity_Type'Class( Entity );
+
+		procedure Iterator( C : Property_Lists.Cursor ) is
+			Property : Entity_Property_Ptr := Property_Lists.Element( C );
+		begin
+			Append( Buf, ',' );
+			Append( Buf, Property.Column_Name );
+			Append( Buf, ":'" & KOW_Lib.String_Util.Scriptify( Get_Property( Property.all, E ) ) & ''' );
+		end Iterator;
+
+
+		procedure Append_Info( T : in Ada.Tags.Tag ) is
+			use Ada.Tags;
+			Info : Entity_Information_Type := Get_Information( T );
+			PT : Tag := Parent_Tag( T );
+		begin
+			if PT /= Entity_Type'Tag then
+				Append_Info( PT );
+			end if;
+
+			Property_Lists.Iterate( Info.Properties, Iterator'Access );
+		end Append_Info;
+	begin
+
+		Append( Buf, "{original_tag:'" & Ada.Tags.Expanded_Name( E'Tag ) & ''' );
+		if not Is_new( E ) then
+			Append( Buf, ",id:'" & To_String( E.ID ) & ''' );
+		end if;
+		Append( Buf, ",filter_tags:'" & KOW_Lib.String_Util.Scriptify( To_String( E.Filter_Tags ) ) );
+
+		Append_Info( E'Tag );
+
+		Append( Buf, '}' );
+
+		return To_String( Buf );
+	end To_JSon;
 
 
 	function Is_New( Entity : in Entity_Type ) return Boolean is
