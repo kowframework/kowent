@@ -399,7 +399,7 @@ package body KOW_Ent is
 		if not Is_new( E ) then
 			Append( Buf, ",id:'" & To_String( E.ID ) & ''' );
 		end if;
-		Append( Buf, ",filter_tags:'" & KOW_Lib.String_Util.Scriptify( To_String( E.Filter_Tags ) ) );
+		Append( Buf, ",filter_tags:'" & KOW_Lib.String_Util.Scriptify( To_String( E.Filter_Tags ) )  & ''' );
 
 		Append_Info( E'Tag );
 
