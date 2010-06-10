@@ -378,7 +378,7 @@ package body KOW_Ent is
 		begin
 			Append( Buf, ',' );
 			Append( Buf, Property.Column_Name );
-			Append( Buf, ":'" & KOW_Lib.String_Util.Scriptify( Get_Property( Property.all, E ) ) & ''' );
+			Append( Buf, ":'" & KOW_Lib.String_Util.JSon_Scriptify( Get_Property( Property.all, E ) ) & ''' );
 		end Iterator;
 
 
