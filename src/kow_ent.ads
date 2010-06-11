@@ -60,6 +60,7 @@ with Ada.Tags;					use Ada.Tags;
 with KOW_Config;
 with KOW_Config.Generic_Registry;
 with KOW_Config.Text;
+with KOW_Lib.Json;
 with KOW_Lib.Locales;
 with KOW_Lib.UString_Vectors;
 
@@ -187,8 +188,17 @@ package KOW_Ent is
 	--
 	-- this is quite usefull in gravatar interaction provided by kow_sec-entities package
 
+
+
+
+	function To_Json_Object( Entity : in Entity_Type ) return KOW_Lib.Json.Object_Type;
+	-- convert the given entity into json object
+	
+	function To_Json_Data (Entity : in Entity_Type ) return KOW_Lib.Json.Json_Data_Type;
+	-- convert the given entity into a generic json data (using to_json_object)
+	
 	function To_Json( Entity : in Entity_Type ) return String;
-	-- convert the given entity into json
+	-- convert the given entity into json string (using to_json_object);
 
 	-- The following procedures are triggers you can override.
 

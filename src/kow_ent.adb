@@ -367,18 +367,17 @@ package body KOW_Ent is
 	end Image_URL;
 
 
-	function To_JSon( Entity : in Entity_Type ) return String is
-		-- convert the given entity into json
+	function To_Json_Object( Entity : in Entity_Type ) return KOW_Lib.Json.Object_Type is
+		-- convert the given entity into json object
+		use KOW_Lib.Json;
 
-		Buf	: Unbounded_String;
+		Object	: Object_Type;
 		E	: Entity_Type'Class := Entity_Type'Class( Entity );
 
 		procedure Iterator( C : Property_Lists.Cursor ) is
 			Property : Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
-			Append( Buf, ',' );
-			Append( Buf, Property.Column_Name );
-			Append( Buf, ":'" & KOW_Lib.String_Util.JSon_Scriptify( Get_Property( Property.all, E ) ) & ''' );
+			Set( Object, Property.Column_Name, To_Unbounded_String( Get_Property( Property.all, E ) ) );
 		end Iterator;
 
 
@@ -395,17 +394,25 @@ package body KOW_Ent is
 		end Append_Info;
 	begin
 
-		Append( Buf, "{original_tag:'" & Ada.Tags.Expanded_Name( E'Tag ) & ''' );
-		if not Is_new( E ) then
-			Append( Buf, ",id:'" & To_String( E.ID ) & ''' );
-		end if;
-		Append( Buf, ",filter_tags:'" & KOW_Lib.String_Util.Scriptify( To_String( E.Filter_Tags ) )  & ''' );
-
+		Set( Object, "original_tag", Ada.Tags.Expanded_name( E'Tag ) );
+		Set( Object, "id", To_String( E.ID ) );
+		Set( Object, "filter_tags", E.Filter_Tags );
 		Append_Info( E'Tag );
 
-		Append( Buf, '}' );
+		return Object;
+	end To_Json_Object;
 
-		return To_String( Buf );
+
+	function To_Json_Data (Entity : in Entity_Type ) return KOW_Lib.Json.Json_Data_Type is
+		-- convert the given entity into a generic json data (using to_json_object)
+	begin
+		return KOW_Lib.Json.To_Data( To_Json_Object( Entity ) );
+	end To_Json_Data;
+
+	function To_JSon( Entity : in Entity_Type ) return String is
+		-- convert the given entity into json string (using to_json_object);
+	begin
+		return KOW_Lib.Json.To_Json( To_Json_Object( Entity ) );
 	end To_JSon;
 
 
