@@ -395,7 +395,7 @@ package body KOW_Ent is
 	begin
 
 		Set( Object, "original_tag", Ada.Tags.Expanded_name( E'Tag ) );
-		Set( Object, "id", To_String( E.ID ) );
+		Set( Object, "id", Integer( E.ID.Value ) );
 		Set( Object, "filter_tags", E.Filter_Tags );
 		Append_Info( E'Tag );
 
