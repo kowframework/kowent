@@ -10,7 +10,6 @@
 with "apq";
 with "apq_provider";
 with "kowconfig";
-with "kowconfig-text";
 with "kowlib";
 
 

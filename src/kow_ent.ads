@@ -59,7 +59,6 @@ with Ada.Tags;					use Ada.Tags;
 ---------------
 with KOW_Config;
 with KOW_Config.Generic_Registry;
-with KOW_Config.Text;
 with KOW_Lib.Json;
 with KOW_Lib.Locales;
 with KOW_Lib.UString_Vectors;
@@ -274,8 +273,7 @@ package KOW_Ent is
 
 	package Labels is new KOW_Config.Generic_Registry(
 					Element_Type	=> Label_Getter,
-					Relative_Path	=> "kowent/labels",
-					Parser		=> new KOW_Config.Text.Parser
+					Relative_Path	=> "kowent/labels"
 				);
 
 	function Get_Label( Getter : in Label_Getter; Locale : in KOW_Lib.Locales.Locale ) return Unbounded_String;
