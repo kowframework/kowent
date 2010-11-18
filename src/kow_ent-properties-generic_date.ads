@@ -28,8 +28,8 @@ package KOW_ENT.Properties.Generic_Date is
 	-- The Property --
 	------------------
 
-	type Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Val_Type;
-	type Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Val_type );
+	type Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return Val_Type;
+	type Setter_Callback is access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Val_type );
 
 
 	type Property_Type is new KOW_Ent.Entity_Property_Type with record

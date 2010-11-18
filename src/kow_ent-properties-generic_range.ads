@@ -25,8 +25,8 @@ package KOW_ENT.Properties.Generic_Range is
 	------------------
 
 
-	type Getter_Callback is not null access function( Entity : in Entity_Type'Class ) return Val_Type;
-	type Setter_Callback is not null access procedure( Entity : in out Entity_Type'Class; Value : Val_Type );
+	type Getter_Callback is access function( Entity : in Entity_Type'Class ) return Val_Type;
+	type Setter_Callback is access procedure( Entity : in out Entity_Type'Class; Value : Val_Type );
 
 
 	type Property_Type is new KOW_Ent.Entity_Property_Type with record

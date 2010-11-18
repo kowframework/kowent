@@ -49,8 +49,8 @@ package KOW_Ent.Properties is
 	-- Foreign Key --
 	-----------------
 	
-	type Foreign_Key_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-	type Foreign_Key_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+	type Foreign_Key_Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+	type Foreign_Key_Setter_Callback is access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
 
 
 	type Foreign_Key_Property_Type is new Entity_Property_Type with record
@@ -110,8 +110,8 @@ package KOW_Ent.Properties is
 	-- Boolean Property --
 	----------------------
 
-	type Boolean_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Boolean;
-	type Boolean_Setter_Callback is not null access procedure( Entity : in out KOW_ent.Entity_Type'Class; Value : in Boolean );
+	type Boolean_Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return Boolean;
+	type Boolean_Setter_Callback is access procedure( Entity : in out KOW_ent.Entity_Type'Class; Value : in Boolean );
 
 
 	type Boolean_Property_Type is new Entity_Property_Type with record
@@ -168,8 +168,8 @@ package KOW_Ent.Properties is
 	-- Locale Property --
 	---------------------
 
-	type Locale_Getter_Callback is not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-	type Locale_Setter_Callback is not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+	type Locale_Getter_Callback is access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
+	type Locale_Setter_Callback is access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
 
 
 	type Locale_Property_Type is new Entity_Property_Type with record
@@ -229,8 +229,8 @@ package KOW_Ent.Properties is
 	-- Unbounded String property --
 	-------------------------------
 
-	type UString_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
-	type UString_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
+	type UString_Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
+	type UString_Setter_Callback is access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
 
 	type UString_Property_Type is new Entity_Property_Type with record
 		Getter		: UString_Getter_Callback;
@@ -295,9 +295,9 @@ package KOW_Ent.Properties is
 	-- Password Property --
 	-----------------------
 
-	type Password_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
+	type Password_Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
 
-	type Password_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Password : in Unbounded_String );
+	type Password_Setter_Callback is access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Password : in Unbounded_String );
 	-- NOTE:: the password setter type CAN be null!
 		
 
