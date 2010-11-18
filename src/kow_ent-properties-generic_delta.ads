@@ -23,10 +23,14 @@ package KOW_ENT.Properties.Generic_Delta is
 	------------------
 	-- The Property --
 	------------------
+	
+
+	type Getter_Callback is not null access function( Entity : in Entity_type'Class ) return Val_Type;
+	type Setter_Callback is not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
 
 	type Property_Type is new KOW_Ent.Entity_Property_Type with record
-		Getter	: access function( Entity : in Entity_Type'Class ) return Val_type;
-		Setter	: access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
+		Getter	: Getter_Callback;
+		Setter	: Setter_Callback;
 	end record;
 
 
@@ -73,8 +77,8 @@ package KOW_ENT.Properties.Generic_Delta is
 
 	function New_Property(
 					Column_Name	: in String;
-					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
-					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
+					Getter		: Getter_Callback;
+					Setter		: Setter_Callback;
 					Immutable	: in Boolean := False
 			) return KOW_Ent.Entity_Property_Ptr;
 

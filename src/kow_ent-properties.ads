@@ -49,10 +49,14 @@ package KOW_Ent.Properties is
 	-- Foreign Key --
 	-----------------
 	
+	type Foreign_Key_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
+	type Foreign_Key_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+
+
 	type Foreign_Key_Property_Type is new Entity_Property_Type with record
 		Related_Entity_Tag	: Ada.Tags.Tag;
-		Getter			: access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-		Setter			: access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+		Getter			: Foreign_Key_Getter_Callback;
+		Setter			: Foreign_Key_Setter_Callback;
 	end record;
 
 
@@ -96,8 +100,8 @@ package KOW_Ent.Properties is
 	function New_Foreign_Key_Property(
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
-				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+				Getter			: Foreign_Key_Getter_Callback;
+				Setter			: Foreign_Key_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
@@ -106,9 +110,13 @@ package KOW_Ent.Properties is
 	-- Boolean Property --
 	----------------------
 
+	type Boolean_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Boolean;
+	type Boolean_Setter_Callback is not null access procedure( Entity : in out KOW_ent.Entity_Type'Class; Value : in Boolean );
+
+
 	type Boolean_Property_Type is new Entity_Property_Type with record
-		Getter			: access function( Entity : in KOW_Ent.Entity_Type'Class ) return Boolean;
-		Setter			: access procedure( Entity : in out KOW_ent.Entity_Type'Class; Value : in Boolean );
+		Getter			: Boolean_Getter_Callback;
+		Setter			: Boolean_Setter_Callback;
 	end record;
 
 
@@ -149,8 +157,8 @@ package KOW_Ent.Properties is
 
 	function New_Boolean_Property(
 				Column_Name		: in String;
-				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean );
+				Getter			: Boolean_Getter_Callback;
+				Setter			: Boolean_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
@@ -160,9 +168,13 @@ package KOW_Ent.Properties is
 	-- Locale Property --
 	---------------------
 
+	type Locale_Getter_Callback is not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
+	type Locale_Setter_Callback is not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+
+
 	type Locale_Property_Type is new Entity_Property_Type with record
-		Getter	: access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-		Setter	: access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+		Getter	: Locale_Getter_Callback;
+		Setter	: Locale_Setter_Callback;
 	end record;
 
 
@@ -205,8 +217,8 @@ package KOW_Ent.Properties is
 
 	function New_Locale_Property(
 				Column_Name		: in String;
-				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+				Getter			: Locale_Getter_Callback;
+				Setter			: Locale_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr;
 
@@ -217,17 +229,12 @@ package KOW_Ent.Properties is
 	-- Unbounded String property --
 	-------------------------------
 
-	type UString_Getter_Type is not null access function(
-				Entity	: in KOW_Ent.Entity_Type'Class
-			) return Unbounded_String;
-	type UString_Setter_Type is not null access procedure(
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				Value	: in     Unbounded_String
-			);
+	type UString_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
+	type UString_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
 
 	type UString_Property_Type is new Entity_Property_Type with record
-		Getter		: access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
-		Setter		: access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
+		Getter		: UString_Getter_Callback;
+		Setter		: UString_Setter_Callback;
 		Default_Value	: Unbounded_String;
 		Length		: Positive;
 	end record;
@@ -273,8 +280,8 @@ package KOW_Ent.Properties is
 
 	function New_UString_Property(
 				Column_Name	: in     String;
-				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
+				Getter		: UString_Getter_Callback;
+				Setter		: UString_Setter_Callback;
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150
@@ -288,14 +295,9 @@ package KOW_Ent.Properties is
 	-- Password Property --
 	-----------------------
 
-	type Password_Getter_Type is not null access function(
-				Entity	: in KOW_Ent.Entity_Type'Class
-			) return Unbounded_String;
+	type Password_Getter_Callback is not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
 
-	type Password_Setter_Type is access procedure(
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				Password: in     Unbounded_String
-			);
+	type Password_Setter_Callback is not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Password : in Unbounded_String );
 	-- NOTE:: the password setter type CAN be null!
 		
 
@@ -304,11 +306,11 @@ package KOW_Ent.Properties is
 		-- it's only used to set a new password.
 		--
 		-- The stored password is Hashed.
-		Getter : access function( Entity : in KOW_Ent.Entity_Type'Class ) return Unbounded_String;
+		Getter : Password_Getter_Callback;
 		-- get the non-hashed password
 
 
-		Setter : access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in Unbounded_String );
+		Setter : Password_Setter_Callback;
 	end record;
 
 
@@ -362,32 +364,12 @@ package KOW_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null;
+				Getter		: Password_Getter_Callback;
+				Setter		: Password_Setter_Callback;
 				Immutable	: Boolean := False
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of password properties.
 	-- when Setter is NULL, KOW_view-entity_forms won't work for this property
 
-
-
-	-------------------
-	-- File Location --
-	-------------------
-
---	NOTE: for now I'm gonna implement file upload using pure Ada structures with 1 file from DB entry
---	-- TODO :: desenhar a parte de file upload e IMPLEMENTAR
---	type File_Location_Property is new UString_Property with record
---		Root_Path : Unbounded_String;
---		-- where the files should be stored
---		--
---		-- on the KOW framework files aren't stored in the database backend.
---		-- Even though storing in the database is easier and more portable
---		-- storing on the file system should be easier to handle.
---		--
---		-- More than that, there are also default getter and setter.
---
---		Default_Extension : Unbounded_String;
---	end record;
 
 end KOW_Ent.Properties;

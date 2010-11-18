@@ -290,7 +290,7 @@ begin
 			Entity_Tag	=> Validation_Entity'Tag,
 			Table_Name	=> Table_Name,
 			Id_Generator	=> null,
-			Factory		=> Validation_Factory'Access
+			Factory		=> Validation_Factory'Unrestricted_Access
 		);
 
 
@@ -298,8 +298,8 @@ begin
 			Entity_Tag	=> Validation_Entity'Tag,
 			Property	=> KOW_Ent.Extra_Properties.Timestamp_Properties.New_Property(
 							Column_Name		=> "from_date",
-							Getter			=> Get_From_Date'Access,
-							Setter			=> Set_From_Date'Access
+							Getter			=> Get_From_Date'Unrestricted_Access,
+							Setter			=> Set_From_Date'Unrestricted_Access
 						)
 		);
 
@@ -307,8 +307,8 @@ begin
 			Entity_Tag	=> Validation_Entity'Tag,
 			Property	=> KOW_Ent.Extra_Properties.Timestamp_Properties.New_Property(
 							Column_Name		=> "to_date",
-							Getter			=> Get_To_Date'Access,
-							Setter			=> Set_To_Date'Access
+							Getter			=> Get_To_Date'Unrestricted_Access,
+							Setter			=> Set_To_Date'Unrestricted_Access
 						)
 		);
 
@@ -319,8 +319,8 @@ begin
 			Property	=> KOW_Ent.Properties.New_Foreign_Key_Property(
 							Column_Name		=> "owner_id",
 							Related_Entity_Tag	=> Entity_Type'Tag,
-							Getter			=> Get_Owner_Id'Access,
-							Setter			=> Set_Owner_Id'Access
+							Getter			=> Get_Owner_Id'Unrestricted_Access,
+							Setter			=> Set_Owner_Id'Unrestricted_Access
 						)
 		);
 

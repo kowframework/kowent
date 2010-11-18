@@ -90,8 +90,8 @@ package body KOW_ENT.Properties.Generic_Mod is
 
 	function New_Property(
 					Column_Name	: in String;
-					Getter		: not null access function( Entity : in Entity_Type'Class ) return Val_Type;
-					Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Val_Type );
+					Getter		: Getter_Callback;
+					Setter		: Setter_Callback;
 					Immutable	: in Boolean := False
 			) return KOW_Ent.Entity_Property_Ptr is
 		PT : Property_Type;

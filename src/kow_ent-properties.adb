@@ -142,8 +142,8 @@ package body KOW_Ent.Properties is
 	function New_Foreign_Key_Property(
 				Column_Name		: in String;
 				Related_Entity_Tag	: in Ada.Tags.Tag;
-				Getter			: not null access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Ent.ID_Type;
-				Setter			: not null access procedure( Entity : in out KOW_Ent.Entity_Type'Class; ID : in KOW_Ent.ID_Type );
+				Getter			: Foreign_Key_Getter_Callback;
+				Setter			: Foreign_Key_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		FK : Foreign_Key_property_Type;
@@ -236,8 +236,8 @@ package body KOW_Ent.Properties is
 
 	function New_Boolean_Property(
 				Column_Name		: in String;
-				Getter			: not null access function( Entity : in Entity_Type'Class ) return Boolean;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Value : in Boolean );
+				Getter			: Boolean_Getter_Callback;
+				Setter			: Boolean_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		Bool : Boolean_Property_Type;
@@ -330,8 +330,8 @@ package body KOW_Ent.Properties is
 
 	function New_Locale_Property(
 				Column_Name		: in String;
-				Getter			: not null access function( Entity : in Entity_Type'Class ) return KOW_Lib.Locales.Locale;
-				Setter			: not null access procedure( Entity : in out Entity_Type'Class; Locale : in KOW_Lib.Locales.Locale );
+				Getter			: Locale_Getter_Callback;
+				Setter			: Locale_Setter_Callback;
 				Immutable		: Boolean := False
 			) return Entity_Property_Ptr is
 		Loc : Locale_Property_Type;
@@ -441,8 +441,8 @@ package body KOW_Ent.Properties is
 
 	function New_UString_Property(
 				Column_Name	: in     String;
-				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
+				Getter		: UString_Getter_Callback;
+				Setter		: UString_Setter_Callback;
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150
@@ -544,8 +544,8 @@ package body KOW_Ent.Properties is
 
 	function New_Password_Property(
 				Column_Name	: in     String;
-				Getter		: access function( Entity : in Entity_Type'Class ) return Unbounded_String;
-				Setter		: access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String ) := null;
+				Getter		: Password_Getter_Callback;
+				Setter		: Password_Setter_Callback;
 				Immutable	: Boolean := False
 			) return Entity_Property_Ptr is
 		-- used to assist the creation of password properties.
