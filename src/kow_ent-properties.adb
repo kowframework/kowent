@@ -537,7 +537,7 @@ package body KOW_Ent.Properties is
 	begin
 		APQ.Append(
 				Query,
-				To_String( Property.Column_Name ) & " VARCHAR(20) NOT NULL DEFAULT 'x'"
+				To_String( Property.Column_Name ) & " VARCHAR(40) NOT NULL DEFAULT 'x'"
 			);
 	end Append_Create_Table;
 

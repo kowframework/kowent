@@ -52,6 +52,12 @@ with KOW_Lib.UString_Vectors;
 
 with KOW_Ent.Properties;
 
+
+--------------------------------------
+-- The password is now a SHA1 Hash! --
+--------------------------------------
+with GNAT.SHA1;
+
 package body KOW_Ent is
 
 	
@@ -177,10 +183,11 @@ package body KOW_Ent is
 	function Calculate_Hash( Pwd : in String ) return String is
 		-- return a hashed version of Pwd.
 		-- Used in both KOW_Ent.Properties and KOW_Ent.Query_Builders for handling password fields
+		use GNAT.SHA1;
+		C : Context;
 	begin
-		return Ada.Containers.Hash_Type'Image(
-				Ada.Strings.Hash( Pwd )
-			);
+		Update( C, Pwd );
+		return Digest( C );
 	end Calculate_Hash;
 
 
