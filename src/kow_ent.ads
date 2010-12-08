@@ -64,6 +64,12 @@ with APQ_Provider;
 
 
 package KOW_Ent is
+
+
+	procedure Setup;
+	-- looks for the kow_ent configuration file and initializes the provider
+
+
 	-------------------------
 	-- Database Management --
 	-------------------------

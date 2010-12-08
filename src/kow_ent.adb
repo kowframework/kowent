@@ -153,6 +153,19 @@ package body KOW_Ent is
 	end Prepend_All;
 
 
+
+
+	-----------
+	-- Setup --
+	-----------
+	procedure Setup is
+		-- looks for the kow_ent configuration file and initializes the provider
+		Provider : APQ_Provider.Connection_Provider_Ptr := new APQ_Provider.Connection_Provider_Type;
+	begin
+		Provider.Setup( KOW_Config.New_Config_File( "kow_ent" ) );
+		KOW_Ent.Set_Connection_Provider( Provider );
+	end Setup;
+
 	-------------------------
 	-- Database Management --
 	-------------------------
