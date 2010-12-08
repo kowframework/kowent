@@ -4,9 +4,9 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
---             Copyright (C) 2007-2009, KOW Framework Project               --
+--             Copyright (C) 2007-2011, KOW Framework Project               --
 --                                                                          --
 --                                                                          --
 -- KOW_Ent is free library;  you can redistribute it  and/or modify it under--

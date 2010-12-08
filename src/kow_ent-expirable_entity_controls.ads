@@ -1,22 +1,22 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                        KOW Framework :: Entity                           --
+--                       KOW Framework :: Entities                          --
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
 --                                 S p e c                                  --
 --                                                                          --
---             Copyright (C) 2007-2009, KOW Framework Project               --
+--               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
 --                                                                          --
--- KOW_Ent is free library;  you can redistribute it  and/or modify it under--
+-- KOWLib is free software; you can redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. KOW_Ent is distributed in the hope that it will be useful, but WITH---
+-- sion. KOWLib is distributed in the hope that it will be useful, but WITH---
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
 -- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with KOW_Ent; see file COPYING. If not, write --
+-- Public License distributed with KOWLib; see file COPYING.  If not, write --
 -- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
 -- MA 02111-1307, USA.                                                      --
 --                                                                          --
@@ -26,10 +26,10 @@
 -- covered  by the  GNU  General  Public  License.  This exception does not --
 -- however invalidate  any other reasons why  the executable file  might be --
 -- covered by the  GNU Public License.                                      --
+--                                                                          --
 ------------------------------------------------------------------------------
 
-
-------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 -- This package provides a generic implementation of an entity to control   --
 -- validation periods for entities.                                         --
 ------------------------------------------------------------------------------
