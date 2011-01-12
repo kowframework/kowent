@@ -357,6 +357,13 @@ package KOW_Ent is
 	----------------------------------
 
 
+	type Entity_Property_Metadata_Interface is interface;
+	-- used to store custom metadata into the entity property type (such as renderers for web pages)
+	type Entity_Property_Metadata_Access is access all Entity_Property_Metadata_Interface'Class;
+
+	type Entity_Property_Metadata_Array is Array( Positive range 1 .. 10 ) of Entity_Property_Metadata_Access;
+	-- we support up to 10 metadata in each entity property...
+
 	-- The work done in queries is managed by Set_Property and Get_Property procedures.
 	-- This is another part of KOW_Ent that's 100% object oriented, which means you can
 	-- extend KOW_Ent to support your own types.
@@ -375,6 +382,8 @@ package KOW_Ent is
 		Immutable	: Boolean := False;
 		-- when true, the database value won't ever be updated.
 
+
+		Metadata	: Entity_Property_Metadata_Array := ( others => null );
 	end record;
 
 
