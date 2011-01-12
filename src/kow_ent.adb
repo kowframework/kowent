@@ -860,6 +860,22 @@ package body KOW_Ent is
 	end Hash;
 
 
+	protected body Metadata_Registry is
+		-- take care of allocating slots for given metadata types...
+
+		procedure Allocate( Index : out Positive ) is
+			-- allocate the metadata slot returning it's index..
+		begin
+			if Next > Entity_Property_Metadata_Array'Last then
+				raise Constraint_Error with "no more property metadata slots left...";
+			end if;
+			Index := Next;
+			Next := Next + 1;
+		end Allocate;
+	end Metadata_Registry;
+
+
+
 
 	function Should_Read( Property : in Entity_Property_Type ) return Boolean is
 		-- Asks if the value should be set from the database or not

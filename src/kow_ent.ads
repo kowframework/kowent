@@ -368,6 +368,14 @@ package KOW_Ent is
 	-- This is another part of KOW_Ent that's 100% object oriented, which means you can
 	-- extend KOW_Ent to support your own types.
 
+	protected Metadata_Registry is
+		-- take care of allocating slots for given metadata types...
+
+		procedure Allocate( Index : out Positive );
+		-- allocate the metadata slot returning it's index..
+	private
+		Next : Positive := 1;
+	end Metadata_Registry;
 
 	type Entity_Property_Type is abstract tagged record
 		Column_Name	: Unbounded_String;
@@ -384,6 +392,8 @@ package KOW_Ent is
 
 
 		Metadata	: Entity_Property_Metadata_Array := ( others => null );
+		-- the metadata for this property
+		-- avoid accessing directly. Instead use KOW_Ent.Generic_Property_Metadata package
 	end record;
 
 
