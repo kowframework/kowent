@@ -327,13 +327,6 @@ package KOW_Ent is
 
 
 
-	-- TODO: implement Narrow
-	-- procedure Narrow( From : in Entity_Type'Class; To: out Entity_Type'Class );
-	-- narrow an entity to it's parent/child preserving/restoring properties
-	-- this is usefull for working with entities that extend a parent entity
-
-
-
 	--------------------------
 	-- Entity ID Management --
 	--------------------------

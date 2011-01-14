@@ -35,7 +35,7 @@
 
 
 generic
-	type Entity_Property_Metadata_Type is new KOW_Ent.Entity_Property_Metadata_Interface with private;
+	type Entity_Property_Metadata_Type is abstract new KOW_Ent.Entity_Property_Metadata_Interface with private;
 	type Metadata_Access is access all Entity_Property_Metadata_Type'Class;
 	with function On_Null( Property : in KOW_Ent.Entity_Property_Type'Class ) return Metadata_Access;
 package KOW_Ent.Generic_Property_Metadata is
