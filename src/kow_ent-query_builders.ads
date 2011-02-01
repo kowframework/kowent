@@ -252,13 +252,14 @@ package KOW_Ent.Query_Builders is
 	
 	procedure Get_Some(
 				Q		: in     Query_Type;
-				From		: in     Natural;
-				Ammount		: in     Positive;
+				From		: in     Positive;
+				Limit		: in     Natural;
 				Result		:    out Entity_Vectors.Vector;
 				Total_Count	:    out Natural
 			);
-	-- get a page of results from From, presenting at max Ammount results.
+	-- get a page of results from From (inclusive), presenting at max Ammount results.
 	-- also, count the total results for the user...
+	-- if limit = 0, get all results
 
 
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;

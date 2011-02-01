@@ -508,8 +508,8 @@ package body KOW_Ent.Query_Builders is
 
 	procedure Get_Some(
 				Q		: in     Query_Type;
-				From		: in     Natural;
-				Ammount		: in     Positive;
+				From		: in     Positive;
+				Limit		: in     Natural;
 				Result		:    out Entity_Vectors.Vector;
 				Total_Count	:    out Natural
 			) is
@@ -523,6 +523,15 @@ package body KOW_Ent.Query_Builders is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 			use APQ;
+
+
+			procedure Append_Result is
+				E : Entity_Type;
+			begin
+				Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+				Entity_Vectors.Append( Results, E );
+			end Append_Result;
+
 		begin
 			Prepare_Query( Q, Query, Connection );
 			
@@ -538,21 +547,17 @@ package body KOW_Ent.Query_Builders is
 				end;
 
 
-				APQ.Append( Query, " limit " & natural'image( from ) & ',' & positive'image( ammount  ) );
+				APQ.Append( Query, " limit " & natural'image( natural(from) - 1 ) );
+				if Limit /= 0 then
+					APQ.Append( Query, ',' & natural'image( Limit  ) );
+				end if;
 
 				APQ.Execute( Query, Connection );
 
 				begin
 					loop
 						APQ.Fetch( Query );
-						
-						declare
-							E: Entity_Type;
-						begin
-							Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
-							Entity_Vectors.Append( Results, E );
-						end;
-			
+						Append_Result;
 					end loop;
 				exception
 					when others => null;
@@ -562,26 +567,29 @@ package body KOW_Ent.Query_Builders is
 				TC := Natural( APQ.Tuples( Query ) );
 
 				begin
-					for i in 1 .. From loop
+					for i in 1 .. Natural( From ) - 1 loop
 						APQ.Fetch( Query );
 					end loop;
 
-					for i in From + 1 .. From + Natural( Ammount ) loop
-						APQ.Fetch( Query );
-						declare
-							E: Entity_Type;
-						begin
-							Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
-							Entity_Vectors.Append( Results, E );
-						end;
-					end loop;
+					if Limit /= 0 then
+						for i in From .. From + Positive( Limit ) loop
+							APQ.Fetch( Query );
+							Append_Result;
+						end loop;
 
-					loop
-						-- fetch all other results just so we don't trash the connection..
-						-- NOTE: MAYBE, just MAYBE trashing the connection isn't that bad
-						-- as APQ_Provider will manage to reconnect the next time it is needed..
-						APQ.Fetch( Query );
-					end loop;
+						loop
+							-- fetch all other results just so we don't trash the connection..
+							-- NOTE: MAYBE, just MAYBE trashing the connection isn't that bad
+							-- as APQ_Provider will manage to reconnect the next time it is needed..
+							APQ.Fetch( Query );
+						end loop;
+					else
+						loop
+							APQ.Fetch( Query );
+							Append_Result;
+						end loop;
+					end if;
+
 				exception
 					when others => null;
 				end;
