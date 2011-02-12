@@ -632,6 +632,15 @@ package body KOW_Ent.Properties is
 	begin
 		return KOW_Lib.Json.To_Json( Property.Getter.all( Entity ) );
 	end Get_Property;
+	
+	overriding
+	function To_Json_Data(
+				Property	: in     Json_Object_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type is
+	begin
+		return KOW_Lib.Json.To_Data( Property.Getter.all( Entity ) );
+	end To_Json_Data;
 
 
 	overriding
@@ -693,6 +702,141 @@ package body KOW_Ent.Properties is
 
 		return new Json_Object_Property_Type'( P );
 	end New_Json_Object_Property;
+
+
+
+	--------------------------
+	-- Json Array Property --
+	--------------------------
+
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
+			) is
+		-- Set the property into the Entity.
+		Column : String := To_String( Property.Column_Name );
+		Index  : APQ.Column_Index_Type := APQ.Column_Index( Q, Column );
+		Value  : String := APQ.Value( Q, Index );
+	begin
+		Property.Setter.all(
+				Entity,
+				KOW_Lib.Json.From_Json( Value )
+			);
+	exception
+		when APQ.Null_Value =>
+			Property.Setter.all(
+				Entity,
+				Property.Default_Value
+			);
+	end Set_Property;
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
+			) is
+	begin
+		APQ.Append_Quoted( Query, Connection, KOW_Lib.Json.To_Json( Property.Getter.All( Entity ) ) );
+	end Get_Property;
+
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			) is
+		-- Set the property from a String representation of the value
+	begin
+		Property.Setter.all( Entity, KOW_Lib.Json.From_Json( Value ) );
+	end Set_Property;
+
+	overriding
+	function Get_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String is
+	begin
+		return KOW_Lib.Json.To_Json( Property.Getter.all( Entity ) );
+	end Get_Property;
+
+	overriding
+	function To_Json_Data(
+				Property	: in     Json_Array_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type is
+	begin
+		return KOW_Lib.Json.To_Data( Property.Getter.all( Entity ) );
+	end To_Json_Data;
+
+
+	overriding
+	procedure Append_Create_Table( Property : in Json_Array_Property_Type; Query : in out APQ.Root_Query_Type'Class ) is
+	begin
+		if Property.Length <= 255 then
+			APQ.Append(
+					Query,
+					To_String( Property.Column_Name ) &
+							" VARCHAR(" &
+							Positive'Image( Property.Length ) &
+							" ) NOT NULL"
+				);
+		elsif Property.Length <= 65_535 then
+			APQ.Append(
+					Query,
+					To_String( Property.Column_Name ) & " TEXT NOT NULL "
+				);
+		elsif Property.Length <= 16_777_215 then
+			APQ.Append(
+					Query,
+					To_String( Property.COlumn_Name ) & " MEDIUMTEXT NOT NULL"
+				);
+
+		else
+			-- it would be a long text..
+			-- 4,294,967,295
+			-- " LONGTEXT NOT NULL"
+			--
+			-- but its way TOO BIG (4G of information....)
+			-- so, we raise this exception:
+			raise PROGRAM_ERROR with "The property pointed by the column " & To_String( Property.Column_Name ) &
+				" in a given table, is a way to big json Array! Please, fix that...";
+		end if;
+			
+	end Append_Create_Table;
+
+
+
+	function New_Json_Array_Property(
+				Column_Name	: in     String;
+				Getter		: Json_Array_Getter_Callback;
+				Setter		: Json_Array_Setter_Callback;
+				Default_Value	: in     String := "";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
+
+			) return Entity_Property_Ptr is
+		-- used to assist the creation of Json_Array properties.
+		-- default_value represents the value to be set when the one retoner from database is NULL
+		P : Json_Array_Property_Type;
+	begin
+		P.Column_Name := To_Unbounded_String( Column_name );
+		P.Getter := Getter;
+		P.Setter := Setter;
+		P.Default_Value := KOW_Lib.Json.From_Json( Default_Value );
+		P.Immutable := Immutable;
+		P.Length := Length;
+
+		return new Json_Array_Property_Type'( P );
+	end New_Json_Array_Property;
+
 
 
 

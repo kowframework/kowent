@@ -304,7 +304,7 @@ package KOW_Ent.Properties is
 
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
-	-- default_value represents the value to be set when the one retoner from database is NULL
+	-- default_value represents the value to be set when the one returned from database is NULL
 
 
 	-----------------------
@@ -437,6 +437,13 @@ package KOW_Ent.Properties is
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String;
 
+	overriding
+	function To_Json_Data(
+				Property	: in     Json_Object_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type;
+
+
 
 	overriding
 	procedure Append_Create_Table( Property : in Json_Object_Property_Type; Query : in out APQ.Root_Query_Type'Class );
@@ -452,8 +459,80 @@ package KOW_Ent.Properties is
 
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of Json_Object properties.
-	-- default_value represents the value to be set when the one retoner from database is NULL
+	-- default_value represents the value to be set when the one returned from database is NULL
 
+
+	--------------------------
+	-- Json Array Property --
+	--------------------------
+
+
+	type Json_Array_Getter_Callback is access function( Entity : in KOW_Ent.Entity_Type'Class ) return KOW_Lib.Json.Array_Type;
+	type Json_Array_Setter_Callback is access procedure( Entity : in out KOW_Ent.Entity_Type'Class; Value : in KOW_Lib.Json.Array_Type );
+
+	type Json_Array_Property_Type is new Entity_Property_Type with record
+		Getter		: Json_Array_Getter_Callback;
+		Setter		: Json_Array_Setter_Callback;
+		Default_Value	: KOW_Lib.Json.Array_Type;
+		Length		: Positive;
+	end record;
+
+
+	overriding
+	procedure Set_Property(	
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Q		: in out APQ.Root_Query_Type'Class;	-- the query from witch to fetch the result
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
+			);
+	-- Set the property into the Entity.
+
+	overriding
+	procedure Get_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class;		-- the entity
+				Query		: in out APQ.Root_Query_Type'Class;	-- the query to witch append the value to insert
+				Connection	: in out APQ.Root_Connection_type'Class		-- the connection that belongs the query
+			);
+
+
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;		-- the entity
+				Value		: in     String				-- the String representation of this value
+			);
+	-- Set the property from a String representation of the value
+	
+	overriding
+	function Get_Property(
+				Property	: in     Json_Array_Property_Type;		-- the property worker
+				Entity		: in     Entity_Type'Class		-- the entity
+			) return String;
+	
+	overriding
+	function To_Json_Data(
+				Property	: in     Json_Array_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type;
+
+
+	overriding
+	procedure Append_Create_Table( Property : in Json_Array_Property_Type; Query : in out APQ.Root_Query_Type'Class );
+
+
+	function New_Json_Array_Property(
+				Column_Name	: in     String;
+				Getter		: Json_Array_Getter_Callback;
+				Setter		: Json_Array_Setter_Callback;
+				Default_Value	: in     String := "";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
+
+			) return Entity_Property_Ptr;
+	-- used to assist the creation of Json_Array properties.
+	-- default_value represents the value to be set when the one returned from database is NULL
 
 
 end KOW_Ent.Properties;
