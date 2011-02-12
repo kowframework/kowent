@@ -398,7 +398,7 @@ package body KOW_Ent is
 		procedure Iterator( C : Property_Lists.Cursor ) is
 			Property : Entity_Property_Ptr := Property_Lists.Element( C );
 		begin
-			Set( Object, Property.Column_Name, To_Unbounded_String( Get_Property( Property.all, E ) ) );
+			Set( Object, Property.Column_Name, To_Json_Data( Property.all, E ) );
 		end Iterator;
 
 
@@ -875,6 +875,16 @@ package body KOW_Ent is
 	end Metadata_Registry;
 
 
+	function To_Json_Data(
+				Property	: in     Entity_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type is
+		-- get the property as a json data type
+	begin
+		return KOW_Lib.Json.To_Data(
+					Get_Property( Entity_Property_Type'Class( Property ), Entity )
+				);
+	end To_Json_Data;
 
 
 	function Should_Read( Property : in Entity_Property_Type ) return Boolean is

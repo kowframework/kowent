@@ -422,6 +422,12 @@ package KOW_Ent is
 				Property	: in     Entity_Property_Type;		-- the property worker
 				Entity		: in     Entity_Type'Class		-- the entity
 			) return String is abstract;
+	
+	function To_Json_Data(
+				Property	: in     Entity_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return KOW_Lib.Json.Json_Data_Type;
+	-- get the property as a json data type
 
 	function Should_Read( Property : in Entity_Property_Type ) return Boolean;
 	-- Asks if the value should be set from the database or not
