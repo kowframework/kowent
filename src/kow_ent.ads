@@ -137,7 +137,7 @@ package KOW_Ent is
 	-- Query All Elements --
 	------------------------
 	
-	type ID_Array_Type is Array( Natural range <> ) of ID_Type;
+	type ID_Array_Type is Array( Positive range <> ) of ID_Type;
 	-- used to list IDs for any entity type
 	
 	function Get_All_IDs( Entity_Tag : Ada.Tags.Tag ) return ID_Array_Type;
