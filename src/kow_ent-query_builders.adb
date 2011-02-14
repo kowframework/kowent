@@ -51,6 +51,24 @@ with APQ;
 with APQ_Provider;
 
 package body KOW_Ent.Query_Builders is
+
+	--------------------
+	-- Entity Vectors --
+	--------------------
+
+	function To_Json_Array( V : in Entity_Vectors.Vector ) return KOW_Lib.Json.Array_Type is
+		use Entity_Vectors;
+		
+		Arr : KOW_Lib.Json.Array_Type;
+		procedure Iterator( C : in Cursor ) is
+		begin
+			KOW_Lib.Json.Append( Arr, To_Json_Object( Element( C ) ) );
+		end iterator;
+	begin
+		Iterate( V, Iterator'Access );
+
+		return Arr;
+	end To_Json_Array;
 	
 	----------------------
 	-- Query Management --

@@ -49,15 +49,16 @@ with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Lib.Json;
 with APQ;
 
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private;
 package KOW_Ent.Query_Builders is
 	
-	-----------------------------------
-	-- Generic Package Instantiation --
-	-----------------------------------
+	--------------------
+	-- Entity Vectors --
+	--------------------
 
 	package Entity_Vectors is new Ada.Containers.Vectors(
 				Element_Type	=> Entity_Type,
@@ -65,6 +66,8 @@ package KOW_Ent.Query_Builders is
 			);
 	
 
+	function To_Json_Array( V : in Entity_Vectors.Vector ) return KOW_Lib.Json.Array_Type;
+	
 	----------------
 	-- Exceptions --
 	----------------
