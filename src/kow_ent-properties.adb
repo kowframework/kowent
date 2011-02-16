@@ -824,7 +824,7 @@ package body KOW_Ent.Properties is
 				Column_Name	: in     String;
 				Getter		: Json_Array_Getter_Callback;
 				Setter		: Json_Array_Setter_Callback;
-				Default_Value	: in     String := "";
+				Default_Value	: in     String := "[]";
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150
 
