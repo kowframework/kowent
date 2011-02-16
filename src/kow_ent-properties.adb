@@ -34,6 +34,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Exceptions;
 with Ada.Strings.Hash;
 
 -------------------
@@ -701,6 +702,11 @@ package body KOW_Ent.Properties is
 		P.Length := Length;
 
 		return new Json_Object_Property_Type'( P );
+	exception
+		when e : KOW_Lib.Json.SYNTAX_ERROR =>
+			raise KOW_Lib.Json.SYNTAX_ERROR with "Error in default Json Object Value ( """ & Default_Value & """ ) : " &
+					Ada.Exceptions.Exception_Message( e );
+
 	end New_Json_Object_Property;
 
 
@@ -835,6 +841,10 @@ package body KOW_Ent.Properties is
 		P.Length := Length;
 
 		return new Json_Array_Property_Type'( P );
+	exception
+		when e : KOW_Lib.Json.SYNTAX_ERROR =>
+			raise KOW_Lib.Json.SYNTAX_ERROR with "Error in default Json Array Value ( """ & Default_Value & """ ) : " &
+					Ada.Exceptions.Exception_Message( e );
 	end New_Json_Array_Property;
 
 
