@@ -1385,6 +1385,21 @@ package body KOW_Ent is
 	end Entity_Registry;
 
 
+	function Get_Property( Entity_Tag : in Ada.Tags.Tag; Column_Name : in String; Force_All : Boolean := False ) return Entity_Property_Ptr is
+		Property : Entity_Property_Ptr;
+
+		procedure Iterator( C : Property_Lists.Cursor ) is
+			Current_Property : Entity_Property_Ptr := Property_Lists.Element( C );
+		begin
+			if Current_Property.Column_Name = Column_Name then
+				Property := Current_Property;
+			end if;
+		end Iterator;
+	begin
+		Property_Lists.Iterate( Get_Properties( Entity_Tag, Force_All ), Iterator'Access );
+
+		return Property;
+	end Get_Property;
 
 -- private ::
 
