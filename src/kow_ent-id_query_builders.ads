@@ -247,12 +247,41 @@ package KOW_Ent.ID_Query_Builders is
 	function Get_All( Q : in Query_Type ) return KOW_Ent.ID_Array_Type;
 	-- get all results from the query
 	-- if no results, raise NO_ENTITY
-	
+
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return KOW_Ent.Id_Array_Type;
+	-- if limit = 0, get all results
+
 
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return KOW_Ent.ID_Type;
 	-- get the first element from the query
 	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
 	-- if no results, raise NO_ENTITY
+
+
+	------------------------
+	-- SQL Query Building --
+	------------------------
+
+
+	procedure Build_Query(
+				Q		: in      Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			);
+
+	procedure Build_Query(
+				Q		: in     Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				From		: in     Positive;
+				Limit		: in     Natural
+			);
+	
+
 
 private
 

@@ -473,24 +473,8 @@ package body KOW_Ent.ID_Query_Builders is
 	end Append_Order_by_to_APQ_Query;
 
 
-	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
-	
-
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
-
-	begin
-		APQ.Prepare( Query, "SELECT id,original_tag" );
-		Append_Column_Names_For_Read( Query, Info.Properties, "," );
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
-		Append_to_APQ_Query( Q, Query, Connection, False );
-		APQ.Append( Query, " " );
-		Append_Order_By_to_APQ_Query( Q, Query, Connection );
-
-		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 
 
-		APQ.Execute( Query, Connection );
-	end Prepare_and_Run_Query;
 
 	function Get_All( Q : in Query_Type ) return KOW_Ent.ID_Array_Type is
 		-- get all results from the query
@@ -502,7 +486,8 @@ package body KOW_Ent.ID_Query_Builders is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
-			Prepare_And_Run_Query( Q, Query, Connection );
+			Build_Query( Q, Query, Connection );
+			APQ.Execute( Query, Connection );
 			begin
 				loop
 					APQ.Fetch( Query );
@@ -521,6 +506,61 @@ package body KOW_Ent.ID_Query_Builders is
 	end Get_All;
 	
 
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return KOW_Ent.Id_Array_Type is
+		-- if limit = 0, get all results
+
+		
+		function max_results return positive is
+		begin
+			if limit = 0 then
+				return 1_000;
+			else
+				return positive( limit );
+			end if;
+		end max_results;
+
+		Results : KOW_Ent.Id_Array_type( 1 .. max_results );
+		Total	: Natural := 0;
+
+		
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			Build_Query( Q, Query, Connection, From, Limit );
+			APQ.Execute( Query, Connection );
+			begin
+				for i in Results'range loop
+					APQ.Fetch( Query );
+					Total := i;
+					Results( i ) := KOW_Ent.TO_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
+				end loop;
+
+				loop
+					APQ.Fetch( Query );
+					-- we fetch the rest of results if any just in case (so we won't trash the connection)
+				end loop;
+			exception
+				when others => null;
+			end;
+
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+
+		if Total = 0 then
+			return Results( 2 .. 1 ); -- empty array
+		else
+			return Results( 1 .. Positive( Total ) );
+		end if;
+	end Get_Some;
+
+
+
+
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return KOW_Ent.ID_Type is
 		-- get the first element from the query
 		-- if no results, raise NO_ENTITY
@@ -531,7 +571,8 @@ package body KOW_Ent.ID_Query_Builders is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
-			Prepare_And_Run_Query( Q, Query, Connection );
+			Build_Query( Q, Query, Connection );
+			APQ.Execute( Query, Connection );
 			APQ.Fetch( Query );
 			Result := KOW_Ent.To_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
 			begin
@@ -555,4 +596,48 @@ package body KOW_Ent.ID_Query_Builders is
 			raise NO_ENTITY with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
 
 	end Get_First;
+
+
+
+
+	------------------------
+	-- SQL Query Building --
+	------------------------
+
+
+	procedure Build_Query(
+				Q		: in      Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			) is
+	
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
+	begin
+		APQ.Prepare( Query, "SELECT id,original_tag" );
+		Append_Column_Names_For_Read( Query, Info.Properties, "," );
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
+		Append_to_APQ_Query( Q, Query, Connection, False );
+		APQ.Append( Query, " " );
+		Append_Order_By_to_APQ_Query( Q, Query, Connection );
+	end Build_Query;
+
+	procedure Build_Query(
+				Q		: in     Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) is
+		use APQ;
+	begin
+		Build_Query( Q, Query, Connection );
+
+		if Engine_of( Connection ) = Engine_MySQL then
+			Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
+			if Limit /= 0 then
+				Append( Query, "," & Natural'Image( Limit ) );
+			end if;
+		end if;
+	end Build_Query;
+
 end KOW_Ent.ID_Query_Builders;
