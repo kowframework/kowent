@@ -79,9 +79,6 @@ package KOW_Ent is
 	-- used when trying to produce an entity object with no factory in it's registry
 
 
-	Data_Validation_Error	: Exception;
-	-- to be used when some sort of data validation has failed
-
 	procedure Set_Connection_Provider( Provider : in APQ_Provider.Connection_Provider_Ptr );
 	-- set the current database connection provider
 
