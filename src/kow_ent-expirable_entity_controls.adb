@@ -71,7 +71,7 @@ package body KOW_Ent.Expirable_Entity_Controls is
 		if Validation.From_Date = No_Validation OR Validation.To_Date = No_Validation then
 			return;
 		elsif Validation.From_Date > Validation.To_Date then
-			raise KOW_Ent.Data_Validation_Error with "invalid period!";
+			raise CONSTRAINT_ERROR with "invalid period!";
 		end if;
 	end Will_Insert;
 
