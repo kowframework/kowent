@@ -673,4 +673,20 @@ package body KOW_Ent.Query_Builders is
 			raise NO_ENTITY with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
 
 	end Get_First;
+
+
+	function To_String( Q : in Query_Type ) return String is
+		-- return the query as string
+		Buffer : Unbounded_String;
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			Prepare_Query( Q, Query, Connection );
+			Buffer := To_Unbounded_String( APQ.To_String( Query ) );
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+
+		return To_String( Buffer );
+	end To_String;
 end KOW_Ent.Query_Builders;

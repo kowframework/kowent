@@ -277,6 +277,10 @@ package KOW_Ent.Query_Builders is
 	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
 	-- if no results, raise NO_ENTITY
 
+
+	function To_String( Q : in Query_Type ) return String;
+	-- return the query as string
+
 private
 
 	-- --------- --
