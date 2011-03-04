@@ -621,6 +621,24 @@ package body KOW_Ent.Query_Builders is
 		Result := Results;
 	end Get_Some;
 
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return Entity_Vectors.Vector is
+		Result		: Entity_Vectors.Vector;
+		Total_Count	: Natural;
+	begin
+		Get_Some(	
+				Q		=> Q,
+				From		=> From,
+				Limit		=> Limit,
+				Result		=> Result,
+				Total_Count	=> Total_Count
+			);
+		return Result;
+	end Get_Some;
+
 
 
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is

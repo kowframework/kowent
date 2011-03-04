@@ -265,6 +265,13 @@ package KOW_Ent.Query_Builders is
 	-- if limit = 0, get all results
 
 
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return Entity_Vectors.Vector;
+
+
 	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;
 	-- get the first element from the query
 	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
