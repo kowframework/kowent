@@ -1385,6 +1385,20 @@ package body KOW_Ent is
 	end Entity_Registry;
 
 
+	function Load_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; ID : in Id_Type ) return Entity_Type'Class is
+		Ent : Entity_Type'Class := New_Entity( Entity_Tag );
+	begin
+		Load( Ent, ID );
+		return Ent;
+	end Load_Entity;
+
+	function Load_Entity( Entity_Tag : in Ada.Strings.Unbounded.Unbounded_String; ID : in Natural ) return Entity_Type'Class is
+	begin
+		return Load_Entity( Entity_Tag, To_ID( ID ) );
+	end Load_Entity;
+
+
+
 	function Get_Property( Entity_Tag : in Ada.Tags.Tag; Column_Name : in String; Force_All : Boolean := False ) return Entity_Property_Ptr is
 		Property : Entity_Property_Ptr;
 
