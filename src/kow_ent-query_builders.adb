@@ -53,6 +53,34 @@ with APQ_Provider;
 package body KOW_Ent.Query_Builders is
 
 	--------------------
+	-- Helper Methods --
+	--------------------
+	procedure Set_Values_From_Query_Helper(
+				Entity		: in out Entity_Type'Class;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Info		: in     Entity_Information_Type
+			) is
+		-- this package hasn't been update to support extended entities...
+		-- as a result most of the values aren't set at all.
+		--
+		-- this procedure a workaround for this ...
+		--
+		-- it's slow and dumb. I know... but it's easy to implement.
+	begin
+		KOW_Ent.Set_Values_From_Query(
+				Entity		=> Entity,
+				Query		=> Query,
+				Connection	=> Connection,
+				Info		=> Info
+			);
+
+		KOW_Ent.Load( Entity, Entity.ID );
+		-- the trick is to load the entity :)
+	end Set_Values_From_Query_Helper;
+
+
+	--------------------
 	-- Entity Vectors --
 	--------------------
 
@@ -508,7 +536,7 @@ package body KOW_Ent.Query_Builders is
 					declare
 						E: Entity_Type;
 					begin
-						Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+						Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
 						Entity_Vectors.Append( Results, E );
 					end;
 		
@@ -546,7 +574,7 @@ package body KOW_Ent.Query_Builders is
 			procedure Append_Result is
 				E : Entity_Type;
 			begin
-				Set_Values_From_Query( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+				Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
 				Entity_Vectors.Append( Results, E );
 			end Append_Result;
 
@@ -651,7 +679,7 @@ package body KOW_Ent.Query_Builders is
 		begin
 			Prepare_And_Run_Query( Q, Query, Connection );
 			APQ.Fetch( Query );
-			Set_Values_From_Query( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
 			begin
 				loop
 					APQ.Fetch( Query );
