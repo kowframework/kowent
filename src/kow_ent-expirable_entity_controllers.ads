@@ -67,7 +67,7 @@ with KOW_Ent.Query_Builders;
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private;
 	Table_Name : String;
-package KOW_Ent.Expirable_Entity_Controls is
+package KOW_Ent.Expirable_Entity_Controllers is
 
 
 
@@ -156,4 +156,4 @@ package KOW_Ent.Expirable_Entity_Controls is
 	package Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => Validation_Entity );
 
 
-end KOW_Ent.Expirable_Entity_Controls;
+end KOW_Ent.Expirable_Entity_Controllers;

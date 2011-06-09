@@ -54,7 +54,7 @@ with KOW_Ent.Properties;
 -- 	it means the 
 
 
-package body KOW_Ent.Expirable_Entity_Controls is
+package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 
@@ -340,4 +340,4 @@ begin
 
 
 
-end KOW_Ent.Expirable_Entity_Controls;
+end KOW_Ent.Expirable_Entity_Controllers;
