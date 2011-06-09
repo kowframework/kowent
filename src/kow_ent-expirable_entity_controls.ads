@@ -79,14 +79,17 @@ package KOW_Ent.Expirable_Entity_Controls is
 	INVALID_PERIOD : Exception;
 	-- raised when there is an incosistence in the validation period
 
-	-- -------------------- --
+	--------------------------
 	-- Validation Timestamp --
-	-- -------------------- --
+	--------------------------
 
 	subtype Validation_Timestamp is KOW_Ent.Extra_Properties.Timestamp;
 
+	function Clock return Validation_Timestamp;
+	-- same as Ada.Calendar.Clock
 
-	No_Validation : constant Validation_Timestamp := KOW_Ent.Extra_Properties.No_Timestamp;
+
+	No_Validation_Timestamp : constant Validation_Timestamp := KOW_Ent.Extra_Properties.No_Timestamp;
 
 
 
@@ -95,9 +98,9 @@ package KOW_Ent.Expirable_Entity_Controls is
 
 	
 
-	-- --------------------- --
+	---------------------------
 	-- Validation Management --
-	-- --------------------- --
+	---------------------------
 	
 
 
