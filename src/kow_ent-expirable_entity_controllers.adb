@@ -94,6 +94,57 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 
+	function Is_Valid(
+				Entity		: in Entity_Type;
+				From_Date	: in Validation_Timestamp;
+				To_Date		: in Validation_Timestamp
+			) return Boolean is
+		-- check if the entity is valid anytime durin the given period
+		use Query_Builders;
+		Q, Child_Q : Query_Type;
+
+
+		procedure Append_Inside( Date : in Validation_Timestamp ) is
+			Sub_Child_Q : Query_Type;
+		begin
+			Append(
+					Q	=> Sub_Child_Q,
+					Column	=> "from_date",
+					Value	=> ""
+				);
+		end Append_Inside;
+	begin
+		Append(
+				Q	=> Q,
+				Column	=> "owner_id",
+				Value	=> Entity.Id
+			);
+
+		Append_Inside( From_Date );
+		Append_Inside( To_Date );
+		--Append_Outside;
+
+		Append(
+				Q	=> Q,
+				Child_Q	=> Child_Q,
+				Appender=> Appender_And
+			);
+
+		-- TODO :: count
+		return true;
+	end Is_Valid;
+
+
+	function Is_Valid(
+				Entity		: in Entity_Type;
+				Date		: in Validation_Timestamp := Clock
+			) return Boolean is
+		-- check if the entity is valid in the given instant
+	begin
+		return Is_Valid( Entity, Date, Date );
+	end Is_Valid;
+
+
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
 		-- check if the entity is in a valid period
 		Now : Validation_Timestamp := Clock;
@@ -115,7 +166,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	begin
 		if To_Date /= No_Validation_Timestamp AND THEN From_Date > To_Date then
 			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date";
-		elsif Is_Valid( Entity ) then
+		elsif Is_Valid( Entity, From_Date, To_Date ) then
 			raise INVALID_PERIOD with "Can't set period when the entity is already valid";
 		end if;
 
@@ -148,7 +199,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		-- raise invalid_period if Is_Valid = TRUE
 		Validation : Validation_Entity;
 	begin
-		if Is_Valid( Entity ) then
+		if Is_Valid( Entity, From_Date, Clock ) then
 			raise INVALID_PERIOD with "Trying to validate an already valid entity";
 		end if;
 

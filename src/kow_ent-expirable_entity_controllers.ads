@@ -104,8 +104,19 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	
 
 
-	function Is_Valid( Entity : in Entity_Type ) return Boolean;
-	-- check if the entity is in a valid period
+	function Is_Valid(
+				Entity		: in Entity_Type;
+				From_Date	: in Validation_Timestamp;
+				To_Date		: in Validation_Timestamp
+			) return Boolean;
+	-- check if the entity is valid anytime durin the given period
+
+	function Is_Valid(
+				Entity		: in Entity_Type;
+				Date		: in Validation_Timestamp := Clock
+			) return Boolean;
+	-- check if the entity is valid in the given instant
+
 
 	procedure New_Validation_Period( Entity : in Entity_Type; From_Date, To_Date : in Validation_Timestamp );
 	-- set the new validation period.

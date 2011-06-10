@@ -58,7 +58,7 @@ package body KOW_Ent.Relations is
 				Q		=> Query,
 				Foreign_Key	=> Entity,
 				Appender	=> Appender_And,
-				Operator	=> Operator_Equals
+				Operator	=> Operator_Equal_To
 			);
 			return Query;
 		end Get_Query;
