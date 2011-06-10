@@ -97,12 +97,19 @@ package KOW_Ent.Query_Builders is
 		Operator_Greater_Than_Or_Equal_To
 	);
 
+
+	-----------------------------------------------------------------------------------------------------------------
+
 	----------------------
 	-- Query Management --
 	----------------------
 	
 	type Query_Type is private;
 	type Query_Ptr is access Query_Type;
+
+
+	function To_String( Q : in Query_Type ) return String;
+	-- return the query as string
 
 
 	procedure Clear( Q : in out Query_Type );
@@ -274,9 +281,9 @@ package KOW_Ent.Query_Builders is
 	-- append another query as a child query :: () stuff
 	
 
-	-- -------- --
+	--------------
 	-- Order By --
-	-- -------- --
+	--------------
 
 	type Ordenation_Type is ( ASCENDING, DESCENDING );
 	-- order ascending or descending?
@@ -294,9 +301,95 @@ package KOW_Ent.Query_Builders is
 		 	);
 
 
-	--------------------
-	-- IMPLEMENTATION --
-	--------------------
+	-----------------------------------------------------------------------------------------------------------------
+
+
+	---------------------
+	-- Retrieving Data --
+	---------------------
+
+	--
+	-- All
+	--
+
+	function Get_All( Q : in Query_Type ) return KOW_Ent.ID_Array_Type;
+	-- get all results from the query
+	-- if no results, raise NO_ENTITY
+
+
+	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector;
+	-- get all results from the query
+	-- if no results, raise NO_ENTITY
+
+	--
+	-- Some
+	--
+
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return KOW_Ent.Id_Array_Type;
+	-- ger some results from _From_.
+	-- if limit = 0 then get all remaining results
+
+
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return Entity_Vectors.Vector;
+	-- ger some results from _From_.
+	-- if limit = 0 then get all remaining results
+
+
+	--
+	-- First
+	--
+
+	function Get_First( Q : in Query_Type; Unique : in Boolean ) return KOW_Ent.ID_Type;
+	-- get the first element from the query
+	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
+	-- if no results, raise NO_ENTITY
+
+
+	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;
+	-- get the first element from the query
+	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
+	-- if no results, raise NO_ENTITY
+
+
+	--
+	-- Count
+	--
+
+	function Count( Q : in Query_Type ) return Natural;
+	-- count how many results this query would return
+
+	-----------------------------------------------------------------------------------------------------------------
+
+
+private
+	------------------------
+	-- SQL Query Building --
+	------------------------
+
+
+	procedure Build_Query(
+				Q		: in      Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Count_Query	: in     Boolean := False
+			);
+
+	procedure Build_Query(
+				Q		: in     Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				From		: in     Positive;
+				Limit		: in     Natural
+			);
+
 
 	procedure Append_to_APQ_Query(
 				Q		: in     Query_Type;
@@ -310,43 +403,10 @@ package KOW_Ent.Query_Builders is
 				Connection	: in out APQ.Root_Connection_Type'Class
 			);
 
-	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector;
-	-- get all results from the query
-	-- if no results, raise NO_ENTITY
-	
-	procedure Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural;
-				Result		:    out Entity_Vectors.Vector;
-				Total_Count	:    out Natural
-			);
-	-- get a page of results from From (inclusive), presenting at max Ammount results.
-	-- also, count the total results for the user...
-	-- if limit = 0, get all results
 
-
-	function Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural
-			) return Entity_Vectors.Vector;
-
-
-	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;
-	-- get the first element from the query
-	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
-	-- if no results, raise NO_ENTITY
-
-
-	function To_String( Q : in Query_Type ) return String;
-	-- return the query as string
-
-private
-
-	-- --------- --
+	---------------
 	-- Operators --
-	-- --------- --
+	---------------
 
 	type Control_Operation_Type is (
 			L_Operator,	-- Logical Operator
@@ -427,9 +487,9 @@ private
 
 
 
-	-- -------- --
+	--------------
 	-- Order By --
-	-- -------- --
+	--------------
 	
 
 	type Order_By_Type is record

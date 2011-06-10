@@ -100,10 +100,32 @@ package body KOW_Ent.Query_Builders is
 		return Arr;
 	end To_Json_Array;
 	
+
+
+	-----------------------------------------------------------------------------------------------------------------
+
 	----------------------
 	-- Query Management --
 	----------------------
-	
+
+	function To_String( Q : in Query_Type ) return String is
+		-- return the query as string
+		Buffer : Unbounded_String;
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			Build_Query( Q, Query, Connection );
+			Buffer := To_Unbounded_String( APQ.To_String( Query ) );
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+
+		return To_String( Buffer );
+	end To_String;
+
+
+
+
 	procedure Clear( Q : in out Query_Type ) is
 		-- clear the query for reuse
 	begin
@@ -397,9 +419,9 @@ package body KOW_Ent.Query_Builders is
 	end Append;
 
 
-	-- -------- --
+	--------------
 	-- Order By --
-	-- -------- --
+	--------------
 
 	procedure Append_Order(
 				Q		: in out Query_Type;
@@ -431,9 +453,420 @@ package body KOW_Ent.Query_Builders is
 	end Append_Order;
 
 
-	--------------------
-	-- IMPLEMENTATION --
-	--------------------
+
+
+	-----------------------------------------------------------------------------------------------------------------
+
+
+	-----------------------------
+	-- Generic Implementations --
+	-----------------------------
+
+
+	-- 
+	-- All
+	--
+	generic
+		with procedure Iterator(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				);
+	procedure Generic_All_Iterator( Q : in Query_Type ) is
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+
+			procedure Append_Entity is
+			end Append_Entity;
+
+		begin
+			Build_Query( Q, Query, Connection );
+			APQ.Execute( Query, Connection );
+			begin
+				loop
+					APQ.Fetch( Query );
+					Append_Entity;
+				end loop;
+			exception
+				when APQ.No_Tuple =>
+					null;
+			end;
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+	end Generic_All_Iterator;
+
+
+	-- 
+	-- Some
+	--
+
+	
+	generic
+		with procedure Iterator(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				);
+	procedure Generic_Some_Iterator(
+				Query	: in Query_Type;
+				From	: in Positive;
+				Limit	: in Natural
+			) is
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			use APQ;
+		begin
+			Build_Query( Q, Query, Connection, From, Limit );
+			APQ.Execute( Query, Connection );
+
+			if APQ.Engine_Of( Query ) = Engine_MySQL then
+				begin
+					loop
+						APQ.Fetch( Query );
+						Iterator( Query, Connection );
+					end loop;
+				exception
+					when APQ.No_Tuple =>
+						null;
+				end;
+			else
+				begin
+					for i in 1 .. Natural( From ) - 1 loop
+						APQ.Fetch( Query );
+					end loop;
+
+					if Limit /= 0 then
+						for i in From .. From + Positive( Limit ) loop
+							APQ.Fetch( Query );
+							Iterator( Query, Connection );
+						end loop;
+
+						loop
+							-- fetch all other results just so we don't trash the connection..
+							-- NOTE: MAYBE, just MAYBE trashing the connection isn't that bad
+							-- as APQ_Provider will manage to reconnect the next time it is needed..
+							APQ.Fetch( Query );
+						end loop;
+					else
+						loop
+							APQ.Fetch( Query );
+							Iterator( Query, COnnection );
+						end loop;
+					end if;
+
+				exception
+					when others => null;
+				end;
+
+			end if;
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+	end Generic_Some_Iterator;
+
+	--
+	-- First 
+	--
+	generic
+		with procedure Iterator(
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			);
+	procedure Generic_First_Iterator(
+				Q	: in Query_Type;
+				Unique	: in Boolean
+			)
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			Build_Query( Q, Query, Connection, 1, 2 );
+			APQ.Execute( Query, Connection );
+			APQ.Fetch( Query );
+			Iterator( Query, Connection );
+			begin
+				loop
+					APQ.Fetch( Query );
+					-- if it got here, then check if it's ok to have duplicated results:
+					if Unique then
+						raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
+					end if;
+				end loop;
+			exception
+				when APQ.No_Tuple => null;
+			end;
+		end Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+	end Generic_First_Iterator;
+
+
+	---------------------
+	-- Retrieving Data --
+	---------------------
+
+
+	--
+	-- All
+	--
+
+	function Get_All( Q : in Query_Type ) return KOW_Ent.ID_Array_Type is
+		-- get all results from the query
+		-- if no results, raise NO_ENTITY
+
+		Tons_OF_Ids	: KOW_Ent.ID_Array_Type( 1 .. 10000 );
+		Last_ID		: Natural := Natural'First;
+
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				) is
+		begin
+			Last_ID := Last_ID + 1;
+			Tons_Of_IDs( Last_ID ) := KOW_Ent.TO_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
+		end Set_Value;
+
+		procedure Iterate is new Generic_All_Iterator( Set_Value );
+	begin
+		Iterate( Q );
+		return Tons_of_IDs( 1 .. Last_ID );
+	exception
+		when e : CONSTRAINT_ERROR =>
+			if Last_ID > Tons_of_IDs'Last then
+				return Tons_of_IDs;
+			else
+				Ada.Exceptions.Reraise_Occurrence( e );
+			end if;
+	end Get_All;
+
+
+	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector is
+		-- get all results from the query
+	
+		Results : Entity_Vectors.Vector;
+
+
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				) is
+			E : Entity_Type;
+		begin
+			Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
+			Entity_Vectors.Append( Results, E );
+		end Set_Value;
+
+		procedure Iterate is new Generic_All_Iterator( Set_Value );
+	begin
+		Iterate( Q );
+		return Results;
+	end Get_All;
+	
+
+	--
+	-- Some
+	--
+
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return KOW_Ent.Id_Array_Type is
+		-- if limit = 0, get all results
+		
+		function max_results return positive is
+		begin
+			if limit = 0 then
+				return 1_000;
+			else
+				return positive( limit );
+			end if;
+		end max_results;
+
+		Results : KOW_Ent.Id_Array_type( 1 .. max_results );
+		Total	: Natural := 0;
+
+		
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Query_Type'Class
+				) is
+		begin
+			Total := Total + 1;
+			Results( Total ) := KOW_Ent.TO_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
+		end Set_Value;
+
+		procedure Iterate is new Generic_Get_Some_Iterator( Set_Value );
+	begin
+		Iterate( Q, From, Limit );
+
+		if Total = 0 then
+			return Results( 2 .. 1 ); -- empty array
+		else
+			return Results( 1 .. Positive( Total ) );
+		end if;
+	end Get_Some;
+
+
+
+	function Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) return Entity_Vectors.Vector is
+		Result		: Entity_Vectors.Vector;
+		Total_Count	: Natural;
+
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
+		return Result;
+	end Get_Some;
+
+
+
+	--
+	-- First
+	--
+
+
+	function Get_First( Q : in Query_Type; Unique : in Boolean ) return KOW_Ent.ID_Type is
+		-- get the first element from the query
+		-- if no results, raise NO_ENTITY
+		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
+
+
+		Result : KOW_Ent.ID_Type;
+
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				) is
+		begin
+			Result := KOW_Ent.To_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
+		end Set_Value;
+
+
+		procedure Iterate is new Generic_First_Iterator( Set_Value );
+	begin
+		Iterate( Q, Unique );
+
+		return Result;
+	exception
+		when APQ.No_Tuple =>
+			raise NO_ENTITY with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
+
+	end Get_First;
+
+
+
+
+	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is
+		-- get the first element from the query
+		-- if no results, raise NO_ENTITY
+		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
+		Result : Entity_Type;
+
+		
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				) is
+		begin
+			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
+		end;
+
+		procedure Iterate is new Generic_First_Iterator( Set_Value );
+	begin
+		Iterate( Q, Unique );
+		return Result;
+	exception
+		when APQ.No_Tuple =>
+			raise NO_ENTITY with "Tag :: " & To_String( Q.Entity_Tag );
+
+	end Get_First;
+
+	--
+	-- Count
+	--
+
+	function Count( Q : in Query_Type ) return Natural is
+		Total_Count : Natural;
+		function Natural_Value is new APQ.Integer_Value( Val_Type => Natural );
+		
+		procedure Count_Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			use APQ;
+			Count_Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+
+		begin
+			Build_Query(
+					Q		=> Q, 
+					Query		=> Count_Query,
+					Connection	=> Connection,
+					Count_Query	=> True
+				);
+
+			APQ.Execute( Count_Query, Connection );
+			APQ.Fetch( Count_Query );
+			Total_Count := Natural_Value( Count_Query, APQ.Column_Index( Count_Query, "rowscount" ) );
+			-- the coult query aways return only 1 result, so we are all good
+		end Count_Runner;
+	begin
+		APQ_Provider.Run( KOW_Ent.My_Provider.all, Count_Runner'Access );
+
+		return Total_Count;
+	end Get_Some;
+
+
+
+
+
+	------------------------
+	-- SQL Query Building --
+	------------------------
+
+	procedure Build_Query(
+				Q		: in      Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				Count_Query	: in     Boolean := False
+			) is
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
+
+	begin
+		if Count_Query then
+			APQ.Prepare( Query, "SELECT count(*) as rowscount " );
+		else
+			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
+			Append_Column_Names_For_Read( Query, Info.Properties, "," );
+		end if;
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
+		Append_to_APQ_Query( Q, Query, Connection );
+		APQ.Append( Query, " " );
+		Append_Order_By_to_APQ_Query( Q, Query, Connection );
+
+		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
+	end Build_Query;
+
+
+	procedure Build_Query(
+				Q		: in     Query_Type;
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class;
+				From		: in     Positive;
+				Limit		: in     Natural
+			) is
+		use APQ;
+	begin
+		Build_Query( Q, Query, Connection );
+
+		if Engine_of( Connection ) = Engine_MySQL then
+			Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
+			if Limit /= 0 then
+				Append( Query, "," & Natural'Image( Limit ) );
+			end if;
+		end if;
+	end Build_Query;
+
+
+
 
 	procedure Append_to_APQ_Query(
 				Q		: in     Query_Type;
@@ -563,242 +996,10 @@ package body KOW_Ent.Query_Builders is
 	end Append_Order_by_to_APQ_Query;
 
 
-	procedure Prepare_Count_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
-	
-
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
-
-	begin
-		APQ.Prepare( Query, "SELECT count(*) as rowscount " );
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-		Append_to_APQ_Query( Q, Query, Connection );
-		APQ.Append( Query, " " );
-		Append_Order_By_to_APQ_Query( Q, Query, Connection );
-
-		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
-	end Prepare_Count_Query;
-
-	procedure Prepare_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
-	
-
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
-
-	begin
-		APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
-		Append_Column_Names_For_Read( Query, Info.Properties, "," );
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-		Append_to_APQ_Query( Q, Query, Connection );
-		APQ.Append( Query, " " );
-		Append_Order_By_to_APQ_Query( Q, Query, Connection );
-
-		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
-	end Prepare_Query;
 
 
 
-	procedure Prepare_and_Run_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
-	begin
-		Prepare_Query( Q, Query, Connection );
-		APQ.Execute( Query, Connection );
-	end Prepare_and_Run_Query;
 
-	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector is
-		-- get all results from the query
-	
-		Results : Entity_Vectors.Vector;
-		
-		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-		begin
-			Prepare_And_Run_Query( Q, Query, Connection );
-			begin
-				loop
-					APQ.Fetch( Query );
-					
-					declare
-						E: Entity_Type;
-					begin
-						Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-						Entity_Vectors.Append( Results, E );
-					end;
-		
-				end loop;
-			exception
-				when others => null;
-			end;
-		end Runner;
-	begin
-		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
-	
-		return Results;
-	end Get_All;
-	
-
-	procedure Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural;
-				Result		:    out Entity_Vectors.Vector;
-				Total_Count	:    out Natural
-			) is
-		-- Get a page of results in the query
-	
-		Results : Entity_Vectors.Vector;
-		TC	: Natural := 0;
-
-		function Natural_Value is new APQ.Integer_Value( Val_Type => Natural );
-		
-		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-			use APQ;
-
-
-			procedure Append_Result is
-				E : Entity_Type;
-			begin
-				Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-				Entity_Vectors.Append( Results, E );
-			end Append_Result;
-
-		begin
-			Prepare_Query( Q, Query, Connection );
-			
-			if APQ.Engine_Of( Query ) = Engine_MySQL then
-				
-				declare
-					Count_Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-				begin	
-					Prepare_Count_Query( Q, Count_Query, Connection );
-					APQ.Execute( Count_Query, Connection );
-					APQ.Fetch( Count_Query );
-					TC := Natural_Value( Count_Query, APQ.Column_Index( Count_Query, "rowscount" ) );
-				end;
-
-
-				APQ.Append( Query, " limit " & natural'image( natural(from) - 1 ) );
-				if Limit /= 0 then
-					APQ.Append( Query, ',' & natural'image( Limit  ) );
-				end if;
-
-				APQ.Execute( Query, Connection );
-
-				begin
-					loop
-						APQ.Fetch( Query );
-						Append_Result;
-					end loop;
-				exception
-					when others => null;
-				end;
-			else
-				APQ.Execute( Query, Connection );
-				TC := Natural( APQ.Tuples( Query ) );
-
-				begin
-					for i in 1 .. Natural( From ) - 1 loop
-						APQ.Fetch( Query );
-					end loop;
-
-					if Limit /= 0 then
-						for i in From .. From + Positive( Limit ) loop
-							APQ.Fetch( Query );
-							Append_Result;
-						end loop;
-
-						loop
-							-- fetch all other results just so we don't trash the connection..
-							-- NOTE: MAYBE, just MAYBE trashing the connection isn't that bad
-							-- as APQ_Provider will manage to reconnect the next time it is needed..
-							APQ.Fetch( Query );
-						end loop;
-					else
-						loop
-							APQ.Fetch( Query );
-							Append_Result;
-						end loop;
-					end if;
-
-				exception
-					when others => null;
-				end;
-
-			end if;
-		end Runner;
-	begin
-		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
-	
-		Total_Count := TC;
-		Result := Results;
-	end Get_Some;
-
-	function Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural
-			) return Entity_Vectors.Vector is
-		Result		: Entity_Vectors.Vector;
-		Total_Count	: Natural;
-	begin
-		Get_Some(	
-				Q		=> Q,
-				From		=> From,
-				Limit		=> Limit,
-				Result		=> Result,
-				Total_Count	=> Total_Count
-			);
-		return Result;
-	end Get_Some;
-
-
-
-	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is
-		-- get the first element from the query
-		-- if no results, raise NO_ENTITY
-		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
-		Result : Entity_Type;
-		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-		begin
-			Prepare_And_Run_Query( Q, Query, Connection );
-			APQ.Fetch( Query );
-			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-			begin
-				loop
-					APQ.Fetch( Query );
-					-- if it got here, then check if it's ok to have duplicated results:
-					if Unique then
-						raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & To_String( Q.Entity_Tag );
-					end if;
-				end loop;
-			exception
-				when APQ.No_Tuple => null;
-			end;
-		end Runner;
-	begin
-		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
-
-		return Result;
-	exception
-		when APQ.No_Tuple =>
-			raise NO_ENTITY with "Tag :: " & To_String( Q.Entity_Tag );
-
-	end Get_First;
-
-
-	function To_String( Q : in Query_Type ) return String is
-		-- return the query as string
-		Buffer : Unbounded_String;
-		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-		begin
-			Prepare_Query( Q, Query, Connection );
-			Buffer := To_Unbounded_String( APQ.To_String( Query ) );
-		end Runner;
-	begin
-		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
-
-		return To_String( Buffer );
-	end To_String;
 
 -- private
 
