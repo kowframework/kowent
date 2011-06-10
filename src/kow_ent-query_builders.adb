@@ -111,6 +111,27 @@ package body KOW_Ent.Query_Builders is
 		Order_By_Vectors.Clear( Q.Order_By );
 	end Clear;
 
+
+	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Ada.Tags.Tag ) is
+		-- clear the query and set it up for the given entity tag
+	begin
+		Prepare(
+				Q		=> Q,
+				Entity_Tag	=> To_Unbounded_String(
+							Ada.Tags.Expanded_Name( Entity_Tag )
+						)
+			);
+	end Prepare;
+
+	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Unbounded_String ) is
+		-- clear the query and set it up for the given entity tag
+	begin
+		Clear( Q );
+		Q.Entity_Tag := Entity_Tag;
+	end Prepare;
+
+
+
 	--
 	-- Foreign Key
 	--
@@ -153,7 +174,7 @@ package body KOW_Ent.Query_Builders is
 	begin
 
 		-- first we gotta get all the properties for this entity
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity_Type'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Q.Entity_Tag );
 
 		-- and now we try to find out which one is a foreign key
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
@@ -545,7 +566,7 @@ package body KOW_Ent.Query_Builders is
 	procedure Prepare_Count_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	
 
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
 
 	begin
 		APQ.Prepare( Query, "SELECT count(*) as rowscount " );
@@ -560,7 +581,7 @@ package body KOW_Ent.Query_Builders is
 	procedure Prepare_Query( Q : in Query_Type; Query : in out APQ.Root_Query_Type'Class; Connection : in out APQ.Root_Connection_Type'Class ) is
 	
 
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Type'Tag );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
 
 	begin
 		APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
@@ -597,7 +618,7 @@ package body KOW_Ent.Query_Builders is
 					declare
 						E: Entity_Type;
 					begin
-						Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+						Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
 						Entity_Vectors.Append( Results, E );
 					end;
 		
@@ -635,7 +656,7 @@ package body KOW_Ent.Query_Builders is
 			procedure Append_Result is
 				E : Entity_Type;
 			begin
-				Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+				Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
 				Entity_Vectors.Append( Results, E );
 			end Append_Result;
 
@@ -740,13 +761,13 @@ package body KOW_Ent.Query_Builders is
 		begin
 			Prepare_And_Run_Query( Q, Query, Connection );
 			APQ.Fetch( Query );
-			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Type'Tag ) );
+			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
 			begin
 				loop
 					APQ.Fetch( Query );
 					-- if it got here, then check if it's ok to have duplicated results:
 					if Unique then
-						raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
+						raise DUPLICATED_ENTITY_ELEMENT with "Tag :: " & To_String( Q.Entity_Tag );
 					end if;
 				end loop;
 			exception
@@ -759,7 +780,7 @@ package body KOW_Ent.Query_Builders is
 		return Result;
 	exception
 		when APQ.No_Tuple =>
-			raise NO_ENTITY with "Tag :: " & Ada.Tags.Expanded_Name( Entity_Type'Tag );
+			raise NO_ENTITY with "Tag :: " & To_String( Q.Entity_Tag );
 
 	end Get_First;
 

@@ -45,6 +45,7 @@
 with Ada.Containers.Vectors;
 with Ada.Finalization;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
+with Ada.Tags;
 
 -------------------
 -- KOW Framework --
@@ -106,6 +107,15 @@ package KOW_Ent.Query_Builders is
 
 	procedure Clear( Q : in out Query_Type );
 	-- clear the query for reuse
+
+
+	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Ada.Tags.Tag );
+	-- clear the query and set it up for the given entity tag
+	
+	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Unbounded_String );
+	-- clear the query and set it up for the given entity tag
+
+
 
 	--
 	-- Foreign Key
@@ -435,6 +445,7 @@ private
 	type Query_Type is record
 		Operators	: Operator_Vectors.Vector;
 		Order_By	: Order_By_Vectors.Vector;
+		Entity_Tag	: Unbounded_String := To_Unbounded_String( Ada.Tags.Expanded_Name( Entity_Type'Tag ) );
 	end record;
 
 
