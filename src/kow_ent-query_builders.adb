@@ -248,13 +248,13 @@ package body KOW_Ent.Query_Builders is
 				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
-		Handler : Operator_Handler_Type;
+		Handler : Operator_Handler_Type( Data_Type => Is_String );
 	begin
-		Handler.Column	:= Column;
-		Handler.Value	:= Value;
-		Handler.Appender:= Appender;
-		Handler.Operator:= Operator;
-		Handler.Operation_Type := L_Operator;
+		Handler.Column		:= Column;
+		Handler.String_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
 
 		Operator_Vectors.Append( Q.Operators, Handler );
 	end Append;
@@ -325,6 +325,32 @@ package body KOW_Ent.Query_Builders is
 	end Append_Password;
 
 
+
+	--
+	-- Percent 
+	-- 
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Percent;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Percent );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Percent_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Append;
+
+
+
 	--
 	-- Sub Queries
 	--
@@ -338,7 +364,7 @@ package body KOW_Ent.Query_Builders is
 				Appender: in     Logic_Appender := Appender_AND
 			) is
 		-- append another query as a child query :: () stuff
-		Handler : Operator_Handler_Type;
+		Handler : Operator_Handler_Type( Data_Type => Is_None );
 	begin
 		Handler.Child_Query := new Query_Type'( Child_Q );
 		Handler.Appender := Appender;
@@ -436,11 +462,35 @@ package body KOW_Ent.Query_Builders is
 							APQ.Append( APQ_Q, " >= " );
 
 					end case;
-					APQ.Append_Quoted( 
-							APQ_Q, 
-							Connection, 
-							To_String( Handler.Value )
-						);
+
+
+					case Handler.Data_Type is
+						when Is_String => 
+							APQ.Append_Quoted( 
+									APQ_Q, 
+									Connection, 
+									To_String( Handler.String_Value )
+								);
+
+						when Is_Percent =>
+							null;
+						when Is_Money =>
+							null;
+						when Is_Date =>
+							null;
+						when Is_Timestamp =>
+							null;
+						when Is_Dimension =>
+							null;
+						when Is_Weight =>
+							null;
+						when Is_Count =>
+							null;
+
+						when Is_None =>
+							null;
+					end case;
+
 
 				when Q_Operator =>
 					APQ.Append( APQ_Q, "(" );

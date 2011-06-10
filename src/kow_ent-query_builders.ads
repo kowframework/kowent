@@ -49,6 +49,7 @@ with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Ent.Extra_Properties;		use KOW_Ent.Extra_Properties;
 with KOW_Lib.Json;
 with APQ;
 
@@ -205,6 +206,50 @@ package KOW_Ent.Query_Builders is
 
 
 	--
+	-- Percent 
+	-- 
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Percent;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
+
+	--
+	-- Money 
+	--
+
+	--
+	-- Date 
+	--
+
+	--
+	-- Timestamp 
+	--
+
+	--
+	-- Dimension 
+	--
+
+	--
+	-- Weight 
+	--
+
+	--
+	-- Count 
+	--
+
+
+
+
+
+
+
+
+	--
 	-- Sub Queries
 	--
 
@@ -295,18 +340,56 @@ private
 			L_Operator,	-- Logical Operator
 			Q_Operator	-- Child Query;
 		);
-	type Operator_Handler_Type is record
+
+	type Operator_Data_Type is (
+			Is_String,
+
+			Is_Percent,
+			Is_Money,
+			Is_Date,
+			Is_Timestamp,
+			Is_Dimension,
+			Is_Weight,
+			Is_Count,
+
+			Is_None		-- used by the Q_Operator
+		);
+
+	
+	type Operator_Handler_Type( Data_Type : Operator_Data_Type := Is_None ) is record
 		-- global :
 		Appender	: Logic_Appender;
 		Operation_Type	: Control_Operation_Type;
 
 		-- logical :
 		Column		: Unbounded_String;
-		Value		: Unbounded_String;
 		Operator	: Logic_Operator;
 
 		-- child query :
 		Child_Query	: Query_Ptr;
+
+
+		case Data_Type is
+			when Is_String =>
+				String_Value : Unbounded_String;
+			when Is_Percent =>
+				Percent_Value : Percent;
+			when Is_Money =>
+				Money_Value : Money;
+			when Is_Date =>
+				Date_Value : Date;
+			when Is_Timestamp =>
+				Timestamp_Value : Timestamp;
+			when Is_Dimension =>
+				Dimension_Value : Dimension;
+			when Is_Weight =>
+				Weight_Value : Weight;
+			when Is_Count =>
+				Count_Value : KOW_Ent.Extra_Properties.Count;
+
+			when Is_None =>
+				null;
+		end case;
 	end record;
 
 	package Operator_Vectors is new Ada.Containers.Vectors(
