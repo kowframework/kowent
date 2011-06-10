@@ -34,9 +34,11 @@
 -- Ada 2005 --
 --------------
 with Ada.Containers.Vectors;
+with Ada.Finalization;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with Ada.Tags;
 with Ada.Text_IO;
+with Ada.Unchecked_Deallocation;
 
 -------------------
 -- KOW Framework --
@@ -366,7 +368,7 @@ package body KOW_Ent.Query_Builders is
 		-- append another query as a child query :: () stuff
 		Handler : Operator_Handler_Type( Data_Type => Is_None );
 	begin
-		Handler.Child_Query := new Query_Type'( Child_Q );
+		Handler.Child_Query.Q := new Query_Type'( Child_Q );
 		Handler.Appender := Appender;
 		Handler.Operation_Type := Q_Operator;
 
@@ -494,7 +496,7 @@ package body KOW_Ent.Query_Builders is
 
 				when Q_Operator =>
 					APQ.Append( APQ_Q, "(" );
-					Append_to_APQ_Query( Handler.Child_Query.all, APQ_Q, Connection );
+					Append_to_APQ_Query( Handler.Child_Query.Q.all, APQ_Q, Connection );
 					APQ.Append( APQ_Q, ")" );
 			end case;
 		end Append_Operator;
@@ -776,4 +778,30 @@ package body KOW_Ent.Query_Builders is
 
 		return To_String( Buffer );
 	end To_String;
+
+-- private
+
+	
+	procedure Free is new Ada.Unchecked_Deallocation(
+				Object	=> Query_Type,
+				Name	=> Query_Ptr
+			);
+
+	overriding
+	procedure Finalize( Container : in out Query_Container_Type ) is
+	begin
+		if Container.Q /= null then
+			Free( Container.Q );
+		end if;
+	end Finalize;
+
+	overriding
+	procedure Adjust( Container : in out Query_Container_Type ) is
+	begin
+		if Container.Q /= null then
+			Container.Q := new Query_Type'( Container.Q.all );
+		end if;
+	end Adjust;
+
+
 end KOW_Ent.Query_Builders;

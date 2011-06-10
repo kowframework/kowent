@@ -43,6 +43,7 @@
 -- Ada 2005 --
 --------------
 with Ada.Containers.Vectors;
+with Ada.Finalization;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 
 -------------------
@@ -356,6 +357,18 @@ private
 		);
 
 	
+	type Query_Container_Type is new Ada.Finalization.Controlled with record
+		Q	: Query_Ptr := null;
+	end record;
+
+	overriding
+	procedure Finalize( Container : in out Query_Container_Type );
+
+	overriding
+	procedure Adjust( Container : in out Query_Container_Type );
+
+
+
 	type Operator_Handler_Type( Data_Type : Operator_Data_Type := Is_None ) is record
 		-- global :
 		Appender	: Logic_Appender;
@@ -366,7 +379,7 @@ private
 		Operator	: Logic_Operator;
 
 		-- child query :
-		Child_Query	: Query_Ptr;
+		Child_Query	: Query_Container_Type;
 
 
 		case Data_Type is
@@ -391,6 +404,8 @@ private
 				null;
 		end case;
 	end record;
+
+
 
 	package Operator_Vectors is new Ada.Containers.Vectors(
 			Element_Type	=> Operator_Handler_Type,
@@ -420,5 +435,6 @@ private
 		Operators	: Operator_Vectors.Vector;
 		Order_By	: Order_By_Vectors.Vector;
 	end record;
+
 
 end KOW_Ent.Query_Builders;
