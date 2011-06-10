@@ -57,6 +57,7 @@ with APQ;
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private;
 package KOW_Ent.Query_Builders is
+
 	
 	--------------------
 	-- Entity Vectors --
