@@ -466,17 +466,9 @@ package body KOW_Ent.Query_Builders is
 	-- 
 	-- All
 	--
-	generic
-		with procedure Iterator(
-					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Connection_Type'Class
-				);
 	procedure Generic_All_Iterator( Q : in Query_Type ) is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
-
-			procedure Append_Entity is
-			end Append_Entity;
 
 		begin
 			Build_Query( Q, Query, Connection );
@@ -484,7 +476,7 @@ package body KOW_Ent.Query_Builders is
 			begin
 				loop
 					APQ.Fetch( Query );
-					Append_Entity;
+					Iterator( Query, Connection );
 				end loop;
 			exception
 				when APQ.No_Tuple =>
@@ -501,13 +493,8 @@ package body KOW_Ent.Query_Builders is
 	--
 
 	
-	generic
-		with procedure Iterator(
-					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Connection_Type'Class
-				);
 	procedure Generic_Some_Iterator(
-				Query	: in Query_Type;
+				Q	: in Query_Type;
 				From	: in Positive;
 				Limit	: in Natural
 			) is
@@ -566,15 +553,10 @@ package body KOW_Ent.Query_Builders is
 	--
 	-- First 
 	--
-	generic
-		with procedure Iterator(
-				Query		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class
-			);
 	procedure Generic_First_Iterator(
 				Q	: in Query_Type;
 				Unique	: in Boolean
-			)
+			) is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
@@ -687,14 +669,14 @@ package body KOW_Ent.Query_Builders is
 		
 		procedure Set_Value(
 					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Query_Type'Class
+					Connection	: in out APQ.Root_Connection_Type'Class
 				) is
 		begin
 			Total := Total + 1;
 			Results( Total ) := KOW_Ent.TO_ID( Integer( KOW_Ent.ID_Value( Query, APQ.Column_Index( Query, "id" ) ) ) );
 		end Set_Value;
 
-		procedure Iterate is new Generic_Get_Some_Iterator( Set_Value );
+		procedure Iterate is new Generic_Some_Iterator( Iterator => Set_Value );
 	begin
 		Iterate( Q, From, Limit );
 
@@ -715,9 +697,34 @@ package body KOW_Ent.Query_Builders is
 		Result		: Entity_Vectors.Vector;
 		Total_Count	: Natural;
 
+		procedure Set_Value(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				) is
+			Entity	: Entity_Type;
+		begin
+			Set_Values_From_Query_Helper( Entity, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
+		end Set_Value;
+
 	begin
-		APQ_Provider.Run( KOW_Ent.My_Provider.all, Runner'Access );
 		return Result;
+	end Get_Some;
+
+
+	procedure Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural;
+				Result		:    out Entity_Vectors.Vector;
+				Total_Count	:    out Natural
+			) is
+		-- ger some results from _From_.
+		-- if limit = 0 then get all remaining results
+		--
+		-- for backwards compatibility only! avoid the use
+	begin
+		Result := Get_Some( Q, From, Limit );
+		Total_Count := Count( Q );
 	end Get_Some;
 
 
@@ -812,7 +819,7 @@ package body KOW_Ent.Query_Builders is
 		APQ_Provider.Run( KOW_Ent.My_Provider.all, Count_Runner'Access );
 
 		return Total_Count;
-	end Get_Some;
+	end Count;
 
 
 

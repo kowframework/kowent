@@ -43,6 +43,7 @@
 with Ada.Containers;
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Containers.Ordered_Maps;
+with Ada.Exceptions;
 with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 with Ada.Tags;					use Ada.Tags;
 

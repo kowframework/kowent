@@ -304,6 +304,52 @@ package KOW_Ent.Query_Builders is
 	-----------------------------------------------------------------------------------------------------------------
 
 
+
+	-----------------------------
+	-- Generic Implementations --
+	-----------------------------
+
+
+	-- 
+	-- All
+	--
+	generic
+		with procedure Iterator(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				);
+	procedure Generic_All_Iterator( Q : in Query_Type );
+
+	-- 
+	-- Some
+	--
+
+	generic
+		with procedure Iterator(
+					Query		: in out APQ.Root_Query_Type'Class;
+					Connection	: in out APQ.Root_Connection_Type'Class
+				);
+	procedure Generic_Some_Iterator(
+				Q	: in Query_Type;
+				From	: in Positive;
+				Limit	: in Natural
+			);
+
+	--
+	-- First 
+	--
+	generic
+		with procedure Iterator(
+				Query		: in out APQ.Root_Query_Type'Class;
+				Connection	: in out APQ.Root_Connection_Type'Class
+			);
+	procedure Generic_First_Iterator(
+				Q	: in Query_Type;
+				Unique	: in Boolean
+			);
+
+
+
 	---------------------
 	-- Retrieving Data --
 	---------------------
@@ -341,6 +387,20 @@ package KOW_Ent.Query_Builders is
 			) return Entity_Vectors.Vector;
 	-- ger some results from _From_.
 	-- if limit = 0 then get all remaining results
+
+
+
+	procedure Get_Some(
+				Q		: in     Query_Type;
+				From		: in     Positive;
+				Limit		: in     Natural;
+				Result		:    out Entity_Vectors.Vector;
+				Total_Count	:    out Natural
+			);
+	-- ger some results from _From_.
+	-- if limit = 0 then get all remaining results
+	--
+	-- for backwards compatibility only! avoid the use
 
 
 	--
