@@ -142,7 +142,7 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	procedure Will_Update( Validation : in out Validation_Entity );
 	-- make sure the validation period is actually valid..
 	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity;
+	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity'Class;
 	-- get the last validation in the database backend
 
 

@@ -96,11 +96,13 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 	function Is_Valid( Entity : in Entity_Type ) return Boolean is
 		-- check if the entity is in a valid period
-		Validation : Validation_Entity;
 		Now : Validation_Timestamp := Clock;
 	begin
-		Validation := Last_Validation( Entity );
-		return Validation.From_Date <= Now AND ( Validation.To_Date >= Now OR Validation.To_Date = No_Validation_Timestamp );
+		declare
+			Validation : Validation_Entity'Class := Last_Validation( Entity );
+		begin
+			return Validation.From_Date <= Now AND ( Validation.To_Date >= Now OR Validation.To_Date = No_Validation_Timestamp );
+		end;
 	exception
 		when INVALID_PERIOD => 
 			return false;
@@ -130,7 +132,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	procedure Expire( Entity : in Entity_Type; To_Date : in Validation_Timestamp ) is
 		-- expire in the given date..
 		-- raise invalid_period when To_Date < the last validation period
-		Validation : Validation_Entity := Last_Validation( Entity );
+		Validation : Validation_Entity'Class := Last_Validation( Entity );
 	begin
 		if Validation.To_Date /= No_Validation_Timestamp AND THEN Validation.To_Date < To_Date then
 			raise INVALID_PERIOD with "Invalidating an already invalid entity";
@@ -175,12 +177,12 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	end Validate_Now;
 
 	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity is
+	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity'Class is
 		-- get the last validation in the database backend
 		Validations : Validation_Array := Get_Validations( Entity );
 		-- TODO :: implement Last_Validation using Query_Builders
 	begin
-		return Validations( Validations'Last );
+		return Validation_Entity'Class( KOW_Ent.Narrow( Validations( Validations'Last ) ) );
 	end Last_Validation;
 
 
