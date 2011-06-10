@@ -84,9 +84,13 @@ package KOW_Ent.Query_Builders is
 	);
 
 	type Logic_Operator is (
-		Operator_Equals,
-		Operator_Not_Equals,
-		Operator_Like
+		Operator_Equal_To,
+		Operator_Not_Equal_To,
+		Operator_Like,
+		Operator_Less_Than,
+		Operator_Less_Than_Or_Equal_To,
+		Operator_Greater_Than,
+		Operator_Greater_Than_Or_Equal_To
 	);
 
 	----------------------
@@ -107,7 +111,7 @@ package KOW_Ent.Query_Builders is
 				Q		: in out Query_Type;
 				Foreign_Key	: in     KOW_Ent.Entity_Type'Class;
 				Appender	: in     Logic_Appender := Appender_AND;
-				Operator	: in     Logic_Operator := Operator_Equals
+				Operator	: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element based on foreign key
 	
@@ -120,7 +124,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     String;
 				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 
@@ -129,7 +133,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 
 	--
@@ -141,7 +145,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     String;
 				Value	: in     String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 
@@ -151,7 +155,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 
@@ -161,7 +165,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 	
@@ -175,7 +179,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     String;
 				Value	: in     String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 
@@ -185,7 +189,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 
@@ -195,7 +199,7 @@ package KOW_Ent.Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			);
 	-- append a query element to this query
 

@@ -111,7 +111,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Q		: in out Query_Type;
 				Foreign_Key	: in     KOW_Ent.Entity_Type'Class;
 				Appender	: in     Logic_Appender := Appender_AND;
-				Operator	: in     Logic_Operator := Operator_Equals
+				Operator	: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element based on foreign key
 		Properties : KOW_Ent.Property_Lists.List;
@@ -161,7 +161,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     String;
 				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 	begin
 		Append(
@@ -178,7 +178,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     KOW_Ent.Id_Type;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 	begin
 		Append(
@@ -200,7 +200,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     String;
 				Value	: in     String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 	begin
@@ -220,7 +220,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 	begin
@@ -240,7 +240,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 		Handler : Operator_Handler_Type;
@@ -266,7 +266,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     String;
 				Value	: in     String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 	begin
@@ -287,7 +287,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 	begin
@@ -306,7 +306,7 @@ package body KOW_Ent.ID_Query_Builders is
 				Column	: in     Unbounded_String;
 				Value	: in     Unbounded_String;
 				Appender: in     Logic_Appender := Appender_AND;
-				Operator: in     Logic_Operator := Operator_Equals
+				Operator: in     Logic_Operator := Operator_Equal_To
 			) is
 		-- append a query element to this query
 	begin
@@ -419,12 +419,20 @@ package body KOW_Ent.ID_Query_Builders is
 				when L_Operator =>
 					APQ.Append( APQ_Q, To_String( Handler.Column ) );
 					case Handler.Operator is
-						when Operator_Equals =>
+						when Operator_Equal_To =>
 							APQ.Append( APQ_Q, "=" );
-						when Operator_Not_Equals =>
+						when Operator_Not_Equal_To =>
 							APQ.Append( APQ_Q, "!=" );
 						when Operator_Like =>
 							APQ.Append( APQ_Q, " LIKE " );
+						when Operator_Less_Than =>
+							APQ.Append( APQ_Q, " < " );
+						when Operator_Less_Than_Or_Equal_To =>
+							APQ.Append( APQ_Q, " <= " );
+						when Operator_Greater_Than =>
+							APQ.Append( APQ_Q, " > " );
+						when Operator_Greater_Than_Or_Equal_To =>
+							APQ.Append( APQ_Q, " >= " );
 					end case;
 					APQ.Append_Quoted( 
 							APQ_Q, 
