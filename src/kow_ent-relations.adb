@@ -39,6 +39,7 @@ with Ada.Containers.Vectors;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
 
 
@@ -51,8 +52,9 @@ package body KOW_Ent.Relations is
 		-- package Related_Entity_Vectors is new Ada.Containers.Vectors(
 
 		function Get_Query( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Query_Type is
+			use KOW_Ent.Id_Query_Builders;
 			use Related_Entity_Query_Builders;
-			Query : Query_Type;
+			Query : Related_Entity_Query_Builders.Query_Type;
 		begin
 			Append(
 				Q		=> Query,

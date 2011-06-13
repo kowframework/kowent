@@ -49,7 +49,7 @@ with Ada.Containers.Vectors;
 -------------------
 with KOW_Ent;
 with KOW_Ent.Properties;
-with KOW_Ent.Query_Builders;
+with KOW_Ent.Generic_Query_Builders;
 
 
 
@@ -63,7 +63,7 @@ package KOW_Ent.Relations is
 		with procedure Set_Foreign_Key( Entity : in out To_Entity_Type; Key_From : in KOW_Ent.Entity_Type'Class );
 	package One_to_Many_Relation_Handlers is
 		
-		package Related_Entity_Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => To_Entity_Type );
+		package Related_Entity_Query_Builders is new KOW_Ent.Generic_Query_Builders( Entity_Type => To_Entity_Type );
 		-- used internally for querying the elements.
 		-- it's also public in here so the user can use the same vector type and
 		-- then have some aditional control over the results (such as appending different result

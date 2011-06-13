@@ -53,7 +53,7 @@ with APQ;
 -- KOW Framework --
 -------------------
 with KOW_Ent.Extra_Properties;
-with KOW_Ent.Query_Builders;
+with KOW_Ent.Generic_Query_Builders;
 
 
 
@@ -164,7 +164,7 @@ package KOW_Ent.Expirable_Entity_Controllers is
 
 
 
-	package Query_Builders is new KOW_Ent.Query_Builders( Entity_Type => Validation_Entity );
+	package Query_Builders is new KOW_Ent.Generic_Query_Builders( Entity_Type => Validation_Entity );
 
 
 end KOW_Ent.Expirable_Entity_Controllers;

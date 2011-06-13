@@ -47,6 +47,7 @@ with Ada.Containers;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
 
 -- Some information:
@@ -127,7 +128,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		Append(
 				Q	=> Q,
 				Child_Q	=> Child_Q,
-				Appender=> Appender_And
+				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
 		-- TODO :: count

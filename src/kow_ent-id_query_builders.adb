@@ -52,54 +52,7 @@ with KOW_Ent.Properties;
 with APQ;
 with APQ_Provider;
 
-package body KOW_Ent.Query_Builders is
-
-	--------------------
-	-- Helper Methods --
-	--------------------
-	procedure Set_Values_From_Query_Helper(
-				Entity		: in out Entity_Type'Class;
-				Query		: in out APQ.Root_Query_Type'Class;
-				Connection	: in out APQ.Root_Connection_Type'Class;
-				Info		: in     Entity_Information_Type
-			) is
-		-- this package hasn't been update to support extended entities...
-		-- as a result most of the values aren't set at all.
-		--
-		-- this procedure a workaround for this ...
-		--
-		-- it's slow and dumb. I know... but it's easy to implement.
-	begin
-		KOW_Ent.Set_Values_From_Query(
-				Entity		=> Entity,
-				Query		=> Query,
-				Connection	=> Connection,
-				Info		=> Info
-			);
-
-		KOW_Ent.Load( Entity, Entity.ID );
-		-- the trick is to load the entity :)
-	end Set_Values_From_Query_Helper;
-
-
-	--------------------
-	-- Entity Vectors --
-	--------------------
-
-	function To_Json_Array( V : in Entity_Vectors.Vector ) return KOW_Lib.Json.Array_Type is
-		use Entity_Vectors;
-		
-		Arr : KOW_Lib.Json.Array_Type;
-		procedure Iterator( C : in Cursor ) is
-		begin
-			KOW_Lib.Json.Append( Arr, To_Json_Object( Element( C ) ) );
-		end iterator;
-	begin
-		Iterate( V, Iterator'Access );
-
-		return Arr;
-	end To_Json_Array;
-	
+package body KOW_Ent.ID_Query_Builders is
 
 
 	-----------------------------------------------------------------------------------------------------------------
@@ -149,8 +102,15 @@ package body KOW_Ent.Query_Builders is
 		-- clear the query and set it up for the given entity tag
 	begin
 		Clear( Q );
-		Q.Entity_Tag := Entity_Tag;
+		Q.The_Entity_Tag := Entity_Tag;
 	end Prepare;
+
+
+	function Entity_Tag( Q : in Query_Type ) return Unbounded_String is
+	begin
+		pragma Assert( Q.The_Entity_Tag /= Null_Unbounded_String, "you haven't set the entity tag" );
+		return Q.The_Entity_Tag;
+	end Entity_Tag;
 
 
 
@@ -196,7 +156,7 @@ package body KOW_Ent.Query_Builders is
 	begin
 
 		-- first we gotta get all the properties for this entity
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Q.Entity_Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag( Query_Type'Class( Q ) ) );
 
 		-- and now we try to find out which one is a foreign key
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
@@ -620,28 +580,6 @@ package body KOW_Ent.Query_Builders is
 	end Get_All;
 
 
-	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector is
-		-- get all results from the query
-	
-		Results : Entity_Vectors.Vector;
-
-
-		procedure Set_Value(
-					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Connection_Type'Class
-				) is
-			E : Entity_Type;
-		begin
-			Set_Values_From_Query_Helper( E, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-			Entity_Vectors.Append( Results, E );
-		end Set_Value;
-
-		procedure Iterate is new Generic_All_Iterator( Set_Value );
-	begin
-		Iterate( Q );
-		return Results;
-	end Get_All;
-	
 
 	--
 	-- Some
@@ -689,46 +627,6 @@ package body KOW_Ent.Query_Builders is
 
 
 
-	function Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural
-			) return Entity_Vectors.Vector is
-		Result		: Entity_Vectors.Vector;
-		Total_Count	: Natural;
-
-		procedure Set_Value(
-					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Connection_Type'Class
-				) is
-			Entity	: Entity_Type;
-		begin
-			Set_Values_From_Query_Helper( Entity, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-		end Set_Value;
-
-	begin
-		return Result;
-	end Get_Some;
-
-
-	procedure Get_Some(
-				Q		: in     Query_Type;
-				From		: in     Positive;
-				Limit		: in     Natural;
-				Result		:    out Entity_Vectors.Vector;
-				Total_Count	:    out Natural
-			) is
-		-- ger some results from _From_.
-		-- if limit = 0 then get all remaining results
-		--
-		-- for backwards compatibility only! avoid the use
-	begin
-		Result := Get_Some( Q, From, Limit );
-		Total_Count := Count( Q );
-	end Get_Some;
-
-
-
 	--
 	-- First
 	--
@@ -763,32 +661,6 @@ package body KOW_Ent.Query_Builders is
 	end Get_First;
 
 
-
-
-	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is
-		-- get the first element from the query
-		-- if no results, raise NO_ENTITY
-		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
-		Result : Entity_Type;
-
-		
-		procedure Set_Value(
-					Query		: in out APQ.Root_Query_Type'Class;
-					Connection	: in out APQ.Root_Connection_Type'Class
-				) is
-		begin
-			Set_Values_From_Query_Helper( Result, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Q.Entity_Tag ) );
-		end;
-
-		procedure Iterate is new Generic_First_Iterator( Set_Value );
-	begin
-		Iterate( Q, Unique );
-		return Result;
-	exception
-		when APQ.No_Tuple =>
-			raise NO_ENTITY with "Tag :: " & To_String( Q.Entity_Tag );
-
-	end Get_First;
 
 	--
 	-- Count
@@ -835,7 +707,7 @@ package body KOW_Ent.Query_Builders is
 				Connection	: in out APQ.Root_Connection_Type'Class;
 				Count_Query	: in     Boolean := False
 			) is
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Q.Entity_Tag );
+		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag( Query_Type'Class( Q ) ) );
 
 	begin
 		if Count_Query then
@@ -1033,4 +905,4 @@ package body KOW_Ent.Query_Builders is
 	end Adjust;
 
 
-end KOW_Ent.Query_Builders;
+end KOW_Ent.ID_Query_Builders;
