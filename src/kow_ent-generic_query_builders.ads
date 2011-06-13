@@ -85,21 +85,20 @@ package KOW_Ent.Generic_Query_Builders is
 	-- Query Management --
 	----------------------
 	
-	type Query_Type is new KOW_Ent.Id_Query_Builders.Query_Type with null record;
-	type Query_Ptr is access Query_Type;
+	type Entity_Query_Type is new KOW_Ent.Id_Query_Builders.Query_Type with null record;
 
 
 	overriding
-	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Ada.Tags.Tag );
+	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Ada.Tags.Tag );
 	-- clear the query 
 	
 	overriding
-	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Unbounded_String );
+	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Unbounded_String );
 	-- clear the query
 
 
 	overriding
-	function Entity_Tag( Q : in Query_Type ) return Unbounded_String;
+	function Entity_Tag( Q : in Entity_Query_Type ) return Unbounded_String;
 	-- return always the package entity tag
 
 
@@ -118,7 +117,7 @@ package KOW_Ent.Generic_Query_Builders is
 	--
 
 
-	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector;
+	function Get_All( Q : in Entity_Query_Type ) return Entity_Vectors.Vector;
 	-- get all results from the query
 	-- if no results, raise NO_ENTITY
 
@@ -127,7 +126,7 @@ package KOW_Ent.Generic_Query_Builders is
 	--
 
 	function Get_Some(
-				Q		: in     Query_Type;
+				Q		: in     Entity_Query_Type;
 				From		: in     Positive;
 				Limit		: in     Natural
 			) return Entity_Vectors.Vector;
@@ -137,7 +136,7 @@ package KOW_Ent.Generic_Query_Builders is
 
 
 	procedure Get_Some(
-				Q		: in     Query_Type;
+				Q		: in     Entity_Query_Type;
 				From		: in     Positive;
 				Limit		: in     Natural;
 				Result		:    out Entity_Vectors.Vector;
@@ -153,7 +152,7 @@ package KOW_Ent.Generic_Query_Builders is
 	-- First
 	--
 
-	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type;
+	function Get_First( Q : in Entity_Query_Type; Unique : in Boolean ) return Entity_Type;
 	-- get the first element from the query
 	-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.
 	-- if no results, raise NO_ENTITY

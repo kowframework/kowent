@@ -71,7 +71,7 @@ package KOW_Ent.Relations is
 
 		function get_All(
 					Entity		: in From_Entity_Type;
-					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+					Extra_Filters	: in Related_Entity_Query_Builders.Entity_Query_Type
 				) return Related_Entity_Query_Builders.Entity_Vectors.Vector;
 		-- Get all the related To_Entity_Type with the extra_filters
 
@@ -80,7 +80,7 @@ package KOW_Ent.Relations is
 		
 		function get_First(
 					Entity		: in From_Entity_Type;
-					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+					Extra_Filters	: in Related_Entity_Query_Builders.Entity_Query_Type
 				) return To_Entity_Type;
 		-- Get the first related To_Entity_Type with extra_filters
 

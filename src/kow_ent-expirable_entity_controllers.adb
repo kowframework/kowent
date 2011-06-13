@@ -102,11 +102,11 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 			) return Boolean is
 		-- check if the entity is valid anytime durin the given period
 		use Query_Builders;
-		Q, Child_Q : Query_Type;
+		Q, Child_Q : Entity_Query_Type;
 
 
 		procedure Append_Inside( Date : in Validation_Timestamp ) is
-			Sub_Child_Q : Query_Type;
+			Sub_Child_Q : Entity_Query_Type;
 		begin
 			Append(
 					Q	=> Sub_Child_Q,
@@ -241,7 +241,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 	function Get_Validations( Entity : in Entity_Type ) return Validation_Array is
 		-- get all the registered validation entities
-		Query	: Query_Builders.Query_Type;
+		Query	: Query_Builders.Entity_Query_Type;
 		Results	: Query_Builders.Entity_Vectors.Vector;
 
 		use Query_Builders;

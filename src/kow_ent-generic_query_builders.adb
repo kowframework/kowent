@@ -107,14 +107,14 @@ package body KOW_Ent.Generic_Query_Builders is
 	----------------------
 	
 	overriding
-	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Ada.Tags.Tag ) is
+	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Ada.Tags.Tag ) is
 		-- clear the query 
 	begin
 		Clear( Q );
 	end Prepare;
 
 	overriding
-	procedure Prepare( Q : in out Query_Type; Entity_Tag : in Unbounded_String ) is
+	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Unbounded_String ) is
 		-- clear the query
 	begin
 		Clear( Q );
@@ -123,7 +123,7 @@ package body KOW_Ent.Generic_Query_Builders is
 
 	The_Entity_Tag : constant Unbounded_String := To_Unbounded_String( Ada.Tags.Expanded_Name( Entity_Type'Tag ) );
 	overriding
-	function Entity_Tag( Q : in Query_Type ) return Unbounded_String is
+	function Entity_Tag( Q : in Entity_Query_Type ) return Unbounded_String is
 		-- return always the package entity tag
 	begin
 		return The_Entity_Tag;
@@ -143,7 +143,7 @@ package body KOW_Ent.Generic_Query_Builders is
 	-- All
 	--
 
-	function Get_All( Q : in Query_Type ) return Entity_Vectors.Vector is
+	function Get_All( Q : in Entity_Query_Type ) return Entity_Vectors.Vector is
 		-- get all results from the query
 	
 		Results : Entity_Vectors.Vector;
@@ -173,7 +173,7 @@ package body KOW_Ent.Generic_Query_Builders is
 
 
 	function Get_Some(
-				Q		: in     Query_Type;
+				Q		: in     Entity_Query_Type;
 				From		: in     Positive;
 				Limit		: in     Natural
 			) return Entity_Vectors.Vector is
@@ -193,7 +193,7 @@ package body KOW_Ent.Generic_Query_Builders is
 
 
 	procedure Get_Some(
-				Q		: in     Query_Type;
+				Q		: in     Entity_Query_Type;
 				From		: in     Positive;
 				Limit		: in     Natural;
 				Result		:    out Entity_Vectors.Vector;
@@ -215,7 +215,7 @@ package body KOW_Ent.Generic_Query_Builders is
 	--
 
 
-	function Get_First( Q : in Query_Type; Unique : in Boolean ) return Entity_Type is
+	function Get_First( Q : in Entity_Query_Type; Unique : in Boolean ) return Entity_Type is
 		-- get the first element from the query
 		-- if no results, raise NO_ENTITY
 		-- if Unique = True and Tuples( Q ) /= 1 then raise DUPLICATED_ENTITY_ELEMENT.

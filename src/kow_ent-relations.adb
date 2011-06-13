@@ -51,10 +51,10 @@ package body KOW_Ent.Relations is
 		
 		-- package Related_Entity_Vectors is new Ada.Containers.Vectors(
 
-		function Get_Query( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Query_Type is
+		function Get_Query( Entity : in From_Entity_Type ) return Related_Entity_Query_Builders.Entity_Query_Type is
 			use KOW_Ent.Id_Query_Builders;
 			use Related_Entity_Query_Builders;
-			Query : Related_Entity_Query_Builders.Query_Type;
+			Query : Entity_Query_Type;
 		begin
 			Append(
 				Q		=> Query,
@@ -68,10 +68,10 @@ package body KOW_Ent.Relations is
 
 		function get_All(
 					Entity		: in From_Entity_Type;
-					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+					Extra_Filters	: in Related_Entity_Query_Builders.Entity_Query_Type
 				) return Related_Entity_Query_Builders.Entity_Vectors.Vector is
 			-- Get all the related To_Entity_Type with the extra_filters
-			Q : Related_Entity_Query_Builders.Query_Type := Get_Query( Entity );
+			Q : Related_Entity_Query_Builders.Entity_Query_Type := Get_Query( Entity );
 		begin
 			Related_Entity_Query_Builders.Append( Q, Extra_Filters );
 			return Related_Entity_Query_Builders.Get_All( Q => Q );
@@ -87,10 +87,10 @@ package body KOW_Ent.Relations is
 
 		function get_First(
 					Entity		: in From_Entity_Type;
-					Extra_Filters	: in Related_Entity_Query_Builders.Query_Type
+					Extra_Filters	: in Related_Entity_Query_Builders.Entity_Query_Type
 				) return To_Entity_Type is
 			-- Get the first related To_Entity_Type with extra_filters
-			Q : Related_Entity_Query_Builders.Query_Type := Get_Query( Entity );
+			Q : Related_Entity_Query_Builders.Entity_Query_Type := Get_Query( Entity );
 		begin
 			Related_Entity_Query_Builders.Append( Q, Extra_Filters );
 			return Related_Entity_Query_Builders.Get_First( Q => Q, Unique => False );
