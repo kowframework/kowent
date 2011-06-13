@@ -229,26 +229,83 @@ package KOW_Ent.ID_Query_Builders is
 	-- Money 
 	--
 
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Money;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
+
 	--
 	-- Date 
 	--
+
+	procedure Date_Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Date;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
 
 	--
 	-- Timestamp 
 	--
 
+	procedure Timestamp_Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Timestamp;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
+
 	--
 	-- Dimension 
 	--
+
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Dimension;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
+
 
 	--
 	-- Weight 
 	--
 
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Weight;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
+
+
+
 	--
 	-- Count 
 	--
 
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     KOW_Ent.Extra_Properties.Count;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			);
 
 
 

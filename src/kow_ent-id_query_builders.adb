@@ -355,6 +355,161 @@ package body KOW_Ent.ID_Query_Builders is
 	end Append;
 
 
+	--
+	-- Money
+	--
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Money;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Money );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Money_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Append;
+
+
+
+	--
+	-- Date 
+	--
+
+	procedure Date_Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Date;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Date );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Date_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Date_Append;
+
+
+
+	--
+	-- Timestamp 
+	--
+
+	procedure Timestamp_Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Timestamp;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Timestamp );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Timestamp_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Timestamp_Append;
+
+
+	--
+	-- Dimension 
+	--
+
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Dimension;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Dimension );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Dimension_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Append;
+
+
+	--
+	-- Weight 
+	--
+
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     Weight;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Weight );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Weight_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+	end Append;
+
+
+
+
+	--
+	-- Count 
+	--
+
+
+	procedure Append(
+				Q	: in out Query_Type;
+				Column	: in     String;
+				Value	: in     KOW_Ent.Extra_Properties.Count;
+				Appender: in     Logic_Appender := Appender_AND;
+				Operator: in     Logic_Operator := Operator_Equal_To
+			) is
+		Handler : Operator_Handler_Type( Data_Type => Is_Count );
+	begin
+		Handler.Column		:= To_Unbounded_String( Column );
+		Handler.Count_Value	:= Value;
+		Handler.Appender	:= Appender;
+		Handler.Operator	:= Operator;
+		Handler.Operation_Type	:= L_Operator;
+
+
+		Operator_Vectors.Append( Q.Operators, Handler );
+
+	end Append;
+
+
+
+
 
 	--
 	-- Sub Queries
@@ -808,22 +963,22 @@ package body KOW_Ent.ID_Query_Builders is
 								);
 
 						when Is_Percent =>
-							null;
+							KOW_Ent.Extra_Properties.Percent_Properties.Append( APQ_Q, Handler.Percent_Value );
 						when Is_Money =>
-							null;
+							KOW_Ent.Extra_Properties.Money_Properties.Append( APQ_Q, Handler.Money_Value );
 						when Is_Date =>
-							null;
+							KOW_Ent.Extra_Properties.Date_Properties.Append( APQ_Q, Handler.Date_Value );
 						when Is_Timestamp =>
-							null;
+							KOW_Ent.Extra_Properties.Timestamp_Properties.Append( APQ_Q, Handler.Timestamp_Value );
 						when Is_Dimension =>
-							null;
+							KOW_Ent.Extra_Properties.Dimension_Properties.Append( APQ_Q, Handler.Dimension_Value );
 						when Is_Weight =>
-							null;
+							KOW_Ent.Extra_Properties.Weight_Properties.Append( APQ_Q, Handler.Weight_Value );
 						when Is_Count =>
-							null;
+							KOW_Ent.Extra_Properties.Count_Properties.Append( APQ_Q, Handler.Count_Value );
 
 						when Is_None =>
-							null;
+							raise CONSTRAINT_ERROR with "invalid logic operator in query";
 					end case;
 
 
