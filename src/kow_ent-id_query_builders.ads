@@ -242,7 +242,7 @@ package KOW_Ent.ID_Query_Builders is
 	-- Date 
 	--
 
-	procedure Date_Append(
+	procedure Append_Date(
 				Q	: in out Query_Type;
 				Column	: in     String;
 				Value	: in     Date;
@@ -255,7 +255,7 @@ package KOW_Ent.ID_Query_Builders is
 	-- Timestamp 
 	--
 
-	procedure Timestamp_Append(
+	procedure Append_Timestamp(
 				Q	: in out Query_Type;
 				Column	: in     String;
 				Value	: in     Timestamp;
