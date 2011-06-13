@@ -73,12 +73,6 @@ package KOW_Ent.Generic_Query_Builders is
 
 	function To_Json_Array( V : in Entity_Vectors.Vector ) return KOW_Lib.Json.Array_Type;
 	
-	----------------
-	-- Exceptions --
-	----------------
-	NO_ENTITY			: Exception;
-	DUPLICATED_ENTITY_ELEMENT	: Exception;
-
 	-----------------------------------------------------------------------------------------------------------------
 
 	----------------------
