@@ -106,14 +106,55 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 		procedure Append_Inside( Date : in Validation_Timestamp ) is
+			use KOW_Ent.Id_Query_Builders;
 			Sub_Child_Q : Entity_Query_Type;
 		begin
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "from_date",
+					Value		=> Date,
+					Operator	=> Operator_Less_Than_Or_Equal_To
+				);
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "to_date",
+					Value		=> Date,
+					Operator	=> Operator_Greater_Than_Or_Equal_To
+				);
+
 			Append(
-					Q	=> Sub_Child_Q,
-					Column	=> "from_date",
-					Value	=> ""
+					Q		=> Child_Q,
+					Child_Q		=> Sub_Child_Q,
+					Appender	=> Appender_OR
 				);
 		end Append_Inside;
+
+
+		procedure Append_Outside is
+			use KOW_Ent.Id_Query_Builders;
+			Sub_Child_Q : Entity_Query_Type;
+		begin
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "from_date",
+					Value		=> From_Date,
+					Operator	=> Operator_Greater_Than
+				);
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "to_date",
+					Value		=> To_Date,
+					Operator	=> Operator_Less_Than
+				);
+
+			Append(
+					Q		=> Child_Q,
+					Child_Q		=> Sub_Child_Q,
+					Appender	=> Appender_OR
+				);
+		end Append_Outside;
+
+			
 	begin
 		Append(
 				Q	=> Q,
@@ -123,7 +164,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 		Append_Inside( From_Date );
 		Append_Inside( To_Date );
-		--Append_Outside;
+		Append_Outside;
 
 		Append(
 				Q	=> Q,
@@ -131,8 +172,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
-		-- TODO :: count
-		return true;
+		return Count( Q ) = 1;
 	end Is_Valid;
 
 

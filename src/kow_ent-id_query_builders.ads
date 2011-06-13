@@ -73,6 +73,9 @@ package KOW_Ent.ID_Query_Builders is
 		Appender_OR
 	);
 
+	-- all operators take into account:
+	-- 	Left-hand side of operation	=> Value inside the database
+	-- 	Right-hand side of operation	=> Parameter passed into the append procedure
 	type Logic_Operator is (
 		Operator_Equal_To,
 		Operator_Not_Equal_To,
