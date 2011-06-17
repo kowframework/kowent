@@ -363,17 +363,53 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		--
 		-- raise invalid_period if Is_Valid = TRUE
 		Validation : Validation_Entity;
+
+
+		use Query_Builders;
+		Q : Entity_Query_Type;
 	begin
-		if Is_Valid( Entity, From_Date, Clock ) then
+
+		-- Check if it's valid ...
+		if Is_Valid( Entity, From_Date ) then
 			raise INVALID_PERIOD with "Trying to validate an already valid entity";
 		end if;
 
 		Validation.From_Date := From_Date;
-		Validation.To_Date := No_Validation_Timestamp;
-		Validation.Owner_Id := Entity.ID;
+		Validation.Owner_Id  := Entity.ID;
+
+
+
+		-- we set the validation timestamp;..
+
+
+		Append(
+				Q	=> Q,
+				Column	=> "owner_id",
+				Value	=> Entity.id
+			);
+
+		Append_Timestamp(
+				Q	=> Q,
+				Column	=> "from_date",
+				Value	=> From_Date,
+				Operator=> KOW_Ent.Id_Query_Builders.Operator_Greater_Than
+			);
+
+		Append_Order(
+				Q	=> Q,
+				Column	=> "from_date"
+			);
+
+
+
+		if Count( Q ) >= 1 then
+			Validation.To_Date := Get_First( Q, False ).From_Date - 1;
+		else
+			Validation.To_Date := No_Validation_Timestamp;
+		end if;
+
 
 		Store( Validation );
-
 	end Validate;
 
 
