@@ -367,7 +367,53 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		use Query_Builders;
 
 
-		Validation	: Validation_Entity;
+
+		function Get_Validation return Validation_Entity'Class is
+			use KOW_Ent.Id_Query_Builders;
+			Previous_Q : Entity_Query_Type;
+		begin
+			Append(
+					Q	=> Previous_Q,
+					Column	=> "owner_id",
+					Value	=> Entity.ID
+				);
+
+
+			Append_Timestamp(
+					Q	=> Previous_Q,
+					Column	=> "to_date",
+					Value	=> From_Date,
+					Operator=> Operator_Less_Than
+				);
+
+			Append_Timestamp(
+					Q	=> Previous_Q,
+					Column	=> "to_date",
+					Value	=> No_Validation_Timestamp,
+					Operator=> Operator_Not_Equal_To
+				);
+
+			Append_Order(
+					Q		=> Previous_Q,
+					Column		=> "to_date",
+					Ordenation	=> DESCENDING
+				);
+
+
+
+			if Count( Previous_Q ) >= 1 then
+				return Validation_Entity'Class( KOW_Ent.Narrow( Get_First( Previous_Q, False ) ) );
+			else
+				declare
+					New_Validation : Validation_Entity;
+				begin
+					return New_Validation;
+				end;
+			end if;
+		end Get_Validation;
+
+
+		Validation	: Validation_Entity'Class := Get_Validation;
 		Q		: Entity_Query_Type;
 	begin
 

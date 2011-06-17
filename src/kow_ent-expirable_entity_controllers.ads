@@ -196,6 +196,11 @@ package KOW_Ent.Expirable_Entity_Controllers is
 			);
 	-- validate from the given date..
 	--
+	-- if there is a validation period just before From_Date, copy
+	-- that into the current one;
+	--
+	-- this will easy the work in case you extend the validation_entity type
+	--
 	-- raise invalid_period if Is_Valid = TRUE
 
 
