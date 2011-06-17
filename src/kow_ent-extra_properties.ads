@@ -127,10 +127,10 @@ package KOW_Ent.Extra_Properties is
 
 	No_Timestamp : constant Timestamp := Timestamp(
 						Ada.Calendar.Time_Of(
-								Year	=> 1948,
-								Month	=> 1,
-								Day	=> 30,
-								Seconds	=> 13.13
+								Year	=> Ada.Calendar.Year_Number'First,
+								Month	=> Ada.Calendar.Month_Number'First,
+								Day	=> Ada.Calendar.Day_Number'First,
+								Seconds	=> 0.0
 							)
 				);
 	-- date of Mohandas Karamchand Gandhi's death
@@ -149,12 +149,7 @@ package KOW_Ent.Extra_Properties is
 			Val_Type	=> Timestamp,
 			To_String	=> Timestamp_To_String,
 			From_String	=> Timestamp_From_String,
-			Null_Value	=> Ada.Calendar.Time_Of(
-							Year	=> Ada.Calendar.Year_Number'First,
-							Month	=> Ada.Calendar.Month_Number'First,
-							Day	=> Ada.Calendar.Day_Number'First,
-							Seconds	=> 0.0
-						)
+			Null_Value	=> No_Timestamp
 		);
 
 

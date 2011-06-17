@@ -28,7 +28,7 @@
 -- covered by the  GNU Public License.                                      --
 --                                                                          --
 ------------------------------------------------------------------------------
-
+with ada.text_io;
 
 with APQ;
 
@@ -75,6 +75,7 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 			) is
 		-- Append into a query being created by the main KOW_ent engine.
 	begin
+		ada.text_io.put_line( "pegando :: " & get_property( property, entity ) );
 		Append( Query, Property.Getter.all( Entity ) );
 	end Get_Property;
 

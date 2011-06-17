@@ -34,6 +34,7 @@
 -- validation periods for entities.                                         --
 ------------------------------------------------------------------------------
 
+with ada.text_io;
 
 
 --------------
@@ -177,6 +178,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
+		Ada.Text_IO.Put_Line( To_String( Q ) );
 		if Count( Q ) /= 1 then
 			raise NO_VALIDATION with "it's not actually valid in the given period";
 		end if;
@@ -289,6 +291,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
+		ada.text_io.put_line( to_string( q ) );
 		return Count( Q ) = 1;
 	end Is_Valid;
 
@@ -402,7 +405,13 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 			if Count( Previous_Q ) >= 1 then
-				return Validation_Entity'Class( KOW_Ent.Narrow( Get_First( Previous_Q, False ) ) );
+				declare
+					No_ID : KOW_Ent.Id_Type;
+					Validation : Validation_Entity'Class := Validation_Entity'Class( KOW_Ent.Narrow( Get_First( Previous_Q, False ) ) );
+				begin
+					Validation.ID := No_ID;
+					return Validation;
+				end;
 			else
 				declare
 					New_Validation : Validation_Entity;
@@ -449,10 +458,13 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 			);
 
 
+		Ada.text_io.put_line( to_string(q));
 
 		if Count( Q ) >= 1 then
+			Ada.Text_IO.Put_Line("lalala" );
 			Validation.To_Date := Get_First( Q, False ).From_Date - Day_Duration(1);
 		else
+			Ada.Text_IO.Put_Line("novo lalalalalalalala" );
 			Validation.To_Date := No_Validation_Timestamp;
 		end if;
 

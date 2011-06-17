@@ -101,8 +101,8 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	-----------------------
 
 	type Validation_Entity is new KOW_Ent.Entity_Type with record
-		From_Date	: Validation_Timestamp := Ada.Calendar.Clock;
-		To_Date		: Validation_Timestamp := Ada.Calendar.Clock;
+		From_Date	: Validation_Timestamp := No_Validation_Timestamp;
+		To_Date		: Validation_Timestamp := No_Validation_Timestamp;
 		Owner_ID	: KOW_Ent.ID_Type;
 	end record;
 
