@@ -613,6 +613,7 @@ package body KOW_Ent.ID_Query_Builders is
 				From	: in Positive;
 				Limit	: in Natural
 			) is
+			use ada.text_io;
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 			use APQ;
@@ -876,7 +877,6 @@ package body KOW_Ent.ID_Query_Builders is
 		APQ.Append( Query, " " );
 		Append_Order_By_to_APQ_Query( Q, Query, Connection );
 
-		-- Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 	end Build_Query;
 
 

@@ -185,9 +185,12 @@ package body KOW_Ent.Generic_Query_Builders is
 			Entity	: Entity_Type;
 		begin
 			Set_Values_From_Query_Helper( Entity, Query, Connection, KOW_Ent.Entity_Registry.Get_Information( Entity_Tag( Q ) ) );
+			Entity_Vectors.Append( Result, Entity );
 		end Set_Value;
 
+		procedure Iterate is new Generic_Some_Iterator( Set_Value );
 	begin
+		Iterate( KOW_Ent.Id_Query_Builders.Query_Type( Q ), From, Limit );
 		return Result;
 	end Get_Some;
 

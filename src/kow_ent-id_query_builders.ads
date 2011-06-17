@@ -451,7 +451,7 @@ private
 
 
 	procedure Build_Query(
-				Q		: in      Query_Type;
+				Q		: in     Query_Type;
 				Query		: in out APQ.Root_Query_Type'Class;
 				Connection	: in out APQ.Root_Connection_Type'Class;
 				Count_Query	: in     Boolean := False
