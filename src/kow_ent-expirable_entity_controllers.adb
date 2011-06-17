@@ -362,11 +362,13 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		-- validate from the given date..
 		--
 		-- raise invalid_period if Is_Valid = TRUE
-		Validation : Validation_Entity;
 
 
 		use Query_Builders;
-		Q : Entity_Query_Type;
+
+
+		Validation	: Validation_Entity;
+		Q		: Entity_Query_Type;
 	begin
 
 		-- Check if it's valid ...
@@ -403,7 +405,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 		if Count( Q ) >= 1 then
-			Validation.To_Date := Get_First( Q, False ).From_Date - 1;
+			Validation.To_Date := Get_First( Q, False ).From_Date - Day_Duration(1);
 		else
 			Validation.To_Date := No_Validation_Timestamp;
 		end if;
