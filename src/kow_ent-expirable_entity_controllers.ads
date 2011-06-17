@@ -79,6 +79,9 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	INVALID_PERIOD : Exception;
 	-- raised when there is an incosistence in the validation period
 
+	NO_VALIDATION  : Exception;
+	-- raised when there is no validation entity in such time
+
 	--------------------------
 	-- Validation Timestamp --
 	--------------------------
@@ -93,16 +96,60 @@ package KOW_Ent.Expirable_Entity_Controllers is
 
 
 
+	-----------------------
+	-- Validation Entity --
+	-----------------------
+
+	type Validation_Entity is new KOW_Ent.Entity_Type with record
+		From_Date	: Validation_Timestamp := Ada.Calendar.Clock;
+		To_Date		: Validation_Timestamp := Ada.Calendar.Clock;
+		Owner_ID	: KOW_Ent.ID_Type;
+	end record;
+
+	overriding
+	procedure Will_Insert(
+				Validation	: in out Validation_Entity
+			);
+	-- make sure the validation period is actually valid and doesnt intersect with other validation period
+	
+	overriding
+	procedure Will_Update(
+				Validation	: in out Validation_Entity
+			);
+	-- make sure the validation period is actually valid and doesnt intersect with other validation period
 	
 
+	function Get_Validation(
+				Entity		: in     Entity_Type;
+				For_Date	: in     Validation_Timestamp := Clock
+			) return Validation_Entity'Class;
+	-- get the validation entity for the given entity during For_Date
+	-- raise NO_VALIDATION if none found
+
+
+	package Query_Builders is new KOW_Ent.Generic_Query_Builders( Entity_Type => Validation_Entity );
+
+
+	-----------
+	-- Array --
+	-----------
+
+	type Validation_Array is Array( Positive range <> ) of Validation_Entity;
+
+	function Get_Validations(
+				Entity	: in     Entity_Type
+			) return Validation_Array;
+	-- get all the registered validation entities
+
+
+
 
 	
+	-----------
+	-- Query --
+	-----------
 
-	---------------------------
-	-- Validation Management --
-	---------------------------
 	
-
 
 	function Is_Valid(
 				Entity		: in Entity_Type;
@@ -118,53 +165,38 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	-- check if the entity is valid in the given instant
 
 
-	procedure New_Validation_Period( Entity : in Entity_Type; From_Date, To_Date : in Validation_Timestamp );
+
+	------------
+	-- Create --
+	------------
+
+	procedure New_Validation_Period(
+				Entity			: in     Entity_Type;
+				From_Date, To_Date	: in     Validation_Timestamp
+			);
 	-- set the new validation period.
 	-- raise INVALID_PERIOD when From_Date > To_Date or Is_Valid == true
 
-	procedure Expire( Entity : in Entity_Type; To_Date : in Validation_Timestamp );
+
+	------------
+	-- Manage --
+	------------
+
+	procedure Expire(
+				Entity	: in     Entity_Type;
+				To_Date	: in     Validation_Timestamp := Clock
+			);
 	-- expire in the given date..
 	-- raise invalid_period when To_Date < the last validation period
+	-- raise no_validation when it's not valid during the specified time
 	
-	procedure Validate( Entity : in Entity_Type; From_Date : in Validation_Timestamp );
+	procedure Validate(
+				Entity		: in     Entity_Type; 
+				From_Date	: in     Validation_Timestamp := Clock
+			);
 	-- validate from the given date..
 	--
 	-- raise invalid_period if Is_Valid = TRUE
-
-	procedure Expire_Now( Entity : in Entity_Type );
-	-- expire now
-	-- raise INVALID_PERIOD if Is_Valid = FALSE
-	
-
-	procedure Validate_Now( Entity : in Entity_Type );
-	-- raise invalid_period if Is_Valid = TRUE
-
-	type Validation_Entity is new KOW_Ent.Entity_Type with record
-		From_Date	: Validation_Timestamp := Ada.Calendar.Clock;
-		To_Date		: Validation_Timestamp := Ada.Calendar.Clock;
-		Owner_ID	: KOW_Ent.ID_Type;
-	end record;
-
-	overriding
-	procedure Will_Insert( Validation : in out Validation_Entity );
-	-- make sure the validation period is actually valid..
-	
-	overriding
-	procedure Will_Update( Validation : in out Validation_Entity );
-	-- make sure the validation period is actually valid..
-	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity'Class;
-	-- get the last validation in the database backend
-
-
-	type Validation_Array is Array( Positive range <> ) of Validation_Entity;
-
-	function Get_Validations( Entity : in Entity_Type ) return Validation_Array;
-	-- get all the registered validation entities
-
-
-
-	package Query_Builders is new KOW_Ent.Generic_Query_Builders( Entity_Type => Validation_Entity );
 
 
 end KOW_Ent.Expirable_Entity_Controllers;

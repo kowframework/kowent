@@ -59,6 +59,63 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 
+
+
+	--------------------
+	-- Helper Methods --
+	--------------------
+
+	procedure Append_In_Period(
+				Q	: in out Query_Builders.Entity_Query_Type;
+				Value	: in     Validation_Timestamp;
+				Appender: in     KOW_Ent.Id_Query_Builders.Logic_Appender
+			) is
+		use Query_Builders;
+		use KOW_Ent.Id_Query_Builders;
+		Child_Q : Entity_Query_Type;
+
+
+	begin
+		Append_Timestamp(
+				Q		=> Child_Q,
+				Column		=> "from_date",
+				Value		=> Value,
+				Operator	=> Operator_Less_Than_Or_Equal_To
+			);
+
+		declare
+			Sub_Child_Q : Entity_Query_Type;
+		begin
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "to_date",
+					Value		=> Value,
+					Operator	=> Operator_Greater_Than_Or_Equal_To
+				);
+			-- has expiration date...
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "to_date",
+					Value		=> No_Validation_Timestamp,
+					Operator	=> Operator_Equal_To,
+					Appender	=> Appender_OR
+				);
+
+			Append(
+					Q	=> Child_Q,
+					Child_Q	=> Sub_Child_Q,
+					Appender=> Appender_AND
+				);
+		end;
+
+		Append(
+				Q		=> Q,
+				Child_Q		=> Child_Q,
+				Appender	=> Appender
+			);
+	end Append_In_Period;
+
+
 	--------------------------
 	-- Validation Timestamp --
 	--------------------------
@@ -69,30 +126,104 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		return Validation_Timestamp( Ada.Calendar.Clock );
 	end Clock;
 
-	---------------------------
-	-- Validation Management --
-	---------------------------
+	-----------------------
+	-- Validation Entity --
+	-----------------------
 	
 
 	overriding
-	procedure Will_Insert( Validation : in out Validation_Entity ) is
+	procedure Will_Insert(
+				Validation	: in out Validation_Entity
+			) is
 		-- make sure the validation period is actually valid..
 	begin
 
 		if Validation.From_Date = No_Validation_Timestamp OR Validation.To_Date = No_Validation_Timestamp then
 			return;
 		elsif Validation.From_Date > Validation.To_Date then
-			raise CONSTRAINT_ERROR with "invalid period!";
+			raise INVALID_PERIOD;
 		end if;
 	end Will_Insert;
 
+
+
 	overriding
-	procedure Will_Update( Validation : in out Validation_Entity ) is
+	procedure Will_Update(
+				Validation	: in out Validation_Entity
+			) is
 		-- make sure the validation period is actually valid..
 	begin
 		Will_Insert( Validation );
 	end Will_Update;
 
+
+	function Get_Validation(
+				Entity	: in     Entity_Type;
+				For_Date: in     Validation_Timestamp := Clock
+			) return Validation_Entity'Class is
+		use Query_Builders;
+
+
+		Q : Entity_Query_Type;
+	begin
+		Append(
+				Q	=> Q,
+				Column	=> "owner_id",
+				Value	=> Entity.ID
+			);
+		Append_In_Period(
+				Q	=> Q,
+				Value	=> For_Date,
+				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
+			);
+
+		if Count( Q ) /= 1 then
+			raise NO_VALIDATION with "it's not actually valid in the given period";
+		end if;
+
+		return Validation_Entity'Class( KOW_Ent.Narrow( Get_First( Q, True ) ) );
+	end Get_Validation;
+
+
+
+	-----------
+	-- Array --
+	-----------
+	function Get_Validations(
+				Entity	: in     Entity_Type
+			) return Validation_Array is
+		-- get all the registered validation entities
+
+
+		Query	: Query_Builders.Entity_Query_Type;
+		Results	: Query_Builders.Entity_Vectors.Vector;
+
+		use Query_Builders;
+	begin
+		Append( Q => Query, Foreign_key => Entity );
+		Append_Order( Q => Query, Column => "from_date" );
+
+		Results := Get_All( Query );
+
+
+		declare
+			Count : Integer := Integer( Query_Builders.Entity_Vectors.Length( Results ) );
+			Ret   : Validation_Array( 1 .. Count );
+		begin
+			for i in 1 .. count loop
+				Ret( i ) := Query_Builders.Entity_Vectors.Element( Results, i );
+			end loop;
+
+			return Ret;
+		end;
+	end Get_Validations;
+
+
+
+
+	-----------
+	-- Query --
+	-----------
 
 
 	function Is_Valid(
@@ -107,24 +238,10 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 		procedure Append_Inside( Date : in Validation_Timestamp ) is
 			use KOW_Ent.Id_Query_Builders;
-			Sub_Child_Q : Entity_Query_Type;
 		begin
-			Append_Timestamp(
-					Q		=> Sub_Child_Q,
-					Column		=> "from_date",
-					Value		=> Date,
-					Operator	=> Operator_Less_Than_Or_Equal_To
-				);
-			Append_Timestamp(
-					Q		=> Sub_Child_Q,
-					Column		=> "to_date",
-					Value		=> Date,
-					Operator	=> Operator_Greater_Than_Or_Equal_To
-				);
-
-			Append(
+			Append_In_Period(
 					Q		=> Child_Q,
-					Child_Q		=> Sub_Child_Q,
+					Value		=> Date,
 					Appender	=> Appender_OR
 				);
 		end Append_Inside;
@@ -186,29 +303,23 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	end Is_Valid;
 
 
-	function Is_Valid( Entity : in Entity_Type ) return Boolean is
-		-- check if the entity is in a valid period
-		Now : Validation_Timestamp := Clock;
-	begin
-		declare
-			Validation : Validation_Entity'Class := Last_Validation( Entity );
-		begin
-			return Validation.From_Date <= Now AND ( Validation.To_Date >= Now OR Validation.To_Date = No_Validation_Timestamp );
-		end;
-	exception
-		when INVALID_PERIOD => 
-			return false;
-	end is_valid;
 
-	procedure New_Validation_Period( Entity : in Entity_Type; From_Date, To_Date : in Validation_Timestamp ) is
+	------------
+	-- Create --
+	------------
+
+
+	procedure New_Validation_Period(
+				Entity			: in     Entity_Type;
+				From_Date, To_Date	: in     Validation_Timestamp
+			) is
 		-- set the new validation period.
 		-- raise INVALID_PERIOD when From_Date > To_Date or Is_Valid == true
+
 		Validation : Validation_Entity;
 	begin
-		if To_Date /= No_Validation_Timestamp AND THEN From_Date > To_Date then
-			raise INVALID_PERIOD with "From_Date can't be bigger than To_Date";
-		elsif Is_Valid( Entity, From_Date, To_Date ) then
-			raise INVALID_PERIOD with "Can't set period when the entity is already valid";
+		if Is_Valid( Entity, From_Date, To_Date ) then
+			raise INVALID_PERIOD with "intersects with other validation period";
 		end if;
 
 		Validation.From_Date := From_Date;
@@ -216,15 +327,23 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		Validation.Owner_Id := Entity.ID;
 
 		Store( Validation );
-
 	end New_Validation_Period;
 
 
 
-	procedure Expire( Entity : in Entity_Type; To_Date : in Validation_Timestamp ) is
+	------------
+	-- Manage --
+	------------
+
+
+	procedure Expire(
+				Entity	: in     Entity_Type;
+				To_Date	: in     Validation_Timestamp := Clock
+			) is
 		-- expire in the given date..
 		-- raise invalid_period when To_Date < the last validation period
-		Validation : Validation_Entity'Class := Last_Validation( Entity );
+
+		Validation : Validation_Entity'Class := Get_Validation( Entity, To_Date );
 	begin
 		if Validation.To_Date /= No_Validation_Timestamp AND THEN Validation.To_Date < To_Date then
 			raise INVALID_PERIOD with "Invalidating an already invalid entity";
@@ -234,7 +353,12 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	end Expire;
 
 
-	procedure Validate( Entity : in Entity_Type; From_Date : in Validation_Timestamp ) is
+
+
+	procedure Validate(
+				Entity		: in     Entity_Type;
+				From_Date	: in     Validation_Timestamp := Clock
+			) is
 		-- validate from the given date..
 		--
 		-- raise invalid_period if Is_Valid = TRUE
@@ -253,56 +377,6 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	end Validate;
 
 
-
-	procedure Expire_Now( Entity : in Entity_Type ) is
-		-- expire now
-		-- raise INVALID_PERIOD if Is_Valid = FALSE
-	begin
-		Expire( Entity, Clock );
-	end Expire_Now;
-
-
-	procedure Validate_Now( Entity : in Entity_Type ) is
-		-- raise invalid_period if Is_Valid = TRUE
-	begin
-		Validate( Entity, Clock );
-	end Validate_Now;
-
-	
-	function Last_Validation( Entity : in Entity_Type ) return Validation_Entity'Class is
-		-- get the last validation in the database backend
-		Validations : Validation_Array := Get_Validations( Entity );
-		-- TODO :: implement Last_Validation using Query_Builders
-	begin
-		return Validation_Entity'Class( KOW_Ent.Narrow( Validations( Validations'Last ) ) );
-	end Last_Validation;
-
-
-
-	function Get_Validations( Entity : in Entity_Type ) return Validation_Array is
-		-- get all the registered validation entities
-		Query	: Query_Builders.Entity_Query_Type;
-		Results	: Query_Builders.Entity_Vectors.Vector;
-
-		use Query_Builders;
-	begin
-		Append( Q => Query, Foreign_key => Entity );
-		Append_Order( Q => Query, Column => "from_date" );
-
-		Results := Get_All( Query );
-
-
-		declare
-			Count : Integer := Integer( Query_Builders.Entity_Vectors.Length( Results ) );
-			Ret   : Validation_Array( 1 .. Count );
-		begin
-			for i in 1 .. count loop
-				Ret( i ) := Query_Builders.Entity_Vectors.Element( Results, i );
-			end loop;
-
-			return Ret;
-		end;
-	end Get_Validations;
 
 
 
