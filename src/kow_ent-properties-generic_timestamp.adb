@@ -36,24 +36,7 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 
 
 
-	function APQ_Value is new APQ.Timestamp_Value( Val_Type => Val_Type );
 	
-
-	function Value(
-				Query	: in APQ.Root_Query_Type'Class;
-				CX	: in APQ.Column_Index_Type
-			) return Val_Type is
-	begin
-		return APQ_Value( Query, CX );
-	exception
-		when APQ.INVALID_FORMAT => -- which means < no_timestamp
-			return Null_Value;
-	end Value;
-
-		
-
-
-
 	------------------
 	-- The Property --
 	------------------
@@ -133,6 +116,10 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 				Query,
 				To_String( Property.Column_Name ) & " DATETIME NOT NULL"
 			);
+
+		-- DATETIME has a larger range and is not stored in UTC in the database backend
+		-- This will easy the data processing and also the entire Ada range for Ada.Calendar.Time fits into
+		-- the database
 	end Append_Create_Table;
 
 
