@@ -34,8 +34,6 @@
 -- validation periods for entities.                                         --
 ------------------------------------------------------------------------------
 
-with ada.text_io;
-
 
 --------------
 -- Ada 2005 --
@@ -65,6 +63,14 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	--------------------
 	-- Helper Methods --
 	--------------------
+
+
+	procedure Check_New( Entity : in KOW_Ent.Entity_Type'Class ) is
+	begin
+		if KOW_Ent.Is_New( Entity ) then
+			raise CONSTRAINT_ERROR with "can't do this in a new entity";
+		end if;
+	end Check_New;
 
 	procedure Append_In_Period(
 				Q	: in out Query_Builders.Entity_Query_Type;
@@ -98,7 +104,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 					Q		=> Sub_Child_Q,
 					Column		=> "to_date",
 					Value		=> No_Validation_Timestamp,
-					Operator	=> Operator_Equal_To,
+					Operator	=> Operator_Less_Than_Or_Equal_To,
 					Appender	=> Appender_OR
 				);
 
@@ -178,7 +184,6 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
-		Ada.Text_IO.Put_Line( To_String( Q ) );
 		if Count( Q ) /= 1 then
 			raise NO_VALIDATION with "it's not actually valid in the given period";
 		end if;
@@ -202,6 +207,8 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 		use Query_Builders;
 	begin
+		Check_New( Entity );
+
 		Append( Q => Query, Foreign_key => Entity );
 		Append_Order( Q => Query, Column => "from_date" );
 
@@ -275,6 +282,8 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 			
 	begin
+		Check_New( Entity );
+
 		Append(
 				Q	=> Q,
 				Column	=> "owner_id",
@@ -291,7 +300,6 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
-		ada.text_io.put_line( to_string( q ) );
 		return Count( Q ) = 1;
 	end Is_Valid;
 
@@ -321,6 +329,8 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 		Validation : Validation_Entity;
 	begin
+		Check_New( Entity );
+
 		if Is_Valid( Entity, From_Date, To_Date ) then
 			raise INVALID_PERIOD with "intersects with other validation period";
 		end if;
@@ -348,7 +358,9 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 		Validation : Validation_Entity'Class := Get_Validation( Entity, To_Date );
 	begin
-		if Validation.To_Date /= No_Validation_Timestamp AND THEN Validation.To_Date < To_Date then
+		Check_New( Entity );
+
+		if Validation.To_Date > No_Validation_Timestamp AND THEN Validation.To_Date < To_Date then
 			raise INVALID_PERIOD with "Invalidating an already invalid entity";
 		end if;
 		Validation.To_Date := To_Date;
@@ -389,12 +401,6 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 					Operator=> Operator_Less_Than
 				);
 
-			Append_Timestamp(
-					Q	=> Previous_Q,
-					Column	=> "to_date",
-					Value	=> No_Validation_Timestamp,
-					Operator=> Operator_Not_Equal_To
-				);
 
 			Append_Order(
 					Q		=> Previous_Q,
@@ -425,49 +431,17 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		Validation	: Validation_Entity'Class := Get_Validation;
 		Q		: Entity_Query_Type;
 	begin
+		Check_New( Entity );
 
 		-- Check if it's valid ...
 		if Is_Valid( Entity, From_Date ) then
 			raise INVALID_PERIOD with "Trying to validate an already valid entity";
 		end if;
 
+
 		Validation.From_Date := From_Date;
+		Validation.To_Date   := No_Validation_Timestamp;
 		Validation.Owner_Id  := Entity.ID;
-
-
-
-		-- we set the validation timestamp;..
-
-
-		Append(
-				Q	=> Q,
-				Column	=> "owner_id",
-				Value	=> Entity.id
-			);
-
-		Append_Timestamp(
-				Q	=> Q,
-				Column	=> "from_date",
-				Value	=> From_Date,
-				Operator=> KOW_Ent.Id_Query_Builders.Operator_Greater_Than
-			);
-
-		Append_Order(
-				Q	=> Q,
-				Column	=> "from_date"
-			);
-
-
-		Ada.text_io.put_line( to_string(q));
-
-		if Count( Q ) >= 1 then
-			Ada.Text_IO.Put_Line("lalala" );
-			Validation.To_Date := Get_First( Q, False ).From_Date - Day_Duration(1);
-		else
-			Ada.Text_IO.Put_Line("novo lalalalalalalala" );
-			Validation.To_Date := No_Validation_Timestamp;
-		end if;
-
 
 		Store( Validation );
 	end Validate;

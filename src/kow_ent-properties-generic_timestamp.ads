@@ -53,7 +53,12 @@ package KOW_ENT.Properties.Generic_Timestamp is
 	-------------------------------------
 
 	procedure Append is new APQ.Append_Timestamp( Val_Type => Val_Type );
-	function Value is new APQ.Timestamp_Value( Val_Type => Val_Type );
+	function Value(
+				Query	: in APQ.Root_Query_Type'Class;
+				CX	: in APQ.Column_Index_Type
+			) return Val_Type;
+
+
 
 
 	------------------

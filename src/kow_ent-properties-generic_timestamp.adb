@@ -28,12 +28,30 @@
 -- covered by the  GNU Public License.                                      --
 --                                                                          --
 ------------------------------------------------------------------------------
-with ada.text_io;
 
 with APQ;
 
 
 package body KOW_ENT.Properties.Generic_Timestamp is
+
+
+
+	function APQ_Value is new APQ.Timestamp_Value( Val_Type => Val_Type );
+	
+
+	function Value(
+				Query	: in APQ.Root_Query_Type'Class;
+				CX	: in APQ.Column_Index_Type
+			) return Val_Type is
+	begin
+		return APQ_Value( Query, CX );
+	exception
+		when APQ.INVALID_FORMAT => -- which means < no_timestamp
+			return Null_Value;
+	end Value;
+
+		
+
 
 
 	------------------
@@ -75,7 +93,6 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 			) is
 		-- Append into a query being created by the main KOW_ent engine.
 	begin
-		ada.text_io.put_line( "pegando :: " & get_property( property, entity ) );
 		Append( Query, Property.Getter.all( Entity ) );
 	end Get_Property;
 
@@ -114,7 +131,7 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 	begin
 		APQ.Append(
 				Query,
-				To_String( Property.Column_Name ) & " TIMESTAMP NOT NULL"
+				To_String( Property.Column_Name ) & " DATETIME NOT NULL"
 			);
 	end Append_Create_Table;
 
