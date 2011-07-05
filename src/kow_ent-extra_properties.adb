@@ -48,6 +48,7 @@ with Ada.Text_IO;	use Ada.Text_IO;
 -------------------
 -- KOW Framework --
 -------------------
+with APQ;
 with KOW_Ent;				use KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.Locales;
@@ -185,16 +186,57 @@ package body KOW_Ent.Extra_Properties is
 
 	function Timestamp_To_String( D : in Timestamp ) return String is
 	begin
-		return Ada.Calendar.Formatting.Image( D );
+		return APQ.To_String( APQ.APQ_Timestamp( D ) );
 	end Timestamp_to_String;
 
 
-
 	function Timestamp_From_String( Str_D : in String ) return Timestamp is
-	begin
-		return Ada.Calendar.Formatting.Value( Str_D );
-	end Timestamp_From_String;
+		use Ada.Calendar;
 
+		St : constant String := Ada.Strings.Fixed.Trim( Str_D, Ada.Strings.Both );
+
+
+		Year	: Year_Number;
+		Month	: Month_Number;
+		Day	: Day_Number;
+		Seconds	: Day_Duration;
+
+		function Str( From, To : in Positive ) return Natural is
+			The_Str : Constant String :=  St( St'First + From - 1 .. St'First + To - 1 );
+		begin
+			return Natural'Value( The_Str );
+		end Str;
+
+		procedure Split_Date is
+		begin
+			Year	:= Year_Number(	 Str( 1,  4 ) );
+			Month	:= Month_Number( Str( 6,  7 ) );
+			Day	:= Day_NUmber(	 Str( 9, 10 ) );
+		end Split_Date;
+
+		procedure Split_Time is
+			Hour,Minute,Second : Natural;
+		begin
+			Hour	:= Str( 12, 13 );
+			Minute	:= Str( 15, 16 );
+			Second	:= Str( 18, 19 );
+
+			Seconds	:= Day_Duration( Hour * 3600 + Minute * 60 + Second );
+		end Split_Time;
+
+
+		The_Time : Time;
+	begin
+		Split_Date;
+		Split_Time;
+		The_Time := Ada.Calendar.Time_Of(
+						Year		=> Year,
+						Month		=> Month,
+						Day		=> Day,
+						Seconds		=> Seconds
+				);
+		return Timestamp( The_Time );
+	end Timestamp_From_String;
 
 
 	------------------------

@@ -31,6 +31,8 @@
 
 with APQ;
 
+with ada.text_io;
+
 
 package body KOW_ENT.Properties.Generic_Timestamp is
 
@@ -57,12 +59,12 @@ package body KOW_ENT.Properties.Generic_Timestamp is
 				Entity,
 				Value( Q, Index )
 			);
-		exception
-			when APQ.Null_Value =>
-				Property.Setter.all(
-						Entity,
-						Null_Value
-					);
+	exception
+		when APQ.Null_Value =>
+			Property.Setter.all(
+					Entity,
+					Null_Value
+				);
 	end Set_Property;
 
 
