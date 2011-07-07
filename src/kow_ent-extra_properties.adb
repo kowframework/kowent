@@ -145,45 +145,6 @@ package body KOW_Ent.Extra_Properties is
 	------------------------
 	
 
-	function lixo_dois( D : in timestamp ) return string is
-		-- format using YYYY-MM-DD hh:mm:ss
-		use Ada.Calendar;
-		use Ada.Strings;
-		use Ada.Strings.Fixed;
-
-		function T( Str : in String ) return String is
-		begin
-			if Str'Length = 1 then
-				return '0' & Str;
-			else
-				return Str;
-			end if;
-		end T;
-
-		Year_Str 	: String := Trim( Year_Number'Image( Year( D ) ), Both );
-		Month_Str	: String := T( Trim( Month_Number'Image( Month( D ) ), Both ) );
-		Day_Str		: String := T( Trim( Day_Number'Image( Day( D ) ), Both ) );
-
-
-		Date_Str	: String := Year_Str & '-' & Month_Str & '-' & Day_Str;
-
-	begin
-		declare
-			use Ada.Calendar.Formatting;
-			Hour_Str	: String := T( Trim( Hour_Number'Image( Hour( D ) ), Both ) );
-			Minut_Str	: String := T( Trim( Minute_Number'Image( Minute( D ) ), Both ) );
-			Sec_Str		: String := T( Trim( Second_Number'Image( Second( D ) ), Both ) );
-			Time_Str	: String := Hour_Str & ':' & Minut_Str & ':' & Sec_Str;
-		begin
-
-			Put_Line( Date_Str & ' ' & Time_Str );
-			
-			return Date_Str & ' ' & Time_Str;
-		end;
-	end lixo_dois;
-
-
-
 	function Timestamp_To_String( D : in Timestamp ) return String is
 	begin
 		return APQ.To_String( APQ.APQ_Timestamp( D ) );
@@ -193,49 +154,10 @@ package body KOW_Ent.Extra_Properties is
 	function Timestamp_From_String( Str_D : in String ) return Timestamp is
 		use Ada.Calendar;
 
-		St : constant String := Ada.Strings.Fixed.Trim( Str_D, Ada.Strings.Both );
 
-
-		Year	: Year_Number;
-		Month	: Month_Number;
-		Day	: Day_Number;
-		Seconds	: Day_Duration;
-
-		function Str( From, To : in Positive ) return Natural is
-			The_Str : Constant String :=  St( St'First + From - 1 .. St'First + To - 1 );
-		begin
-			return Natural'Value( The_Str );
-		end Str;
-
-		procedure Split_Date is
-		begin
-			Year	:= Year_Number(	 Str( 1,  4 ) );
-			Month	:= Month_Number( Str( 6,  7 ) );
-			Day	:= Day_NUmber(	 Str( 9, 10 ) );
-		end Split_Date;
-
-		procedure Split_Time is
-			Hour,Minute,Second : Natural;
-		begin
-			Hour	:= Str( 12, 13 );
-			Minute	:= Str( 15, 16 );
-			Second	:= Str( 18, 19 );
-
-			Seconds	:= Day_Duration( Hour * 3600 + Minute * 60 + Second );
-		end Split_Time;
-
-
-		The_Time : Time;
+		function To_Timestamp is new APQ.Convert_To_Timestamp( Timestamp );
 	begin
-		Split_Date;
-		Split_Time;
-		The_Time := Ada.Calendar.Time_Of(
-						Year		=> Year,
-						Month		=> Month,
-						Day		=> Day,
-						Seconds		=> Seconds
-				);
-		return Timestamp( The_Time );
+		return To_Timestamp( Str_D, 0 );
 	end Timestamp_From_String;
 
 

@@ -142,7 +142,7 @@ package KOW_Ent.Extra_Properties is
 	function Timestamp_From_String( Str_D : in String ) return Timestamp;
 	-- parse a string in the form YYYY-MM-DD hh:mm:ss
 	-- simply assume it's in the right format and try parsing it... :D
-	-- it's a little bit naieve, but works
+	-- it's a little bit naive, but works
 
 
 	package Timestamp_Properties is new KOW_Ent.Properties.Generic_Timestamp(
