@@ -1035,7 +1035,7 @@ package body KOW_Ent.ID_Query_Builders is
 		if Count_Query then
 			APQ.Prepare( Query, "SELECT count(*) as rowscount " );
 		else
-			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
+			APQ.Prepare( Query, "SELECT " );
 			Append_Select( "id", False );
 			Append_Select( "original_tag" );
 			Append_Select( "filter_Tags" );
