@@ -81,21 +81,9 @@ package KOW_Ent.Generic_Query_Builders is
 	
 	type Entity_Query_Type is new KOW_Ent.Id_Query_Builders.Query_Type with null record;
 
-
 	overriding
-	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Ada.Tags.Tag );
-	-- clear the query 
-	
-	overriding
-	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Unbounded_String );
-	-- clear the query
-
-
-	overriding
-	function Entity_Tag( Q : in Entity_Query_Type ) return Unbounded_String;
-	-- return always the package entity tag
-
-
+	procedure Initialize( Query : in out Entity_Query_Type );
+	-- setup the entity tag to Entity_Type'Tag
 
 
 	-----------------------------------------------------------------------------------------------------------------

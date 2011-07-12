@@ -107,29 +107,12 @@ package body KOW_Ent.Generic_Query_Builders is
 	----------------------
 	
 	The_Entity_Tag : constant Unbounded_String := To_Unbounded_String( Ada.Tags.Expanded_Name( Entity_Type'Tag ) );
-	overriding
-	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Ada.Tags.Tag ) is
-		-- clear the query 
-	begin
-		Clear( Q );
-	end Prepare;
 
 	overriding
-	procedure Prepare( Q : in out Entity_Query_Type; Entity_Tag : in Unbounded_String ) is
-		-- clear the query
+	procedure Initialize( Query : in out Entity_Query_Type ) is
 	begin
-		Clear( Q );
-	end Prepare;
-
-
-	overriding
-	function Entity_Tag( Q : in Entity_Query_Type ) return Unbounded_String is
-		-- return always the package entity tag
-	begin
-		return The_Entity_Tag;
-	end Entity_Tag;
-
-
+		Prepare( Query, The_Entity_Tag );
+	end Initialize;
 
 	-----------------------------------------------------------------------------------------------------------------
 

@@ -149,6 +149,7 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 			use KOW_Ent.Id_Query_Builders;
 			Sub_Child_Q : Entity_Query_Type;
 		begin
+			Prepare( Sub_Child_Q, Validation_Entity'Tag );
 			Append_Timestamp(
 					Q		=> Sub_Child_Q,
 					Column		=> "from_date",

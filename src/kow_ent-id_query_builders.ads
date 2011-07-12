@@ -94,7 +94,7 @@ package KOW_Ent.ID_Query_Builders is
 	-- Query Management --
 	----------------------
 	
-	type Query_Type is tagged private;
+	type Query_Type is new Ada.Finalization.Controlled with private; 
 	type Query_Ptr is access Query_Type;
 
 
@@ -591,7 +591,7 @@ private
 			Index_Type	=> Positive
 		);
 
-	type Query_Type is tagged record
+	type Query_Type is new Ada.Finalization.Controlled with record
 		Operators		: Operator_Vectors.Vector;
 		Order_By		: Order_By_Vectors.Vector;
 		The_Entity_Tag		: Unbounded_String;

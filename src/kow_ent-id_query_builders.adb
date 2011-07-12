@@ -585,7 +585,9 @@ package body KOW_Ent.ID_Query_Builders is
 		Handler.Operation_Type := Q_Operator;
 
 
-		if Entity_Tag( Q ) /= Entity_Tag( Child_Q ) then
+		if Entity_Tag( Child_Q ) = "" then
+			Handler.Child_Query.Q.The_Entity_Tag := Entity_Tag( Q );
+		elsif Entity_Tag( Q ) /= Entity_Tag( Child_Q ) then
 			Append_Unique( Q.Related_Entity_Tags, Entity_Tag( Child_Q ) );
 		end if;
 
@@ -944,7 +946,8 @@ package body KOW_Ent.ID_Query_Builders is
 				Append_To_APQ_Query( Q, Query, Connection );
 			else
 				APQ.Append( Query, " AND " );
-				Append_To_APQ_Query( Q, Query, Connection );
+				APQ.Append( Query, "(" );
+					Append_To_APQ_Query( Q, Query, Connection );
 				APQ.Append( Query, ")" );
 			end if;
 		end Append_Conditions;
@@ -1078,10 +1081,12 @@ package body KOW_Ent.ID_Query_Builders is
 	begin
 		Build_Query( Q, Query, Connection );
 
-		if Engine_of( Connection ) = Engine_MySQL then
-			Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
-			if Limit /= 0 then
-				Append( Query, "," & Natural'Image( Limit ) );
+		if From > 1 and Limit > 0 then
+			if Engine_of( Connection ) = Engine_MySQL then
+				Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
+				if Limit /= 0 then
+					Append( Query, "," & Natural'Image( Limit ) );
+				end if;
 			end if;
 		end if;
 	end Build_Query;
@@ -1095,6 +1100,9 @@ package body KOW_Ent.ID_Query_Builders is
 				Connection	: in out APQ.Root_Connection_Type'Class
 			) is
 		First_Element : Boolean := True;
+
+
+		Table_Name : constant String := To_String( Entity_Registry.Get_Information( Entity_Tag( Query_type'Class( Q ) ) ).Table_Name );
 
 		
 		procedure Append_Appender( Appender : Logic_Appender ) is
@@ -1121,7 +1129,7 @@ package body KOW_Ent.ID_Query_Builders is
 			Append_Appender( Handler.Appender );
 			case Handler.Operation_Type is
 				when L_Operator =>
-					APQ.Append( APQ_Q, To_String( Handler.Column ) );
+					APQ.Append( APQ_Q, Table_Name & "." & To_String( Handler.Column ) );
 					case Handler.Operator is
 						when Operator_Equal_To =>
 							APQ.Append( APQ_Q, "=" );
