@@ -54,6 +54,60 @@ with APQ_Provider;
 
 package body KOW_Ent.ID_Query_Builders is
 
+	--------------------
+	-- Helper Methods --
+	--------------------
+
+	procedure Append_Unique(
+			V	: in out KOW_Lib.Ustring_Vectors.Vector;
+			Value	: in     Unbounded_String
+		) is
+		use KOW_Lib.UString_Vectors;
+	begin
+		if not Contains( V, Value )  then
+			Append( V, Value );
+		end if;
+	end Append_Unique;
+
+
+	procedure Merge_Unique(
+			Container	: in out KOW_Lib.UString_Vectors.Vector;
+			Source		: in     KOW_Lib.UString_Vectors.Vector
+		) is
+
+		procedure Appender( C : in KOW_lib.Ustring_Vectors.Cursor ) is
+		begin
+			Append_Unique( Container, KOW_Lib.UString_Vectors.Element( C ) );
+		end Appender;
+	begin
+		KOW_Lib.UString_Vectors.Iterate( Source, Appender'Access );
+	end Merge_Unique;
+
+
+
+	function To_List(
+			Entity_Tags	: in KOW_Lib.UString_Vectors.Vector;
+			Ignore_tag	: in Unbounded_String
+		) return Entity_Information_Lists.List is
+	
+		Result : Entity_Information_Lists.List;
+
+		procedure Appender( C : in KOW_Lib.UString_Vectors.Cursor ) is
+			Tag : constant Unbounded_String := KOW_Lib.UString_Vectors.Element( C );
+		begin
+			if Tag = "" or else Tag = Ignore_Tag then
+				return;
+			else
+				Entity_Information_Lists.Append( Result, KOW_Ent.Entity_Registry.Get_Information( Tag ) );
+			end if;
+		end Appender;
+			
+	begin
+		KOW_Lib.Ustring_Vectors.Iterate( Entity_Tags, Appender'Access );
+		return Result;
+	end To_List;
+
+
 
 	-----------------------------------------------------------------------------------------------------------------
 
@@ -530,6 +584,11 @@ package body KOW_Ent.ID_Query_Builders is
 		Handler.Appender := Appender;
 		Handler.Operation_Type := Q_Operator;
 
+
+		if Entity_Tag( Q ) /= Entity_Tag( Child_Q ) then
+			Append_Unique( Q.Related_Entity_Tags, Entity_Tag( Child_Q ) );
+		end if;
+
 		Operator_Vectors.Append( Q.Operators, Handler );
 	end Append;
 
@@ -863,19 +922,147 @@ package body KOW_Ent.ID_Query_Builders is
 				Connection	: in out APQ.Root_Connection_Type'Class;
 				Count_Query	: in     Boolean := False
 			) is
-		Info	: Entity_Information_Type := Entity_Registry.Get_Information( Entity_Tag( Query_Type'Class( Q ) ) );
+		use Ada.Containers;	-- = operator for Count type
+		Info			: Entity_Information_Type	:= Entity_Registry.Get_Information( Entity_Tag( Query_Type'Class( Q ) ) );
+		Related_Entity_Tags	: Entity_Information_Lists.List := To_List( Get_Related_Entity_Tags( Q ), Entity_Tag( Q ) );
+
+
+		Table_Name		: constant String := To_String( Info.Table_Name );
+
+		procedure Append_Select( Field : in String; Not_First : Boolean := True ) is
+		begin
+			if Not_First then
+				APQ.Append( Query, "," );
+			end if;
+			APQ.Append( Query, Table_Name & '.' & Field & " as " & Field );
+		end Append_Select;
+
+		procedure Append_Conditions( Append_Where : in Boolean ) is
+		begin
+			if Append_Where then
+				APQ.Append( Query, " WHERE " );
+				Append_To_APQ_Query( Q, Query, Connection );
+			else
+				APQ.Append( Query, " AND " );
+				Append_To_APQ_Query( Q, Query, Connection );
+				APQ.Append( Query, ")" );
+			end if;
+		end Append_Conditions;
+
+
+		procedure Append_Order is
+		begin
+			APQ.Append( Query, " " );
+			Append_Order_By_to_APQ_Query( Q, Query, Connection );
+		end Append_Order;
+
+
+
+		procedure Append_Table_Names( C : in Entity_Information_Lists.Cursor ) is
+		begin
+			APQ.Append( Query, "," & To_String( Entity_Information_Lists.Element( C ).Table_Name ) );
+		end Append_Table_Names;
+
+
+		First : Boolean := True;
+		procedure Append_Relation_Clauses( C : in Entity_Information_Lists.Cursor ) is
+			use Ada.Tags;
+		
+			Related_Info : Entity_Information_Type := Entity_Information_Lists.Element( C );
+
+
+			function Get_Property return KOW_Ent.Properties.Foreign_Key_Property_Type is
+				Prop	: KOW_Ent.Properties.Foreign_Key_Property_Type;
+				Found	: Boolean := False;
+				Self	: Boolean := False;
+
+				procedure Prop_Iterator( C : in Property_Lists.Cursor ) is
+					P : constant Entity_Property_Ptr := Property_lists.Element( C );
+				begin
+					if not Found and then P /= null and then P.all in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
+						Prop := KOW_Ent.Properties.Foreign_Key_Property_Type( P.all );
+
+						if Self then 
+							if Prop.Related_Entity_Tag = Related_Info.Entity_Tag then
+								Found := True;
+							end if;
+						else
+							if Prop.Related_Entity_Tag = Info.Entity_Tag then
+								Found := True;
+							end if;
+						end if;
+					end if;
+				end Prop_Iterator;
+			begin
+				Self := True;
+				Property_Lists.Iterate( Info.Properties, Prop_Iterator'Access );
+				if Found then
+					return Prop;
+				end if;
+
+
+				Self := False;
+				Property_Lists.Iterate( Related_Info.Properties, Prop_iterator'Access );
+				if Found then
+					return Prop;
+				end if;
+
+				raise CONSTRAINT_ERROR with "Not a related entity couple: " & Expanded_name( Info.Entity_Tag ) & " :: " & Expanded_name( Related_info.Entity_Tag );
+			end Get_Property;
+
+			The_Property : constant KOW_Ent.Properties.Foreign_Key_Property_Type := Get_Property;
+		begin
+			
+			if First then
+				First := False;
+			else
+				APQ.Append( Query, " AND " );
+			end if;
+
+			if The_Property.Related_Entity_Tag = Info.Entity_Tag then
+				APQ.Append( Query, To_String( Info.Table_Name ) & ".id=" );
+				APQ.Append( Query, To_String( Related_Info.Table_Name ) & "." & To_String( The_Property.Column_Name ) );
+			elsif The_Property.Related_Entity_Tag = Related_Info.Entity_Tag then
+				APQ.Append( Query, To_String( Related_Info.Table_Name ) & ".id=" );
+				APQ.Append( Query, To_String( Info.Table_Name ) & "." & To_String( The_Property.Column_Name ) );
+			else
+				raise PROGRAM_ERROR with "you found a bug in KOW_Ent... Please report";
+			end if;
+
+		end Append_Relation_Clauses;
 
 	begin
 		if Count_Query then
 			APQ.Prepare( Query, "SELECT count(*) as rowscount " );
 		else
 			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
+			Append_Select( "id", False );
+			Append_Select( "original_tag" );
+			Append_Select( "filter_Tags" );
+
 			Append_Column_Names_For_Read( Query, Info, "," );
 		end if;
-		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
-		Append_to_APQ_Query( Q, Query, Connection );
-		APQ.Append( Query, " " );
-		Append_Order_By_to_APQ_Query( Q, Query, Connection );
+		APQ.Append( Query, " FROM " & To_String( Info.Table_Name )  );
+
+
+		
+		Entity_Information_Lists.Iterate( Related_Entity_Tags, Append_Table_Names'Access );
+
+
+		if Entity_Information_Lists.Length( Related_Entity_Tags ) = 0 then
+			Append_Conditions( Append_Where => true );
+			Append_Order;
+		else
+			APQ.Append( Query, " WHERE " );
+
+			Entity_Information_Lists.Iterate( Related_Entity_Tags, Append_Relation_Clauses'Access );
+
+			Append_Conditions( Append_Where => false );
+
+			APQ.Append( Query, " GROUP BY " & Table_Name & ".id" );
+
+			Append_Order;
+		end if;
 
 	end Build_Query;
 
@@ -1030,6 +1217,32 @@ package body KOW_Ent.ID_Query_Builders is
 	end Append_Order_by_to_APQ_Query;
 
 
+	function Get_Related_Entity_Tags(
+				Q		: in     Query_Type
+			) return KOW_Lib.UString_Vectors.Vector is
+		-- query all the related entity tags from this and all the child queries
+		Tags : KOW_Lib.UString_Vectors.Vector := Q.Related_Entity_Tags;
+
+
+		procedure Append_Child_Query_Operator( C : Operator_Vectors.Cursor ) is
+			-- an iterator for the operators
+			Handler : Operator_Handler_Type := Operator_Vectors.Element( C );
+		begin
+			case Handler.Operation_Type is
+				when Q_Operator	=>
+					Merge_Unique(
+							Container	=> Tags,
+							Source		=> Get_Related_Entity_Tags( Handler.Child_Query.Q.all )
+						);
+				when others =>
+					null;
+			end case;
+		end Append_Child_Query_Operator;
+	begin
+		Operator_Vectors.Iterate( Q.Operators, Append_Child_Query_Operator'Access );
+
+		return Tags;
+	end Get_Related_Entity_Tags;
 
 
 

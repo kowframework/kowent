@@ -50,10 +50,11 @@ with Ada.Tags;
 -------------------
 -- KOW Framework --
 -------------------
+with APQ;
 with KOW_Ent;
 with KOW_Ent.Extra_Properties;		use KOW_Ent.Extra_Properties;
 with KOW_Lib.Json;
-with APQ;
+with KOW_Lib.UString_Vectors;
 
 package KOW_Ent.ID_Query_Builders is
 
@@ -327,6 +328,14 @@ package KOW_Ent.ID_Query_Builders is
 				Appender: in     Logic_Appender := Appender_AND
 			);
 	-- append another query as a child query :: () stuff
+	--
+	-- the child query can be a query prepared for other type
+	-- in this case, make sure the entity type for the child query
+	-- is directly related (using a foreign_key property in any of the types)
+	--
+	--
+	-- notice that, thanks to the group by SQL operator, the entity is
+	-- returned only once even the related query should result and multiple returns.
 	
 
 	--------------
@@ -478,6 +487,11 @@ private
 				Connection	: in out APQ.Root_Connection_Type'Class
 			);
 
+	function Get_Related_Entity_Tags(
+				Q		: in     Query_Type
+			) return KOW_Lib.UString_Vectors.Vector;
+	-- query all the related entity tags from this and all the child queries
+
 
 	---------------
 	-- Operators --
@@ -578,9 +592,13 @@ private
 		);
 
 	type Query_Type is tagged record
-		Operators	: Operator_Vectors.Vector;
-		Order_By	: Order_By_Vectors.Vector;
-		The_Entity_Tag	: Unbounded_String;
+		Operators		: Operator_Vectors.Vector;
+		Order_By		: Order_By_Vectors.Vector;
+		The_Entity_Tag		: Unbounded_String;
+
+		Related_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
+		-- this is populated when appending child queries for other
+		-- entities
 	end record;
 
 

@@ -579,7 +579,7 @@ package KOW_Ent is
 				Query		: in out APQ.Root_Query_Type'Class;
 				Connection	: in out APQ.Root_Connection_Type'Class;
 				Info		: in     Entity_Information_Type
-				);
+			);
 	-- set all the values from the resulting query
 
 
