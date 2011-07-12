@@ -83,6 +83,8 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 
 
 	begin
+		Prepare( Child_Q, Validation_Entity'Tag );
+
 		Append_Timestamp(
 				Q		=> Child_Q,
 				Column		=> "from_date",
@@ -121,6 +123,61 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Appender	=> Appender
 			);
 	end Append_In_Period;
+
+
+
+	function Is_Valid_Query(
+				From_Date	: in Validation_Timestamp;
+				To_Date		: in Validation_Timestamp
+			) return Query_Builders.Entity_Query_Type is
+		-- return a query type initialized for when it's valid..
+		use Query_Builders;
+
+		Child_Q : Entity_Query_Type;
+		procedure Append_Inside( Date : in Validation_Timestamp ) is
+			use KOW_Ent.Id_Query_Builders;
+		begin
+			Append_In_Period(
+					Q		=> Child_Q,
+					Value		=> Date,
+					Appender	=> Appender_OR
+				);
+		end Append_Inside;
+
+
+		procedure Append_Outside is
+			use KOW_Ent.Id_Query_Builders;
+			Sub_Child_Q : Entity_Query_Type;
+		begin
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "from_date",
+					Value		=> From_Date,
+					Operator	=> Operator_Greater_Than
+				);
+			Append_Timestamp(
+					Q		=> Sub_Child_Q,
+					Column		=> "to_date",
+					Value		=> To_Date,
+					Operator	=> Operator_Less_Than
+				);
+
+			Append(
+					Q		=> Child_Q,
+					Child_Q		=> Sub_Child_Q,
+					Appender	=> Appender_OR
+				);
+		end Append_Outside;
+	begin
+		Prepare( Child_Q, Validation_Entity'Tag );
+		Append_Inside( From_Date );
+		Append_Inside( To_Date );
+		Append_Outside;
+
+		return Child_Q;
+	end Is_Valid_Query;
+
+
 
 
 	--------------------------
@@ -234,7 +291,6 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 	-- Query --
 	-----------
 
-
 	function Is_Valid(
 				Entity		: in Entity_Type;
 				From_Date	: in Validation_Timestamp;
@@ -242,45 +298,9 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 			) return Boolean is
 		-- check if the entity is valid anytime durin the given period
 		use Query_Builders;
-		Q, Child_Q : Entity_Query_Type;
+		Q : Entity_Query_Type;
 
 
-		procedure Append_Inside( Date : in Validation_Timestamp ) is
-			use KOW_Ent.Id_Query_Builders;
-		begin
-			Append_In_Period(
-					Q		=> Child_Q,
-					Value		=> Date,
-					Appender	=> Appender_OR
-				);
-		end Append_Inside;
-
-
-		procedure Append_Outside is
-			use KOW_Ent.Id_Query_Builders;
-			Sub_Child_Q : Entity_Query_Type;
-		begin
-			Append_Timestamp(
-					Q		=> Sub_Child_Q,
-					Column		=> "from_date",
-					Value		=> From_Date,
-					Operator	=> Operator_Greater_Than
-				);
-			Append_Timestamp(
-					Q		=> Sub_Child_Q,
-					Column		=> "to_date",
-					Value		=> To_Date,
-					Operator	=> Operator_Less_Than
-				);
-
-			Append(
-					Q		=> Child_Q,
-					Child_Q		=> Sub_Child_Q,
-					Appender	=> Appender_OR
-				);
-		end Append_Outside;
-
-			
 	begin
 		Check_New( Entity );
 
@@ -290,13 +310,9 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 				Value	=> Entity.Id
 			);
 
-		Append_Inside( From_Date );
-		Append_Inside( To_Date );
-		Append_Outside;
-
 		Append(
 				Q	=> Q,
-				Child_Q	=> Child_Q,
+				Child_Q	=> Is_Valid_Query( From_Date => From_Date, To_Date => To_Date ),
 				Appender=> KOW_Ent.Id_Query_Builders.Appender_And
 			);
 
@@ -313,6 +329,31 @@ package body KOW_Ent.Expirable_Entity_Controllers is
 		return Is_Valid( Entity, Date, Date );
 	end Is_Valid;
 
+
+
+	function Query_Valid(
+				Date		: in     Validation_Timestamp := Clock;
+				From		: in     Positive := 1;
+				Limit		: in     Natural := 0
+			) return KOW_Ent.Id_Array_Type is
+		-- quere the active entities
+		use KOW_Ent.Id_Query_Builders;
+
+		Q	: Query_Type;
+	begin
+		Prepare( Q, Entity_Type'Tag );
+		Append(
+				Q	=> Q,
+				Child_Q	=> Query_Type( Is_Valid_Query( From_Date => Date, To_Date => Date ) ),
+				Appender=> Appender_And
+			);
+
+		return Get_Some(
+				Q	=> Q,
+				From	=> From,
+				Limit	=> Limit
+			);
+	end Query_Valid;
 
 
 	------------
