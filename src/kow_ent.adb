@@ -494,7 +494,7 @@ package body KOW_Ent is
 			----------------------
 		
 			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
-			Append_Column_Names_For_Read( Query, Info.Properties, "," );
+			Append_Column_Names_For_Read( Query, Info, "," );
 			APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) );
 			APQ.Append( Query, " WHERE id=" );
 			ID_Append( Query, Entity.ID.Value );
@@ -1709,13 +1709,18 @@ package body KOW_Ent is
 	-- Other Auxiliar Functions --
 	------------------------------
 
-	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Before : in String := "" ) is
+	procedure Append_Column_Names_For_Read(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Info	: in     Entity_Information_Type;
+				Before	: in     String := ""
+			) is
 		-- this procedure is used internally to set a column of values in the fashion of:
 		-- a,b,c,d
 		-- where a, b, c and d are columns of this entity
 		-- implementation is at the end of the file
 
-		First_Property: Boolean := True;
+		First_Property	: Boolean := True;
+		Table_Name	: constant String := To_String( Info.Table_Name ) & '.';
 
 		procedure Set_Column_Names( C: Property_Lists.Cursor ) is
 			use Property_Lists;
@@ -1729,12 +1734,12 @@ package body KOW_Ent is
 					First_Property := False;
 				end if;
 
-				APQ.Append( Query, Column );
+				APQ.Append( Query, Table_Name & Column & " as " & Column );
 			end if;
 		end Set_Column_Names;
 
 	begin
-		Property_Lists.Iterate( Properties, Set_Column_Names'Access );
+		Property_Lists.Iterate( Info.Properties, Set_Column_Names'Access );
 	end Append_Column_Names_For_Read;
 
 

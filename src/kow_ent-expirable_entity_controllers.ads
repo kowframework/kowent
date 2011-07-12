@@ -165,6 +165,8 @@ package KOW_Ent.Expirable_Entity_Controllers is
 	-- check if the entity is valid in the given instant
 
 
+	--function Query_Valid( Date : in Validation_Timestamp := Clock ) return KOW_Ent.Id_Array_Type;
+	-- quere the active entities
 
 	------------
 	-- Create --

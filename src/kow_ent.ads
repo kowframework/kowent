@@ -716,7 +716,11 @@ private
 	-- if it's a new entity, create a new entry and generates an ID for it.
 	-- after it has been saved.
 
-	procedure Append_Column_Names_For_Read( Query : in out APQ.Root_Query_Type'Class; Properties: Property_Lists.List; Before : in String := ""); 
+	procedure Append_Column_Names_For_Read(
+				Query	: in out APQ.Root_Query_Type'Class;
+				Info	: in     Entity_Information_Type;
+				Before	: in     String := ""
+			); 
 	-- this procedure is used internally to set a column of values in the fashion of:
 	-- a,b,c,d
 	-- where a, b, c and d are columns of this entity

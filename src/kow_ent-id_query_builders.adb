@@ -870,7 +870,7 @@ package body KOW_Ent.ID_Query_Builders is
 			APQ.Prepare( Query, "SELECT count(*) as rowscount " );
 		else
 			APQ.Prepare( Query, "SELECT id,original_tag,filter_tags" );
-			Append_Column_Names_For_Read( Query, Info.Properties, "," );
+			Append_Column_Names_For_Read( Query, Info, "," );
 		end if;
 		APQ.Append( Query, " FROM " & To_String( Info.Table_Name ) & " WHERE ");
 		Append_to_APQ_Query( Q, Query, Connection );
