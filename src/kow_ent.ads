@@ -324,6 +324,11 @@ package KOW_Ent is
 	-- get the Label for given property of this entity type as unbounded_string
 
 
+	function Get_Label(
+				Entity_tag	: in Ada.Tags.Tag;
+				Property	: in String;
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			) return Unbounded_String;
 
 	--------------------------
 	-- Entity ID Management --
