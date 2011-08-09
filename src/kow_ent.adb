@@ -777,7 +777,6 @@ package body KOW_Ent is
 				Entity : in Entity_Type'Class;
 				Locale : in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 			) return Unbounded_String is
-		-- TODO get the Label for this entity type as unbounded_string
 		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
@@ -792,6 +791,21 @@ package body KOW_Ent is
 			return To_Unbounded_String( '[' & Ada.Tags.Expanded_Name( Entity'Tag ) & ']' );
 	end Get_Label;
 	
+	function Get_Label(
+				Entity_Tag	: in Ada.Tags.Tag;
+				Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			) return Unbounded_String is
+		-- get the Label for this entity type as unbounded_string
+		Str_Tag  : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity_Tag )
+					);
+	begin
+		KOW_Lib.String_Util.Str_Replace( From => '.', To => '/', Str => Str_Tag );
+		return Get_Label(
+				Labels.Registry.Get( '/' & Str_Tag ),
+				Locale
+			);
+	end Get_Label;
 
 
 	function Get_Label(
