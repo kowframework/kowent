@@ -1088,7 +1088,7 @@ package body KOW_Ent.ID_Query_Builders is
 	begin
 		Build_Query( Q, Query, Connection );
 
-		if From > 1 and Limit > 0 then
+		if From > 1 or Limit > 0 then
 			if Engine_of( Connection ) = Engine_MySQL then
 				Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
 				if Limit /= 0 then
