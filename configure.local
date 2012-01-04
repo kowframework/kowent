@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# 
+# Local configuration file for KOW Lib
+
+
+
+project="kowent"
+
+
+set_configuration KOWENT_EXTERNALLY_BUILT "false"
