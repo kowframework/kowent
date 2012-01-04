@@ -684,10 +684,17 @@ package body KOW_Ent.ID_Query_Builders is
 
 			if APQ.Engine_Of( Query ) = Engine_MySQL then
 				begin
-					loop
-						APQ.Fetch( Query );
-						Iterator( Query, Connection );
-					end loop;
+					if Limit /= 0 then
+						for i in 1 .. Limit loop -- strong limiting the ammount of results
+							APQ.Fetch( Query );
+							Iterator( Query, Connection );
+						end loop;
+					else
+						loop
+							APQ.Fetch( Query );
+							Iterator( Query, Connection );
+						end loop;
+					end if;
 				exception
 					when APQ.No_Tuple =>
 						null;
@@ -1081,7 +1088,7 @@ package body KOW_Ent.ID_Query_Builders is
 	begin
 		Build_Query( Q, Query, Connection );
 
-		if From > 1 and Limit > 0 then
+		if From > 1 or Limit > 0 then
 			if Engine_of( Connection ) = Engine_MySQL then
 				Append( Query, " LIMIT " & Natural'Image( Natural( From ) - 1 ) );
 				if Limit /= 0 then
