@@ -10,29 +10,74 @@
 with "apq";
 with "apq_provider";
 with "kowconfig";
-with "kowconfig-text";
 with "kowlib";
 
 
 project KOWEnt is
 
-	version := $version;
-	
-	
-	for Source_Dirs use ( $include_path );
-	
-	
-	-- LIBRARY
-	for Library_Dir use $lib_path;
-	for Library_Name use "kowent";
-	for Library_Kind use KOWLib'Library_Kind;
-	for Library_Version use "libkowent.so." & Version;
-	for Externally_Built use "true";
-	
-	
+	Version := $version;
+	for Languages use ("Ada");
+
+	-----------------------
+	-- Type declarations --
+	-----------------------
+
+	type True_False is ( "true", "false" );
+	type Supported_OS is ("Windows_NT", "GNU/Linux", "Darwin" );
+
+
+	--------------------
+	-- Main Variables --
+	--------------------
+
+	version	:= $version;
+	OS	: Supported_OS	:= external( "OS", "GNU/Linux" );
+	Debug	: True_False	:= external( "DEBUG", "false" );
+
+
+
+
+
+	----------------
+	-- Parameters --
+	----------------
+
+	for Library_Name use $project;
+	for Source_Dirs use ( "../../src/" & Project'Library_Name );
+	for Library_kind use external( "LIBRARY_KIND", "static" );
+
+
+	case Debug is
+		when "true" =>
+			for Library_Dir use "../" & Project'Library_Name & "-debug/" & Project'Library_Kind;
+			for Object_Dir use $object_path & "/debug/" & Project'Library_Kind;
+		when "false" =>
+			for Library_Dir use "../" & Project'Library_Name & "/" & Project'Library_Kind;
+			for Object_Dir use $object_path & "/" & Project'Library_Kind;
+
+	end case;
+
+
+
+	for Library_Version use "lib" & Project'Library_Name & ".so." & Version;
+	for Externally_Built use External( "KOWENT_EXTERNALLY_BUILT", "true" );
+
+
+
+	----------------------
+	-- Compiler Package --
+	----------------------
 	package Compiler is
-		for Default_Switches ("ada") use ("-O2", "-gnat05");
+		case Debug is
+			when "true" =>
+				for Default_Switches ("ada") use ("-O2", "-gnat05", "-fPIC", "-g");
+			when "false" =>
+				for Default_Switches ("ada") use ("-O2", "-gnat05", "-fPIC" );
+		end case;
 	end Compiler;
+
+
+
 
 end KOWEnt;
 
