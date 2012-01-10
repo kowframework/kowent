@@ -7,4 +7,9 @@
 project="kowent"
 
 
+
+check_project kowlib
+check_project kowconfig
+check_project apqprovider
+
 set_configuration KOWENT_EXTERNALLY_BUILT "false"
