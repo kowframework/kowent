@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -48,169 +48,162 @@ with Ada.Finalization;
 -- KOW Framework --
 -------------------
 with APQ;
+with KOW_Lib.String_Util;
 
-package KOW_Ent is
+package body KOW_Ent is
 
-
-	----------------
-	-- Data Model --
-	----------------
-
-	-- KOW_Ent uses the APQ data model
-	-- Each property must have one or more of these
-
-
-	type Type_Of_Data_Type is (
-				-- these values are mapped back to the APQ type with the same name
-				APQ_Smallint,
-				APQ_Integer,
-				APQ_Bigint,
-				APQ_Real,
-				APQ_Double,
-				APQ_Serial,
-				APQ_Bigserial,
-
-				APQ_Date,
-				APQ_Time,
-				APQ_Timestamp,
-
-				Hour_Number,
-				Minute_Number,
-				Second_Number,
-
-				-- and this one is mapped back to String
-				APQ_String
-			);
 
 
 	--------------------
 	-- The Value Type --
 	--------------------
-	type Value_Type(
-				Type_Of		: Type_Of_Data_Type;
-				String_Length	: Natural 		-- used only when Type_Of = APQ_String
-			) is record
-		case Type_Of is
+
+	function To_String( Value : in Value_Type ) return String is
+		-- convert the value into a not trimmed string
+	begin
+		case Value.Type_Of is
 			when APQ_Smallint =>
-				Smallint_Value	: APQ.APQ_Smallint := APQ.APQ_Smallint'First;
+				return APQ.APQ_Smallint'Image( Value.Smallint_Value );
 
 			when APQ_Integer =>
-				Integer_Value	: APQ.APQ_Integer;
+				return APQ.APQ_Integer'Image( Value.Integer_Value );
 
 			when APQ_Bigint =>
-				Bigint_Value	: APQ.APQ_Bigint;
+				return APQ.APQ_Bigint'Image( Value.Bigint_Value );
 
 			when APQ_Real	=>
-				Real_Value	: APQ.APQ_Real;
+				return APQ.APQ_Real'Image( Value.Real_Value );
 
 			when APQ_Double =>
-				Double_Value	: APQ.APQ_Double;
+				return APQ.APQ_Double'Image( Value.Double_Value );
 
 			when APQ_Serial	=>
-				Serial_Value	: APQ.APQ_Serial;
+				return APQ.APQ_Serial'Image( Value.Serial_Value );
 
 			when APQ_Bigserial =>
-				Bigserial_Value	: APQ.APQ_Bigserial;
+				return APQ.APQ_Bigserial'Image( Value.Bigserial_Value );
 
 			when APQ_Date =>
-				Date_Value	: APQ.APQ_Date;
+				-- TODO :: convert to string
+				return "";
 
 			when APQ_Time =>
-				Time_Value	: APQ.APQ_Time;
+				-- TODO :: convert to string
+				return "";
 
 			when APQ_Timestamp =>
-				Timestamp_Value	: APQ.APQ_Timestamp;
-
+				-- TODO :: convert to string
+				return "";
 
 
 			when Hour_Number =>
-				Hour_Value	: APQ.Hour_Number;
+				return APQ.Hour_Number'Image( Value.Hour_Value );
 			
 			when Minute_Number =>
-				Minute_Value	: APQ.Minute_Number;
+				return APQ.Minute_Number'Image( Value.Minute_Value );
 
 			when Second_Number =>
-				Second_Value	: APQ.Second_Number;
+				return APQ.Second_Number'Image( Value.Second_Value );
 
 			when APQ_String =>
-				String_Value	: String( 1 .. String_Length );
-
+				return Value.String_Value;
 		end case;
-	end record;
-
-
-	function To_String( Value : in Value_Type ) return String;
-	-- convert the value into a not trimmed string
-	
-	procedure From_String( Value : in out Value_Type; String_Value : in String );
-	-- set the value form a string
-	-- if the value.type_of=apq_string, raises constraint_error only if string_value'length > value.string_value'length
+	end To_String;
 
 
 
 
-	----------------------------------
-	-- Property Container Interface --
-	----------------------------------
+	procedure From_String( Value : in out Value_Type; String_Value : in String ) is
+		-- set the value form a string
+		-- if the value.type_of=apq_string, raises constraint_error only if string_value'length > value.string_value'length
+	begin
+		case Value.Type_Of is
+			when APQ_Smallint =>
+				Value.Smallint_Value := APQ.APQ_Smallint'Value( String_Value );
 
-	type Property_Container_Type is abstract tagged;
-	-- this interface is so the Property_Type has 
-	type Property_Container_Ptr is access all Property_Container_Type'Class;
+			when APQ_Integer =>
+				Value.Integer_Value := APQ.APQ_Integer'Value( String_Value );
+
+			when APQ_Bigint =>
+				Value.Bigint_Value := APQ.APQ_Bigint'Value( String_Value );
+
+			when APQ_Real	=>
+				Value.Real_Value := APQ.APQ_Real'Value( String_Value );
+
+			when APQ_Double =>
+				Value.Double_Value := APQ.APQ_Double'Value( String_Value );
+
+			when APQ_Serial	=>
+				Value.Serial_Value := APQ.APQ_Serial'Value( String_Value );
+
+			when APQ_Bigserial =>
+				Value.Bigserial_Value := APQ.APQ_Bigserial'Value( String_Value );
+
+			when APQ_Date =>
+				-- TODO :: convert from string
+				null;
+			when APQ_Time =>
+				-- TODO :: convert from string
+				null;
+
+			when APQ_Timestamp =>
+				-- TODO :: convert from string
+				null;
+
+
+			when Hour_Number =>
+				Value.Hour_Value := APQ.Hour_Number'Value( String_Value );
+			
+			when Minute_Number =>
+				Value.Minute_Value := APQ.Minute_Number'Value( String_Value );
+
+			when Second_Number =>
+				Value.Second_Value := APQ.Second_Number'Value( String_Value );
+
+			when APQ_String =>
+				KOW_Lib.String_Util.Copy( To => Value.String_Value, From => String_Value );
+		end case;
+	end From_String;
 
 
 	-----------------------
 	-- The Property Type --
 	-----------------------
 
-
-	type Property_Type( Container : Property_Container_Ptr ) is abstract new Ada.Finalization.Controlled with null record;
-	-- the property type is abstract so you will have to extend it.
-	
-
-	type Property_Ptr is access all Property_Type'Class;
-
 	overriding
-	procedure Initialize( Property : in out Property_Type );
-	-- register the given property in the given container
-
+	procedure Initialize( Property : in out Property_Type ) is
+		-- register the given property in the given container
+	begin
+		Register( Property.Container.all, Property'Unrestricted_Access );
+	end Initialize;
 	
-
-	-----------------------
-	-- The Property List --
-	-----------------------
-	package Property_Lists is new Ada.Containers.Doubly_Linked_Lists(
-							Element_Type	=> Property_Ptr
-						);
-
 
 	---------------------------------
 	-- The Property Container Type --
 	---------------------------------
 
-	type Property_Container_Type is abstract tagged record
-		-- the property container type is a stucture with
-		-- properties.
-		--
-		-- it's basically an Entity that doesn't know where 
-		-- to be stored
-
-
-		Properties : Property_Lists.List;
-	end record;
-
 	procedure Register(
 			Container	: in out Property_Container_Type;
 			Property	: in     Property_Ptr
-		);
-	-- register a property into this property container
-	-- this is to be called when the property is allocated
+		) is
+		-- register a property into this property container
+		-- this is to be called when the property is allocated
+	begin
+		Property_Lists.Append( Container.Properties, Property );
+	end Register;
 	
 	procedure Iterate(
 			Container	: in out Property_Container_Type;
 			Iterator	: access procedure( Property : Property_Ptr )
-		);
-	-- iterate over all registered properties in this container
-
+		) is
+		-- iterate over all registered properties in this container
+		procedure Inner_iterator( C : Property_Lists.Cursor ) is
+		begin
+			Iterator.all( Property_Lists.Element( C ) );
+		end Inner_iterator;
+	begin
+		Property_Lists.Iterate( Container.Properties, Inner_Iterator'Access );
+	end Iterate;
 
 
 
