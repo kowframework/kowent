@@ -38,9 +38,112 @@
 
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Containers.Doubly_Linked_Lists;
+with Ada.Finalization;
+
+-------------------
+-- KOW Framework --
+-------------------
+with APQ;
+
 package KOW_Ent is
 
 
+	----------------
+	-- Data Model --
+	----------------
+
+	-- KOW_Ent uses the APQ data model
+	-- Each property must have one or more of these
+
+
+	type Type_Of_Data_Type is (
+				-- these values are mapped back to the APQ type with the same name
+				APQ_Smallint,
+				APQ_Integer,
+				APQ_Bigint,
+				APQ_Real,
+				APQ_Double,
+				APQ_Serial,
+				APQ_Bigserial,
+
+				APQ_Date,
+				APQ_Time,
+				APQ_Timestamp,
+
+				Hour_Number,
+				Minute_Number,
+				Second_Number,
+
+				-- and this one is mapped back to String
+				APQ_String
+			);
+
+
+	--------------------
+	-- Data Container --
+	--------------------
+	type Value_Type( Type_Of : Type_Of_Data_Type; String_Length : Natural := 0 ) is record
+		case Type_Of is
+			when APQ_Smallint =>
+				Smallint_Value	: APQ.APQ_Smallint;
+
+			when APQ_Integer =>
+				Integer_Value	: APQ.APQ_Integer;
+
+			when APQ_Bigint =>
+				Bigint_Value	: APQ.APQ_Bigint;
+
+			when APQ_Real	=>
+				Real_Value	: APQ.APQ_Real;
+
+			when APQ_Double =>
+				Double_Value	: APQ.APQ_Double;
+
+			when APQ_Serial	=>
+				Serial_Value	: APQ.APQ_Serial;
+
+			when APQ_Bigserial =>
+				Bigserial_Value	: APQ.APQ_Bigserial;
+
+			when APQ_Date =>
+				Date_Value	: APQ.APQ_Date;
+
+			when APQ_Time =>
+				Time_Value	: APQ.APQ_Time;
+
+			when APQ_Timestamp =>
+				Timestamp_Value	: APQ.APQ_Timestamp;
+
+
+
+			when Hour_Number =>
+				Hour_Value	: APQ.Hour_Number;
+			
+			when Minute_Number =>
+				Minute_Value	: APQ.Minute_Number;
+
+			when Second_Number =>
+				Second_Value	: APQ.Second_Number;
+
+			when APQ_String =>
+				String_Value	: String( 1 .. String_Length );
+		end case;
+	end record;
+
+
+
+
+	----------------------------------
+	-- Property Container Interface --
+	----------------------------------
+
+	type Property_Container_Type is abstract tagged;
+	-- this interface is so the Property_Type has 
+	type Property_Container_Ptr is access all Property_Container_Type'Class;
 
 
 	-----------------------
@@ -48,54 +151,86 @@ package KOW_Ent is
 	-----------------------
 
 
+	type Property_Type( Container : Property_Container_Access ) is abstract new Ada.Finalization.Controlled with null record;
+	-- the property type is abstract so you will have to extend it.
+	
+
+	type Property_Ptr is access all Property_Type'Class;
+
+	overriding
+	procedure Initialize( Property : in out Property_Type );
+	-- register the given property in the given container
+
+	
+
+	-----------------------
+	-- The Property List --
+	-----------------------
+	package Property_Lists is new Ada.Containers.Doubly_Linked_Lists(
+							Element_Type	=> Property_Ptr
+						);
+
 
 	---------------------------------
 	-- The Property Container Type --
 	---------------------------------
 
-	type Property_Container_Type is tagged record
+	type Property_Container_Type is abstract tagged record
 		-- the property container type is a stucture with
 		-- properties.
 		--
 		-- it's basically an Entity that doesn't know where 
 		-- to be stored
-		Properties	: Property_Lists.List;
+
+
+		Properties : Property_Lists.List;
 	end record;
 
+	procedure Register(
+			Container	: in out Property_Container;
+			Property	: in     Property_Access
+		);
+	-- register a property into this property container
+	-- this is to be called when the property is allocated
+	
+	procedure Iterate(
+			Container	: in out Property_Container;
+			Iterator	: access procedure( Property : Property_Access
+		);
+	-- iterate over all registered properties in this container
 
 
 
 
+--	---------------------------
+--	-- The Data Storage Type --
+--	---------------------------
 
-	---------------------------
-	-- The Data Storage Type --
-	---------------------------
-
-	type Data_Storage_Type is interface;
+--	type Data_Storage_Type is interface;
 	-- this is the type that actually handles storing and retrieving data
 
-	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
+--	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
 
-	procedure Read(
-			Data_Storage	: in out Data_Storage_Type;
-			Container	: in out Property_Container_Type'Class;
-			Query		: in     Query_Type
-		) is abstract;
+--	procedure Read(
+--			Data_Storage	: in out Data_Storage_Type;
+--			Container	: in out Property_Container_Type'Class;
+--			Query		: in     Query_Type
+--		) is abstract;
 	
-	procedure Write(
-			Data_Storage	: in out Data_Storage_Type;
-			Container	: in     Property_Container_Type'Class
-		) is abstract;
+--	procedure Write(
+--			Data_Storage	: in out Data_Storage_Type;
+--			Container	: in     Property_Container_Type'Class
+--		) is abstract;
 
 
 	---------------------
 	-- The Entity Type --
 	---------------------
 	
-	type Entity_Type is new Property_Container_Type with record
-		Data_Storage	: Data_Storage_Ptr;
-	end record;
-
-	procedure Load()
+--	type Entity_Type is new Property_Container_Type with record
+--		Data_Storage	: Data_Storage_Ptr;
+--	end record;
+--
+--	procedure Load()
 
 end KOW_nt;
