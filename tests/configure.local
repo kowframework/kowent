@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# 
+# Local configuration file for APQ.MySQL
+
+
+
+
+################
+# Project Name #
+################
+
+project="kowent-tests"
+
+
+
+
+###################
+# Standard Checks #
+###################
+check_project kowent
+check_project ahven
+
+
