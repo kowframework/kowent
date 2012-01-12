@@ -61,8 +61,9 @@ package body KOW_Ent_Tests is
 	procedure Properties_Test is
 		-- test the core funcionality of properties -- how they hold value and the sorts
 		type My_Container is new KOW_Ent.Property_Container_Type with record
-			My_Int : KOW_Ent.Properties.Integer_Property( new String'("my_int" ), My_Container'Unrestricted_Access );
-			My_Real : KOW_Ent.Properties.Real_Property( new String'("my_real" ), My_Container'Unrestricted_Access );
+			My_Int		: KOW_Ent.Properties.Integer_Property( new String'("my_int" ), My_Container'Unrestricted_Access );
+			My_Real		: KOW_Ent.Properties.Real_Property( new String'("my_real" ), My_Container'Unrestricted_Access );
+			My_String	: KOW_Ent.Properties.String_Property( new String'("my_string"), My_Container'Unrestricted_Access, 2 );
 		end record;
 
 
@@ -76,8 +77,15 @@ package body KOW_Ent_Tests is
 			Registered := True;
 			if P.Value_Of = KOW_Ent.APQ_Integer then
 				Ahven.Assert( P.Value.Integer_Value = 1, "integer not holding values" );
+				Ahven.Assert( P.Name.all = "my_int", "integer not holding property name" );
+
 			elsif P.Value_Of = KOW_Ent.APQ_Real then
 				Ahven.Assert( P.Value.Real_Value = 20.0, "real not holding values" );
+				Ahven.Assert( P.Name.all = "my_real", "real not holding property name" );
+
+			elsif P.Value_Of = KOW_Ent.APQ_String then
+				Ahven.Assert( P.Value.String_Value = "A ", "string not holding values" );
+				Ahven.Assert( P.Name.all = "my_string", "string not holding property name" );
 			else
 				Ahven.Assert( false, "not the right value_of" );
 			end if;
@@ -87,6 +95,7 @@ package body KOW_Ent_Tests is
 	begin
 		My.My_Int.Value.Integer_Value := 1;
 		My.My_Real.Value.Real_Value := 20.0;
+		KOW_Ent.From_String( My.My_String.Value, "A" );
 
 		Iterate( My, Iterator'Access );
 

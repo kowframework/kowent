@@ -47,5 +47,12 @@ package KOW_Ent.Properties is
 				Name		: access String;
 				Container	: KOW_Ent.Property_Container_Ptr
 			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_Real, 0 ) with null record;
+	
+
+	type String_Property(
+				Name		: access String;
+				Container	: KOW_Ent.Property_Container_Ptr;
+				String_Length	: Positive
+			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_String, String_Length ) with null record;
 
 end KOW_Ent.Properties;
