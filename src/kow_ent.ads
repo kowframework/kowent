@@ -184,6 +184,9 @@ package KOW_Ent is
 	procedure Initialize( Property : in out Property_Type );
 	-- register the given property in the given container
 
+
+	function To_String( Property : in Property_Type ) return String;
+	procedure From_String( Property : in out Property_Type; String_Value : in String );
 	
 
 	-----------------------
