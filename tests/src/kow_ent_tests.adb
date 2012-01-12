@@ -211,7 +211,7 @@ package body KOW_Ent_Tests is
 
 	procedure Properties_Stress_Test is
 	begin
-		for i in 1 .. 10_000_000 loop
+		for i in 1 .. 1_000_000 loop
 			Properties_Test;
 		end loop;
 	end Properties_Stress_Test;
@@ -221,7 +221,7 @@ package body KOW_Ent_Tests is
 	procedure Stress_Control is
 		a : integer;
 	begin
-		for i in 1 .. 10_000_000 loop
+		for i in 1 .. 1_000_000 loop
 			a := i;
 		end loop;
 	end Stress_Control;
