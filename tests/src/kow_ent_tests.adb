@@ -58,33 +58,36 @@ package body KOW_Ent_Tests is
 	begin
 		Set_Name( T, "KOW_Ent" );
 		Ahven.Framework.Add_Test_Routine( T, Properties_Test'Access, "Properties" );
+		Ahven.Framework.Add_Test_Routine( T, Properties_Stress_Test'Access, "Properties Stress" );
 	end Initialize;
+
+
+
+	type Column_Name is access String;
+	function CN( Name : in String ) return Column_Name is
+	begin
+		return new String'( Name );
+	end CN;
+
+	My_Int_Name	: constant Column_Name := CN( "my_int" );
+	My_Real_Name	: constant Column_Name := CN( "my_real" );
+	My_String_Name	: constant Column_Name := CN( "my_string" );
+
+
+
+	-- test the core funcionality of properties -- how they hold value and the sorts
+	type My_Container is new KOW_Ent.Property_Container_Type with record
+		My_Int		: KOW_Ent.Properties.Integer_Property( My_Int_Name, My_Container'Unrestricted_Access );
+		My_Real		: KOW_Ent.Properties.Real_Property( My_Real_Name, My_Container'Unrestricted_Access );
+		My_String	: KOW_Ent.Properties.String_Property( My_String_Name, My_Container'Unrestricted_Access, 2 );
+	end record;
+
+
+
 
 	procedure Properties_Test is
 
-
-		type Column_Name is access String;
-		function CN( Name : in String ) return Column_Name is
-		begin
-			return new String'( Name );
-		end CN;
-
-		My_Int_Name	: constant Column_Name := CN( "my_int" );
-		My_Real_Name	: constant Column_Name := CN( "my_real" );
-		My_String_Name	: constant Column_Name := CN( "my_string" );
-
-
-
-		-- test the core funcionality of properties -- how they hold value and the sorts
-		type My_Container is new KOW_Ent.Property_Container_Type with record
-			My_Int		: KOW_Ent.Properties.Integer_Property( My_Int_Name, My_Container'Unrestricted_Access );
-			My_Real		: KOW_Ent.Properties.Real_Property( My_Real_Name, My_Container'Unrestricted_Access );
-			My_String	: KOW_Ent.Properties.String_Property( My_String_Name, My_Container'Unrestricted_Access, 2 );
-		end record;
-
-
 		Registered : Boolean := False;
-
 
 		procedure Iterator( P : KOW_Ent.Property_Ptr ) is
 			use APQ;
@@ -119,6 +122,31 @@ package body KOW_Ent_Tests is
 		if not Registered then
 			Ahven.Assert( false, "types not registering" );
 		end if;
+
 	end Properties_Test;
+
+
+
+	procedure Properties_Stress_Test is
+		task type runner;
+
+		task body runner is
+		begin
+			for i in 1 .. 10_000 loop
+				Properties_Test;
+			end loop;
+		end runner;
+
+
+		type runner_ptr is access runner;
+		type runner_arr is array(integer range <> ) of runner_ptr;
+
+		r : runner_arr( 1 .. 5 );
+	begin
+		for i in r'range loop
+			r(i) := new runner;
+			delay 0.2;
+		end loop;
+	end Properties_Stress_Test;
 
 end KOW_Ent_Tests;
