@@ -163,8 +163,13 @@ package KOW_Ent is
 	-----------------------
 
 
+	type Property_Name_Type is access String;
+	function CN( Name : in String ) return Property_Name_Type;
+	-- alias to return new String'(Name);
+
+
 	type Property_Type(
-				Name		: access String;	-- the idea here is column name in a table
+				Name		: Property_Name_Type;	-- the idea here is column name in a table
 				Container	: Property_Container_Ptr;
 				Value_Of	: Type_Of_Data_Type;
 				String_Length	: Natural

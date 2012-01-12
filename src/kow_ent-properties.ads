@@ -38,19 +38,95 @@
 package KOW_Ent.Properties is
 
 
-	type Integer_Property(
-				Name		: access String;
+	-------------
+	-- Numeric --
+	-------------
+
+	type Smallint_Property(
+				Name		: Property_Name_Type;
 				Container	: KOW_Ent.Property_Container_Ptr
-			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_Integer, 0 ) with null record;
+			) is new Property_Type( Name, Container, APQ_Smallint, 0 ) with null record;
+				
+
+	type Integer_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Integer, 0 ) with null record;
+
+	type Bigint_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_PTr
+			) is new Property_Type( Name, COntainer,  APQ_Bigint, 0 ) with null record;
+
 
 	type Real_Property(
-				Name		: access String;
-				Container	: KOW_Ent.Property_Container_Ptr
-			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_Real, 0 ) with null record;
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Real, 0 ) with null record;
 	
+	type Double_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Double, 0 ) with null record;
+
+
+	type Serial_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Serial, 0 ) with null record;
+
+	type Bigserial_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Bigserial, 0 ) with null record;
+
+
+
+	---------------
+	-- Date/time --
+	---------------
+
+	type Date_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Date, 0 ) with null record;
+	
+	
+	type Time_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Time, 0 ) with null record;
+
+	type Timestamp_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, APQ_Timestamp, 0 ) with null record;
+
+
+	
+	type Hour_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, Hour_Number, 0 ) with null record;
+	
+	type Minute_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, Minute_Number, 0 ) with null record;
+
+	
+	type Second_Property(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr
+			) is new Property_Type( Name, Container, Second_Number, 0 ) with null record;
+
+
+	------------
+	-- String --
+	------------
 
 	type String_Property(
-				Name		: access String;
+				Name		: Property_Name_Type;
 				Container	: KOW_Ent.Property_Container_Ptr;
 				String_Length	: Positive
 			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_String, String_Length ) with null record;

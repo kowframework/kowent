@@ -170,6 +170,14 @@ package body KOW_Ent is
 	-- The Property Type --
 	-----------------------
 
+
+
+	function CN( Name : in String ) return Property_Name_Type is
+	begin
+		return new String'( Name );
+	end CN;
+
+
 	overriding
 	procedure Initialize( Property : in out Property_Type ) is
 		-- register the given property in the given container

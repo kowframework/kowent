@@ -57,4 +57,7 @@ package KOW_Ent_Tests is
 	procedure Properties_Test;
 	-- test the core funcionality of properties -- how they hold value and the sorts
 	procedure Properties_Stress_Test;
+
+
+	procedure stress_control;
 end KOW_Ent_Tests;

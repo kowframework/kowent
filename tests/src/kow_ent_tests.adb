@@ -59,6 +59,7 @@ package body KOW_Ent_Tests is
 		Set_Name( T, "KOW_Ent" );
 		Ahven.Framework.Add_Test_Routine( T, Properties_Test'Access, "Properties" );
 		Ahven.Framework.Add_Test_Routine( T, Properties_Stress_Test'Access, "Properties Stress" );
+		Ahven.Framework.Add_Test_Routine( T, Stress_Control'Access, "Stress Control" );
 	end Initialize;
 
 
@@ -148,5 +149,30 @@ package body KOW_Ent_Tests is
 			delay 0.2;
 		end loop;
 	end Properties_Stress_Test;
+
+
+
+	procedure Stress_Control is
+		task type runner;
+
+		task body runner is
+			a : integer;
+		begin
+			for i in 1 .. 10_000 loop
+				a := i;
+			end loop;
+		end runner;
+
+
+		type runner_ptr is access runner;
+		type runner_arr is array(integer range <> ) of runner_ptr;
+
+		r : runner_arr( 1 .. 50 );
+	begin
+		for i in r'range loop
+			r(i) := new runner;
+			delay 0.2;
+		end loop;
+	end Stress_Control;
 
 end KOW_Ent_Tests;
