@@ -69,9 +69,9 @@ package body KOW_Ent_Tests is
 			return new String'( Name );
 		end CN;
 
-		My_Int_Name	: Column_Name := CN( "my_int" );
-		My_Real_Name	: Column_Name := CN( "my_real" );
-		My_String_Name	: Column_Name := CN( "my_string" );
+		My_Int_Name	: constant Column_Name := CN( "my_int" );
+		My_Real_Name	: constant Column_Name := CN( "my_real" );
+		My_String_Name	: constant Column_Name := CN( "my_string" );
 
 
 
