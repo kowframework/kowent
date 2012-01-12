@@ -51,6 +51,8 @@ with KOW_Ent.Properties;
 
 package body KOW_Ent_Tests is
 
+
+
 	overriding
 	procedure Initialize( T : in out Test ) is
 	begin
@@ -59,11 +61,25 @@ package body KOW_Ent_Tests is
 	end Initialize;
 
 	procedure Properties_Test is
+
+
+		type Column_Name is access String;
+		function CN( Name : in String ) return Column_Name is
+		begin
+			return new String'( Name );
+		end CN;
+
+		My_Int_Name	: Column_Name := CN( "my_int" );
+		My_Real_Name	: Column_Name := CN( "my_real" );
+		My_String_Name	: Column_Name := CN( "my_string" );
+
+
+
 		-- test the core funcionality of properties -- how they hold value and the sorts
 		type My_Container is new KOW_Ent.Property_Container_Type with record
-			My_Int		: KOW_Ent.Properties.Integer_Property( new String'("my_int" ), My_Container'Unrestricted_Access );
-			My_Real		: KOW_Ent.Properties.Real_Property( new String'("my_real" ), My_Container'Unrestricted_Access );
-			My_String	: KOW_Ent.Properties.String_Property( new String'("my_string"), My_Container'Unrestricted_Access, 2 );
+			My_Int		: KOW_Ent.Properties.Integer_Property( My_Int_Name, My_Container'Unrestricted_Access );
+			My_Real		: KOW_Ent.Properties.Real_Property( My_Real_Name, My_Container'Unrestricted_Access );
+			My_String	: KOW_Ent.Properties.String_Property( My_String_Name, My_Container'Unrestricted_Access, 2 );
 		end record;
 
 
@@ -77,15 +93,15 @@ package body KOW_Ent_Tests is
 			Registered := True;
 			if P.Value_Of = KOW_Ent.APQ_Integer then
 				Ahven.Assert( P.Value.Integer_Value = 1, "integer not holding values" );
-				Ahven.Assert( P.Name.all = "my_int", "integer not holding property name" );
+				Ahven.Assert( P.Name.all = My_Int_Name.all, "integer not holding property name" );
 
 			elsif P.Value_Of = KOW_Ent.APQ_Real then
 				Ahven.Assert( P.Value.Real_Value = 20.0, "real not holding values" );
-				Ahven.Assert( P.Name.all = "my_real", "real not holding property name" );
+				Ahven.Assert( P.Name.all = My_Real_Name.all, "real not holding property name" );
 
 			elsif P.Value_Of = KOW_Ent.APQ_String then
 				Ahven.Assert( P.Value.String_Value = "A ", "string not holding values" );
-				Ahven.Assert( P.Name.all = "my_string", "string not holding property name" );
+				Ahven.Assert( P.Name.all = My_String_Name.all, "string not holding property name" );
 			else
 				Ahven.Assert( false, "not the right value_of" );
 			end if;
