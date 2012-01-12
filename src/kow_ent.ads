@@ -163,9 +163,15 @@ package KOW_Ent is
 	-----------------------
 
 
-	type Property_Type( Container : Property_Container_Ptr ) is abstract new Ada.Finalization.Controlled with null record;
-	-- the property type is abstract so you will have to extend it.
-	
+	type Property_Type(
+				Name		: access String;	-- the idea here is column name in a table
+				Container	: Property_Container_Ptr;
+				Value_Of	: Type_Of_Data_Type;
+				String_Length	: Natural
+			) is abstract new Ada.Finalization.Controlled with record
+		-- the property type is abstract so you will have to extend it.
+		Value : Value_Type( Value_Of, String_Length );
+	end record;
 
 	type Property_Ptr is access all Property_Type'Class;
 
