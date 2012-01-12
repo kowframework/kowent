@@ -48,6 +48,7 @@ with APQ;
 with KOW_Ent;
 with KOW_Ent.Properties;
 
+with ada.text_io;
 
 package body KOW_Ent_Tests is
 
@@ -209,49 +210,19 @@ package body KOW_Ent_Tests is
 
 
 	procedure Properties_Stress_Test is
-		task type runner;
-
-		task body runner is
-		begin
-			for i in 1 .. 10_000 loop
-				Properties_Test;
-			end loop;
-		end runner;
-
-
-		type runner_ptr is access runner;
-		type runner_arr is array(integer range <> ) of runner_ptr;
-
-		r : runner_arr( 1 .. 50 );
 	begin
-		for i in r'range loop
-			r(i) := new runner;
-			delay 0.2;
+		for i in 1 .. 10_000_000 loop
+			Properties_Test;
 		end loop;
 	end Properties_Stress_Test;
 
 
 
 	procedure Stress_Control is
-		task type runner;
-
-		task body runner is
-			a : integer;
-		begin
-			for i in 1 .. 10_000 loop
-				a := i;
-			end loop;
-		end runner;
-
-
-		type runner_ptr is access runner;
-		type runner_arr is array(integer range <> ) of runner_ptr;
-
-		r : runner_arr( 1 .. 50 );
+		a : integer;
 	begin
-		for i in r'range loop
-			r(i) := new runner;
-			delay 0.2;
+		for i in 1 .. 10_000_000 loop
+			a := i;
 		end loop;
 	end Stress_Control;
 
