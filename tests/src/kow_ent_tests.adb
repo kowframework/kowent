@@ -44,11 +44,12 @@ with Ahven.Framework;
 -------------
 -- KOW Ent --
 -------------
+with APQ;
 with KOW_Ent;
 with KOW_Ent.Properties;
 
 
-package KOW_Ent_Tests is
+package body KOW_Ent_Tests is
 
 	overriding
 	procedure Initialize( T : in out Test ) is
@@ -59,29 +60,40 @@ package KOW_Ent_Tests is
 
 	procedure Properties_Test is
 		-- test the core funcionality of properties -- how they hold value and the sorts
-		type My_Container is new KOW_Ent.Entity_Container_Type with record
-			My_Int : KOW_Ent.Properties.Integer_Property( "my_int", My_Container'Unrestricted_Access );
-			My_Real : KOW_Ent.Properties.Real_Property( "my_real", My_Container'Unrestricted_Access );
+		type My_Container is new KOW_Ent.Property_Container_Type with record
+			My_Int : KOW_Ent.Properties.Integer_Property( new String'("my_int" ), My_Container'Unrestricted_Access );
+			My_Real : KOW_Ent.Properties.Real_Property( new String'("my_real" ), My_Container'Unrestricted_Access );
 		end record;
 
 
-		procedure Iterator( P : KOW_Ent.Property_Type_Ptr ) is
+		Registered : Boolean := False;
+
+
+		procedure Iterator( P : KOW_Ent.Property_Ptr ) is
+			use APQ;
 			use KOW_Ent;
 		begin
-			if P.Value_Of = APQ_Integer then
+			Registered := True;
+			if P.Value_Of = KOW_Ent.APQ_Integer then
 				Ahven.Assert( P.Value.Integer_Value = 1, "integer not holding values" );
-			elsif P.Value_Of = APQ_Real then
+			elsif P.Value_Of = KOW_Ent.APQ_Real then
 				Ahven.Assert( P.Value.Real_Value = 20.0, "real not holding values" );
 			else
-				Ahven.Assert( false, "Not the right value_of" );
+				Ahven.Assert( false, "not the right value_of" );
 			end if;
 		end Iterator;
+
+		My : My_Container;
 	begin
-		My_Container.My_Int.Value.Integer_Value := 1;
-		My_Container.My_Real.Value.Real_Value := 20.0;
+		My.My_Int.Value.Integer_Value := 1;
+		My.My_Real.Value.Real_Value := 20.0;
 
-		Iterate( My_Container, Iterator'Access );
+		Iterate( My, Iterator'Access );
 
+
+		if not Registered then
+			Ahven.Assert( false, "types not registering" );
+		end if;
 	end Properties_Test;
 
 end KOW_Ent_Tests;

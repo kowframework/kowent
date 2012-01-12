@@ -20,3 +20,7 @@ clean:
 distclean: 
 	@-${MAKE} clean
 	@-${MAKE} -C samples clean
+
+
+run:
+	./work/bin/tester
