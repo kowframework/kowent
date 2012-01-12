@@ -141,7 +141,7 @@ package body KOW_Ent_Tests is
 		type runner_ptr is access runner;
 		type runner_arr is array(integer range <> ) of runner_ptr;
 
-		r : runner_arr( 1 .. 5 );
+		r : runner_arr( 1 .. 50 );
 	begin
 		for i in r'range loop
 			r(i) := new runner;
