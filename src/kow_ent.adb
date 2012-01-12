@@ -187,15 +187,6 @@ package body KOW_Ent is
 
 
 
-	function To_String( Property : in Property_Type ) return String is
-	begin
-		return To_String( Property.Value );
-	end To_String;
-
-	procedure From_String( Property : in out Property_Type; String_Value : in String ) is
-	begin
-		From_String( Property.Value, String_Value );
-	end From_String;
 	
 
 	---------------------------------

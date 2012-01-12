@@ -170,13 +170,8 @@ package KOW_Ent is
 
 	type Property_Type(
 				Name		: Property_Name_Type;	-- the idea here is column name in a table
-				Container	: Property_Container_Ptr;
-				Value_Of	: Type_Of_Data_Type;
-				String_Length	: Natural
-			) is abstract new Ada.Finalization.Controlled with record
-		-- the property type is abstract so you will have to extend it.
-		Value : Value_Type( Value_Of, String_Length );
-	end record;
+				Container	: Property_Container_Ptr
+			) is abstract new Ada.Finalization.Controlled with null record;
 
 	type Property_Ptr is access all Property_Type'Class;
 
@@ -184,10 +179,20 @@ package KOW_Ent is
 	procedure Initialize( Property : in out Property_Type );
 	-- register the given property in the given container
 
-
-	function To_String( Property : in Property_Type ) return String;
-	procedure From_String( Property : in out Property_Type; String_Value : in String );
 	
+
+	function Get_Type ( Property : in Property_Type ) return Type_Of_Data_Type is abstract;
+	-- return the type of the value; used for calling set_valued in the right way
+
+	function Get_Value( Property : in Property_Type ) return Value_Type is abstract;
+	-- get the value
+	
+	procedure Set_Value(
+				Property	: in out Property_Type;
+				Value		: in     Value_Type
+			) is abstract;
+	-- set the value, respecting results of get_type
+
 
 	-----------------------
 	-- The Property List --

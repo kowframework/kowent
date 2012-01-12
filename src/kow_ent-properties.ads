@@ -38,6 +38,37 @@
 package KOW_Ent.Properties is
 
 
+
+	type Valued_Property_Type(
+				Name		: Property_Name_Type;
+				Container	: Property_Container_Ptr;
+				Type_Of		: Type_Of_Data_Type;
+				String_Length	: Natural
+			) is abstract new KOW_Ent.Property_Type( Name, Container ) with record
+		Value : Value_Type( Type_of, String_Length );
+	end record;
+
+
+	overriding
+	function Get_Type ( Property : in Valued_Property_Type ) return Type_Of_Data_Type;
+	-- return the type of the value; used for calling set_valued in the right way
+
+	overriding
+	function Get_Value( Property : in Valued_Property_Type ) return Value_Type;
+	-- get the value
+	
+	overriding
+	procedure Set_Value(
+				Property	: in out Valued_Property_Type;
+				Value		: in     Value_Type
+			);
+
+
+	function To_String( Property : in Valued_Property_Type ) return String;
+
+	procedure From_String( Property : in out Valued_Property_Type; String_Value : in String );
+
+
 	-------------
 	-- Numeric --
 	-------------
@@ -45,40 +76,40 @@ package KOW_Ent.Properties is
 	type Smallint_Property(
 				Name		: Property_Name_Type;
 				Container	: KOW_Ent.Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Smallint, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Smallint, 0 ) with null record;
 				
 
 	type Integer_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Integer, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Integer, 0 ) with null record;
 
 	type Bigint_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_PTr
-			) is new Property_Type( Name, COntainer,  APQ_Bigint, 0 ) with null record;
+			) is new Valued_Property_Type( Name, COntainer,  APQ_Bigint, 0 ) with null record;
 
 
 	type Real_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Real, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Real, 0 ) with null record;
 	
 	type Double_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Double, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Double, 0 ) with null record;
 
 
 	type Serial_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Serial, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Serial, 0 ) with null record;
 
 	type Bigserial_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Bigserial, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Bigserial, 0 ) with null record;
 
 
 
@@ -89,36 +120,36 @@ package KOW_Ent.Properties is
 	type Date_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Date, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Date, 0 ) with null record;
 	
 	
 	type Time_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Time, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Time, 0 ) with null record;
 
 	type Timestamp_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, APQ_Timestamp, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, APQ_Timestamp, 0 ) with null record;
 
 
 	
 	type Hour_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, Hour_Number, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, Hour_Number, 0 ) with null record;
 	
 	type Minute_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, Minute_Number, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, Minute_Number, 0 ) with null record;
 
 	
 	type Second_Property(
 				Name		: Property_Name_Type;
 				Container	: Property_Container_Ptr
-			) is new Property_Type( Name, Container, Second_Number, 0 ) with null record;
+			) is new Valued_Property_Type( Name, Container, Second_Number, 0 ) with null record;
 
 
 	------------
@@ -129,6 +160,6 @@ package KOW_Ent.Properties is
 				Name		: Property_Name_Type;
 				Container	: KOW_Ent.Property_Container_Ptr;
 				String_Length	: Positive
-			) is new KOW_Ent.Property_Type( Name, Container, KOW_Ent.APQ_String, String_Length ) with null record;
+			) is new Valued_Property_Type( Name, Container, KOW_Ent.APQ_String, String_Length ) with null record;
 
 end KOW_Ent.Properties;
