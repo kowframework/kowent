@@ -116,33 +116,33 @@ package body KOW_Ent_Tests is
 		begin
 			Registered := True;
 
-			case P.Value_Of is
+			case Get_Type( P.all ) is
 				when KOW_Ent.APQ_Smallint =>
-					Ahven.Assert( P.Value.Smallint_Value = 1, "smallint not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Smallint_Value = 1, "smallint not holding values" );
 					Ahven.Assert( P.Name.all = My_Smallint_Name.all, "smallint not holding property name" );
 
 				when KOW_Ent.APQ_Integer =>
-					Ahven.Assert( P.Value.Integer_Value = 1, "integer not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Integer_Value = 1, "integer not holding values" );
 					Ahven.Assert( P.Name.all = My_Int_Name.all, "integer not holding property name" );
 
 				when KOW_Ent.APQ_Bigint =>
-					Ahven.Assert( P.Value.Bigint_Value = 1, "bigint not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Bigint_Value = 1, "bigint not holding values" );
 					Ahven.Assert( P.Name.all = My_Bigint_Name.all, "bigint not holding property name" );
 
 				when KOW_Ent.APQ_Real =>
-					Ahven.Assert( P.Value.Real_Value = 20.0, "real not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Real_Value = 20.0, "real not holding values" );
 					Ahven.Assert( P.Name.all = My_Real_Name.all, "real not holding property name" );
 
 				when KOW_Ent.APQ_Double =>
-					Ahven.Assert( P.Value.Double_Value = 20.0, "double not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Double_Value = 20.0, "double not holding values" );
 					Ahven.Assert( P.Name.all = My_Double_Name.all, "double not holding property name" );
 
 				when KOW_Ent.APQ_Serial =>
-					Ahven.Assert( P.Value.Serial_Value = 1, "serial not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Serial_Value = 1, "serial not holding values" );
 					Ahven.Assert( P.Name.all = My_Serial_Name.all, "serial not holding property name" );
 
 				when KOW_Ent.APQ_Bigserial =>
-					Ahven.Assert( P.Value.Bigserial_Value = 1, "bigserial not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Bigserial_Value = 1, "bigserial not holding values" );
 					Ahven.Assert( P.Name.all = My_Bigserial_Name.all, "bigserial not holding property name" );
 
 
@@ -158,22 +158,22 @@ package body KOW_Ent_Tests is
 
 				
 				when KOW_Ent.Hour_Number =>
-					Ahven.Assert( P.Value.Hour_Value = 1, "hour not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Hour_Value = 1, "hour not holding values" );
 					Ahven.Assert( P.Name.all = My_Hour_Name.all, "hour not holding property name" );
 
 				when KOW_Ent.Minute_Number =>
-					Ahven.Assert( P.Value.Minute_Value = 1, "minute not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Minute_Value = 1, "minute not holding values" );
 					Ahven.Assert( P.Name.all = My_Minute_Name.all, "minute not holding property name" );
 
 				when KOW_Ent.Second_Number =>
-					Ahven.Assert( P.Value.Second_Value = 1, "second not holding values" );
+					Ahven.Assert( Get_Value( P.all ).Second_Value = 1, "second not holding values" );
 					Ahven.Assert( P.Name.all = My_Second_Name.all, "second not holding property name" );
 
 
 
 
 				when KOW_Ent.APQ_String =>
-					Ahven.Assert( P.Value.String_Value = "A ", "string not holding values" );
+					Ahven.Assert( Get_Value( P.all ).String_Value = "A ", "string not holding values" );
 					Ahven.Assert( P.Name.all = My_String_Name.all, "string not holding property name" );
 			end case;
 		end Iterator;
