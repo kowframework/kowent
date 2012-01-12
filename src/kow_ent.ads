@@ -164,7 +164,7 @@ package KOW_Ent is
 
 
 	type Property_Name_Type is access String;
-	function CN( Name : in String ) return Property_Name_Type;
+	function PN( Name : in String ) return Property_Name_Type;
 	-- alias to return new String'(Name);
 
 

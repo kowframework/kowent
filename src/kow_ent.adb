@@ -172,10 +172,10 @@ package body KOW_Ent is
 
 
 
-	function CN( Name : in String ) return Property_Name_Type is
+	function PN( Name : in String ) return Property_Name_Type is
 	begin
 		return new String'( Name );
-	end CN;
+	end PN;
 
 
 	overriding
