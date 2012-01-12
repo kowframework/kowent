@@ -64,15 +64,9 @@ package body KOW_Ent_Tests is
 
 
 
-	type Column_Name is access String;
-	function CN( Name : in String ) return Column_Name is
-	begin
-		return new String'( Name );
-	end CN;
-
-	My_Int_Name	: constant Column_Name := CN( "my_int" );
-	My_Real_Name	: constant Column_Name := CN( "my_real" );
-	My_String_Name	: constant Column_Name := CN( "my_string" );
+	My_Int_Name	: constant KOW_Ent.Property_Name_Type := KOW_Ent.PN( "my_int" );
+	My_Real_Name	: constant KOW_Ent.Property_Name_Type := KOW_Ent.PN( "my_real" );
+	My_String_Name	: constant KOW_Ent.Property_Name_Type := KOW_Ent.PN( "my_string" );
 
 
 
