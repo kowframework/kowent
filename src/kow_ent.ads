@@ -43,6 +43,7 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Unchecked_Deallocation;
 
 -------------------
 -- KOW Framework --
@@ -139,6 +140,9 @@ package KOW_Ent is
 	end record;
 
 
+	type Value_Ptr is access all Value_Type;
+
+
 	function To_String( Value : in Value_Type ) return String;
 	-- convert the value into a not trimmed string
 	
@@ -147,6 +151,10 @@ package KOW_Ent is
 	-- if the value.type_of=apq_string, raises constraint_error only if string_value'length > value.string_value'length
 
 
+	procedure Free is new Ada.Unchecked_Deallocation(
+					Object	=> Value_Type,
+					Name	=> Value_Ptr
+				);
 
 
 	----------------------------------
@@ -233,14 +241,32 @@ package KOW_Ent is
 
 
 
---	---------------------------
---	-- The Data Storage Type --
---	---------------------------
 
---	type Data_Storage_Type is interface;
+	
+
+	---------------------------
+	-- The Data Storage Type --
+	---------------------------
+
+	type Data_Storage_Type is interface;
 	-- this is the type that actually handles storing and retrieving data
+	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
 
---	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
+
+	---------------------
+	-- The Entity Type --
+	---------------------
+
+	type Entity_Type is new Property_Container_Type with record
+		-- conceptually the entity is a property container which
+		-- is linked to a data storage backend, thus being able to
+		-- be stored and retrieved later on
+		--
+		--
+		-- the data storage is an abstract concept described later
+		Data_Storage : Data_Storage_Ptr;
+	end record;
+
 
 --	procedure Read(
 --			Data_Storage	: in out Data_Storage_Type;
