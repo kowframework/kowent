@@ -47,10 +47,10 @@ package KOW_Ent.Queries.Logic_Operations is
 		Property_Name	: Property_Name_Type;
 		-- it's a pointer but always share the access to the same string value
 		Value		: Value_Ptr;
-		Operator	: Logic_Operator_Type := Operator_Equals_To;
-		Appender	: Loginc_Appender_Type := Appender_AND;
+		Operator	: Logic_Operator_Type := Operator_Equal_To;
+		Appender	: Logic_Appender_Type := Appender_AND;
 	end record;
-	type Stored_Vs_Value_Ptr is access Stored_Vs_Value_Operation;
+	type Stored_Vs_Value_Ptr is access all Stored_Vs_Value_Operation;
 
 
 	overriding
@@ -81,10 +81,10 @@ package KOW_Ent.Queries.Logic_Operations is
 		Right_Property_Name	: Property_Name_Type;
 		Right_Property_Container_Tag : Ada.Tags.Tag;
 
-		Operator		: Logic_Operator_Type := Operator_Equals_To;
+		Operator		: Logic_Operator_Type := Operator_Equal_To;
 		Appender		: Logic_Appender_Type := Appender_AND;
 	end record;
-	type Stored_Vs_Stored_Ptr is access Stored_Vs_Stored_Operation;
+	type Stored_Vs_Stored_Ptr is access all Stored_Vs_Stored_Operation;
 
 
 	overriding
@@ -106,7 +106,7 @@ package KOW_Ent.Queries.Logic_Operations is
 		Logic_Criteria	: Logic_Criteria_Type;
 		Appender	: Logic_Appender_Type	:= Appender_AND;
 	end record;
-	type Logic_Criteria_Ptr is access Logic_Criteria_Operation;
+	type Logic_Criteria_Ptr is access all Logic_Criteria_Operation;
 
 
 	overriding

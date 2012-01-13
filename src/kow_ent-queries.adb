@@ -61,8 +61,6 @@ package body KOW_Ent.Queries is
 	begin
 		Iterate( Logic_Criteria.Operations, Iterator'Access );
 		Logic_Criteria.Operations := New_Operations;
-
-		return Operations;
 	end Adjust;
 
 	overriding
@@ -83,7 +81,7 @@ package body KOW_Ent.Queries is
 
 	procedure Append(
 				Criteria	: in out Logic_Criteria_Type;
-				Operation	: in     Logic_Operation_Type
+				Operation	: in     Logic_Operation_Type'Class
 			) is
 	begin
 		Logic_Operation_Lists.Append(

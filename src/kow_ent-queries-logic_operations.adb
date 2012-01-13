@@ -39,7 +39,7 @@
 --------------
 with Ada.Unchecked_Deallocation;
 
-package KOW_Ent.Queries.Logic_Operations is
+package body KOW_Ent.Queries.Logic_Operations is
 
 
 	---------------------
@@ -83,7 +83,7 @@ package KOW_Ent.Queries.Logic_Operations is
 	function Clone(
 				Operation	: in    Stored_Vs_Value_Operation 
 			) return Logic_Operation_Ptr is
-		Value : Stored_Vs_Value_Ptr := new Logic_Criteria_Operation'( Operation );
+		Value : Stored_Vs_Value_Ptr := new Stored_Vs_Value_Operation'( Operation );
 	begin
 		return Logic_Operation_Ptr( Value );
 	end Clone;
@@ -99,7 +99,7 @@ package KOW_Ent.Queries.Logic_Operations is
 				Name		: in out Logic_Operation_Ptr
 			) is
 		procedure iFree is new Ada.Unchecked_Deallocation(
-							Object	=> Stored_Vs_Stored_Operation;
+							Object	=> Stored_Vs_Stored_Operation,
 							Name	=> Stored_Vs_Stored_Ptr
 						);
 	begin
@@ -120,20 +120,13 @@ package KOW_Ent.Queries.Logic_Operations is
 	-- Logic_Criteria --
 	--------------------
 
-	type Logic_Criteria_Operation is new Logic_Operation_Type with record
-		Logic_Criteria	: Logic_Criteria_Type;
-		Appender	: Logic_Appender_Type	:= Appender_AND;
-	end record;
-	type Logic_Criteria_Ptr is access Logic_Criteria_Operation;
-
-
 	overriding
 	procedure Free(
 				Operation	: in     Logic_Criteria_Operation;
 				Name		: in out Logic_Operation_Ptr
 			) is
 		procedure iFree is new Ada.Unchecked_Deallocation(
-							Object	=> Logic_Criteria_Operation;
+							Object	=> Logic_Criteria_Operation,
 							Name	=> Logic_Criteria_Ptr
 						);
 	begin
@@ -143,7 +136,7 @@ package KOW_Ent.Queries.Logic_Operations is
 	overriding
 	function Clone(
 				Operation	: in     Logic_Criteria_Operation
-			) return Logic_Operation_Ptr
+			) return Logic_Operation_Ptr is
 		Value : Logic_Criteria_Ptr := new Logic_Criteria_Operation'( Operation );
 	begin
 		return Logic_Operation_Ptr( Value );

@@ -43,6 +43,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
 with Ada.Tags;
 
@@ -101,7 +102,7 @@ package KOW_Ent.Queries is
 			) return Logic_Operation_Ptr is abstract;
 
 	package Logic_Operation_Lists is new Ada.Containers.Doubly_Linked_Lists(
-								Element_Type => Logic_Operation_Type
+								Element_Type => Logic_Operation_Ptr
 							);
 
 	-------------------------
@@ -122,7 +123,7 @@ package KOW_Ent.Queries is
 
 	procedure Append(
 				Criteria	: in out Logic_Criteria_Type;
-				Operation	: in     Logic_Operation_Type
+				Operation	: in     Logic_Operation_Type'Class
 			);
 	
 	procedure Iterate(
@@ -136,7 +137,7 @@ package KOW_Ent.Queries is
 	-- Finally The Query Type --
 	----------------------------
 
-	type Query_Type is tagged private;
+	type Query_Type is tagged record
 		Entity_Tag	: Ada.Tags.Tag;
 		Logic_Criteria	: Logic_Criteria_Type;
 	end record;
