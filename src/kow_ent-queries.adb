@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -46,121 +46,63 @@
 with Ada.Finalization;
 with Ada.Tags;
 
-package KOW_Ent.Queries is
-
-	------------------
-	-- Scalar Types --
-	------------------
-
-	type Logic_Appender_Type is (
-			Appender_AND,
-			Appender_OR
-		);
-
-	type Logic_Operator_Type is (
-		-- all operators take into account:
-		-- 	Left-hand side of operation	=> Value inside the data storage
-		-- 	Right-hand side of operation	=> Parameter passed into the append procedure
-			Operator_Equal_To,
-			Operator_Not_Equal_To,
-			Operator_Like,
-			Operator_Less_Than,
-			Operator_Less_Than_Or_Equal_To,
-			Operator_Greater_Than,
-			Operator_Greater_Than_Or_Equal_To
-		);
-	
-
-	type Join_Type is (
-			Left_Join,
-			Right_Join,
-			Inner_Join
-		);
-	
-
-
-	---------------------
-	-- Logic Operation --
-	---------------------
-
-
-
-	type Logic_Operation_Type is abstract new Ada.Finalization.Controlled with null record;
-	type Logic_Operation_Ptr is access all Logic_Operation_Type'Class;
-
-	
-
-	procedure Free(
-				Operation	: in     Logic_Operation_Type;
-				Name		: in out Logic_Operation_Ptr
-			) is abstract;
-	-- frees the pointer of the given type
-
-	function Clone(
-				Operation	: in     Logic_Operation_Type
-			) return Logic_Operation_Ptr is abstract;
-
-	package Logic_Operation_Lists is new Ada.Containers.Doubly_Linked_Lists(
-								Element_Type => Logic_Operation_Type
-							);
-
-	-------------------------
-	-- Logic Criteria Type --
-	-------------------------
-	
-	type Logic_Criteria_Type is new Ada.Finalization.Controlled with private;
+package body KOW_Ent.Queries is
 
 	overriding
-	procedure Adjust( Logic_Criteria : in out Logic_Criteria_Type );
-	-- reallocate all the operations
+	procedure Adjust( Logic_Criteria : in out Logic_Criteria_Type ) is
+		use Logic_Operation_Lists;
+		-- reallocate all the operations
+		New_Operations : List;
+
+		procedure Iterator( C : in Cursor ) is
+		begin
+			Append( New_Operations, Clone( Element( C ).all ) );
+		end Iterator;
+	begin
+		Iterate( Logic_Criteria.Operations, Iterator'Access );
+		Logic_Criteria.Operations := New_Operations;
+
+		return Operations;
+	end Adjust;
 
 	overriding
-	procedure Finalize( Logic_Criteria : in out Logic_Criteria_Type );
-	-- free the operations
+	procedure Finalize( Logic_Criteria : in out Logic_Criteria_Type ) is
+		-- free the operations
+		use Logic_Operation_Lists;
 
+		procedure Iterator( C : in Cursor ) is
+			Ptr : Logic_Operation_Ptr := Element( C );
+		begin
+			Free( Ptr.all, Ptr );
+		end Iterator;
+	begin
+		Iterate( Logic_Criteria.Operations, Iterator'Access );
+		Clear( Logic_Criteria.Operations );
+	end Finalize;
 
 
 	procedure Append(
 				Criteria	: in out Logic_Criteria_Type;
 				Operation	: in     Logic_Operation_Type
-			);
+			) is
+	begin
+		Logic_Operation_Lists.Append(
+						Criteria.Operations,
+						Clone( Operation )
+					);
+	end Append;
+
 	
 	procedure Iterate(
 				Criteria	: in     Logic_Criteria_Type;
 				Iterator	: access procedure( Operation : in Logic_Operation_Type'Class )
-			);
-
-
-
-	----------------------------
-	-- Finally The Query Type --
-	----------------------------
-
-	type Query_Type is tagged private;
-		Entity_Tag	: Ada.Tags.Tag;
-		Logic_Criteria	: Logic_Criteria_Type;
-	end record;
-
-	-----------------------------------
-	-- And now the Joined Query Type --
-	-----------------------------------
-
-	type Joined_Query_Type is tagged record
-		Left_Query	: Query_Type;
-		Right_Query	: Query_Type;
-		Join		: Join_Type;
-		Having		: Logic_Criteria_Type;
-	end record;
-
-
-private
-
-	-------------------------
-	-- Logic Criteria Type --
-	-------------------------
-
-	type Logic_Criteria_Type is new Ada.Finalization.Controlled with record
-		Operations : Logic_Operation_lists.List;
-	end record;
+			) is
+		procedure Inner_Iterator( C : Logic_Operation_Lists.Cursor ) is
+		begin
+			Iterator.all( Logic_Operation_Lists.Element( C ).all );
+		end Inner_Iterator;
+	begin
+		Logic_Operation_Lists.Iterate( Criteria.Operations, Inner_Iterator'Access );
+	end Iterate;
 
 end KOW_Ent.Queries;
