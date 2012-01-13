@@ -40,6 +40,7 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Strings.Hash;
 with Ada.Unchecked_Deallocation;
 
 -------------------
@@ -49,7 +50,7 @@ with APQ;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Operations;
 
-package KOW_Ent.Data_Storages is
+package body KOW_Ent.Data_Storages is
 
 
 	--------------------
@@ -62,18 +63,53 @@ package KOW_Ent.Data_Storages is
 		use Queries;
 
 		Q	: Query_Type;
-		Op	: Logic_Operations.Stored_Vs_Data_Operation;
+		Op	: Logic_Operations.Stored_Vs_Value_Operation;
 	begin
 		Op.Property_Name := Filter.Name;
-		Op.Value := Get_Value( Filter );
+		Op.Value := new Value_Type'(Get_Value( Filter ));
 		-- build the query and then return the type
 	
-		Append( Query, Op );
+		Append( Q.Logic_Criteria, Op );
 
-		return Load( Data_Storage, Q );
+		return Load( Data_Storage_Type'Class( Data_Storage ), Q );
 	end Load;
 
 
 	
+	------------------------
+	-- Central Repository --
+	------------------------
+
+	procedure Register_Entity(
+				Entity_Tag	: in Ada.Tags.Tag;
+				Data_Storage	: in Data_Storage_Ptr
+			) is
+		-- create a relation between an entity and a data storage.
+		use Data_Storage_Maps;
+	begin
+		Insert( Storages, To_String( Entity_Tag ), Data_Storage );
+	end Register_Entity;
+
+	function Get_Data_Storage( Entity_Tag : in Ada.Tags.Tag ) return Data_Storage_Ptr is
+		use Data_Storage_Maps;
+	begin
+		return Element( Storages, To_String( Entity_Tag ) );
+	end Get_Data_Storage;
+
+
+-- private
+
+	function To_String( Entity_Tag : Ada.Tags.Tag ) return Entity_Tag_String is
+	begin
+		return To_Alias( Ada.Tags.Expanded_Name( Entity_Tag ) );
+	end To_String;
+
+
+
+	function Hash( Key : in Entity_Tag_String ) return Ada.Containers.Hash_Type is
+	begin
+		return Ada.Strings.Hash( String( Key ) );
+	end Hash;
+
 
 end KOW_Ent.Data_Storages;

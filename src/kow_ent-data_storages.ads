@@ -38,14 +38,15 @@
 --------------
 -- Ada 2005 --
 --------------
-with Ada.Containers.Doubly_Linked_Lists;
-with Ada.Finalization;
-with Ada.Unchecked_Deallocation;
+with Ada.Containers;
+with Ada.Containers.Hashed_Maps;
+with Ada.Tags;
 
 -------------------
 -- KOW Framework --
 -------------------
 with APQ;
+with KOW_Ent.Queries;
 
 package KOW_Ent.Data_Storages is
 
@@ -66,7 +67,7 @@ package KOW_Ent.Data_Storages is
 	function Get_Alias(
 				Data_Entity	: in    Data_Storage_Type;
 				Entity_Tag	: in    Ada.Tags.Tag
-			) return String is abstract;
+			) return Entity_Alias_Type is abstract;
 	-- get the alias for the given entity
 	-- for database backend, it's the table name
 
@@ -109,10 +110,29 @@ package KOW_Ent.Data_Storages is
 	-- Central Repository --
 	------------------------
 
+	procedure Register_Entity(
+				Entity_Tag	: in Ada.Tags.Tag;
+				Data_Storage	: in Data_Storage_Ptr
+			);
+	-- create a relation between an entity and a data storage.
 
-	type
+	function Get_Data_Storage( Entity_Tag : in Ada.Tags.Tag ) return Data_Storage_Ptr;
+private
 
-	type Entity_Registration
+
+	subtype Entity_Tag_String is Entity_Alias_Type;
+
+	function To_String( Entity_Tag : Ada.Tags.Tag ) return Entity_Tag_String;
 
 
+	function Hash( Key : in Entity_Tag_String ) return Ada.Containers.Hash_Type;
+
+	package Data_Storage_Maps is new Ada.Containers.Hashed_Maps(
+						Key_Type	=> Entity_Tag_String,
+						Element_Type	=> Data_Storage_Ptr,
+						Equivalent_Keys	=> "=",
+						Hash		=> Hash
+					);
+	
+	Storages :Data_Storage_Maps.Map;
 end KOW_Ent.Data_Storages;

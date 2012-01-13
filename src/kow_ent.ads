@@ -261,7 +261,7 @@ package KOW_Ent is
 	-- The Entity Alias Type --
 	---------------------------
 
-	type Entity_Alias_Type is String( 1 .. 2**8 );
+	type Entity_Alias_Type is new String( 1 .. 2**8 );
 	-- this type is used all over the framework to identify the name used when storing an entity
 	
 	function To_Alias( Alias_String : in String ) return Entity_Alias_Type;

@@ -45,6 +45,7 @@ with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
 with Ada.Strings;
 with Ada.Strings.Fixed;
+with Ada.Tags;
 
 -------------------
 -- KOW Framework --
@@ -228,7 +229,7 @@ package body KOW_Ent is
 		-- convenient way for converting an alias string (any length) into an entity alias string
 		Alias : Entity_Alias_Type;
 	begin
-		KOW_Lib.String_Util.Copy( From => Alias_String, To => Alias );
+		KOW_Lib.String_Util.Copy( From => Alias_String, To => String( Alias ) );
 		return Alias;
 	end To_Alias;
 
@@ -236,8 +237,8 @@ package body KOW_Ent is
 	function Trim( Alias : in Entity_Alias_Type ) return String is
 		-- convenient way for returning the trimmed version of the alias
 	begin
-		Ada.Strings.Fixed.Trim(
-					Alias,
+		return Ada.Strings.Fixed.Trim(
+					String( Alias ),
 					Ada.Strings.Right
 				);
 	end Trim;
@@ -256,7 +257,7 @@ package body KOW_Ent is
 					Entity
 				);
 		else
-			raise PROGRAM_ERROR with "don't know how to store the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity ) );
+			raise PROGRAM_ERROR with "don't know how to store the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'Tag );
 		end if;
 	end Store;
 
@@ -270,7 +271,7 @@ package body KOW_Ent is
 					Entity_Type'Class( Entity )'Tag
 				);
 		else
-			raise PROGRAM_ERROR with "don't know how to get the alias for the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity ) );
+			raise PROGRAM_ERROR with "don't know how to get the alias for the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'Tag );
 		end if;
 
 	end Get_Alias;
