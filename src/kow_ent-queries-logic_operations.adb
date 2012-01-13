@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -34,7 +34,10 @@
 ------------------------------------------------------------------------------
 
 
-
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Unchecked_Deallocation;
 
 package KOW_Ent.Queries.Logic_Operations is
 
@@ -43,60 +46,75 @@ package KOW_Ent.Queries.Logic_Operations is
 	-- Stored vs Value --
 	---------------------
 
-	type Stored_Vs_Value_Operation is new Logic_Operation_Type with record
-		Property_Name	: Property_Name_Type;
-		-- it's a pointer but always share the access to the same string value
-		Value		: Value_Ptr;
-		Operator	: Logic_Operator_Type := Operator_Equals_To;
-		Appender	: Loginc_Appender_Type := Appender_AND;
-	end record;
-	type Stored_Vs_Value_Ptr is access Stored_Vs_Value_Operation;
+
+	overriding
+	procedure Adjust( Operation : in out Stored_Vs_Value_Operation ) is
+	begin
+		if Operation.Value /= null then
+			Operation.Value := new Value_Type'( Operation.Value.all );
+		end if;
+	end Adjust;
 
 
 	overriding
-	procedure Adjust( Operation : in out Stored_Vs_Value_Operation );
-
-	overriding
-	procedure Finalize( Operation : in out Stored_Vs_Value_Operation );
+	procedure Finalize( Operation : in out Stored_Vs_Value_Operation ) is
+	begin
+		if Operation.Value /= null then
+			Free( Operation.Value );
+		end if;
+	end Finalize;
 
 
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Value_Operation;
 				Name		: in out Logic_Operation_Ptr
-			);
+			) is
+		procedure iFree is new Ada.Unchecked_Deallocation(
+							Object	=> Stored_Vs_Value_Operation,
+							Name	=> Stored_Vs_Value_Ptr
+						);
+	begin
+		iFree( Stored_Vs_Value_Ptr ( Name ) );
+	end Free;
+
 	
 	overriding
 	function Clone(
 				Operation	: in    Stored_Vs_Value_Operation 
-			) return Logic_Operation_Ptr;
+			) return Logic_Operation_Ptr is
+		Value : Stored_Vs_Value_Ptr := new Logic_Criteria_Operation'( Operation );
+	begin
+		return Logic_Operation_Ptr( Value );
+	end Clone;
 
 
 	----------------------
 	-- Stored vs Stored --
 	----------------------
 
-	type Stored_Vs_Stored_Operation is new Logic_Operation_Type with record
-		Left_Property_Name	: Property_Name_Type;
-		Right_Property_Name	: Property_Name_Type;
-		Right_Property_Container_Tag : Ada.Tags.Tag;
-
-		Operator		: Logic_Operator_Type := Operator_Equals_To;
-		Appender		: Logic_Appender_Type := Appender_AND;
-	end record;
-	type Stored_Vs_Stored_Ptr is access Stored_Vs_Stored_Operation;
-
-
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Stored_Operation;
 				Name		: in out Logic_Operation_Ptr
-			);
+			) is
+		procedure iFree is new Ada.Unchecked_Deallocation(
+							Object	=> Stored_Vs_Stored_Operation;
+							Name	=> Stored_Vs_Stored_Ptr
+						);
+	begin
+		iFree( Stored_Vs_Stored_Ptr( Name ) );
+	end Free;
+
 	
 	overriding
 	function Clone(
 				Operation	: in     Stored_Vs_Stored_Operation
-			) return Logic_Operation_Ptr;
+			) return Logic_Operation_Ptr is
+		Value : Stored_Vs_Stored_Ptr := new Stored_Vs_Stored_Operation'( Operation );
+	begin
+		return Logic_Operation_Ptr( Value );
+	end Clone;
 	
 	--------------------
 	-- Logic_Criteria --
@@ -113,11 +131,22 @@ package KOW_Ent.Queries.Logic_Operations is
 	procedure Free(
 				Operation	: in     Logic_Criteria_Operation;
 				Name		: in out Logic_Operation_Ptr
-			);
+			) is
+		procedure iFree is new Ada.Unchecked_Deallocation(
+							Object	=> Logic_Criteria_Operation;
+							Name	=> Logic_Criteria_Ptr
+						);
+	begin
+		iFree( Logic_Criteria_Ptr( Name ) );
+	end Free;
 	
 	overriding
 	function Clone(
 				Operation	: in     Logic_Criteria_Operation
-			) return Logic_Operation_Ptr;
+			) return Logic_Operation_Ptr
+		Value : Logic_Criteria_Ptr := new Logic_Criteria_Operation'( Operation );
+	begin
+		return Logic_Operation_Ptr( Value );
+	end Clone;
 
 end KOW_Ent.Queries.Logic_Operations;
