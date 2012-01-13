@@ -48,16 +48,47 @@ with Ahven.Framework;
 
 
 package KOW_Ent_Tests is
+
+
+
+	--------------------
+	-- Initialization --
+	--------------------
+
 	type Test is new Ahven.Framework.Test_Case with null record;
 
 	overriding
 	procedure Initialize( T : in out Test );
 
 
+
+	--------------------
+	-- Controll Tests --
+	--------------------
+
+	Default_Stress_Tests_Iterations : constant Positive := 10_000;
+	Stress_Tests_iterations_Variable: constant String := "STRESS_TESTS_ITERATIONS";
+	function Stress_Tests_Iterations return Positive;
+	-- check if the STRESS_TESTS_ITERATIONS environment variable is set.
+	-- if not, use the Default_Stress_Tests_Iterations value
+	procedure Stress_Control;
+
+
+
+	--------------------
+	-- Property Tests --
+	--------------------
+
 	procedure Properties_Test;
 	-- test the core funcionality of properties -- how they hold value and the sorts
 	procedure Properties_Stress_Test;
 
 
-	procedure stress_control;
+
+	-----------------
+	-- Query Tests --
+	-----------------
+
+	procedure Query_Test;
+
 end KOW_Ent_Tests;

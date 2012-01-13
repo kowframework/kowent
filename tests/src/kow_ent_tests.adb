@@ -34,6 +34,14 @@
 ------------------------------------------------------------------------------
 
 
+with Ada.Unchecked_Deallocation;
+with Ada.Finalization;
+
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Environment_Variables;
+
 
 -----------
 -- Ahven --
@@ -53,16 +61,51 @@ with ada.text_io;
 package body KOW_Ent_Tests is
 
 
+	--------------------
+	-- Initialization --
+	--------------------
 
 	overriding
 	procedure Initialize( T : in out Test ) is
 	begin
 		Set_Name( T, "KOW_Ent" );
+		Ahven.Framework.Add_Test_Routine( T, Stress_Control'Access, "Stress Control" );
 		Ahven.Framework.Add_Test_Routine( T, Properties_Test'Access, "Properties" );
 		Ahven.Framework.Add_Test_Routine( T, Properties_Stress_Test'Access, "Properties Stress" );
-		Ahven.Framework.Add_Test_Routine( T, Stress_Control'Access, "Stress Control" );
+		Ahven.Framework.Add_Test_Routine( T, Query_Test'Access, "Query Test" );
 	end Initialize;
 
+
+
+	--------------------
+	-- Controll Tests --
+	--------------------
+
+	function Stress_Tests_Iterations return Positive is
+		use Ada.Environment_Variables;
+	begin
+		if Exists( Stress_Tests_iterations_Variable ) then
+			return Positive'Value( Value( Stress_Tests_iterations_Variable ) );
+		else
+			return Default_Stress_Tests_Iterations;
+		end if;
+	end Stress_Tests_Iterations;
+
+
+	procedure Stress_Control is
+		a : Positive;
+	begin
+		for i in 1 .. Stress_Tests_Iterations loop
+			a := i;
+		end loop;
+	end Stress_Control;
+
+
+
+
+	--------------------
+	-- Property Tests --
+	--------------------
 
 
 	My_Smallint_Name: constant KOW_Ent.Property_Name_Type := KOW_Ent.PN( "my_smallint" );
@@ -217,13 +260,70 @@ package body KOW_Ent_Tests is
 	end Properties_Stress_Test;
 
 
+	-----------------
+	-- Query Tests --
+	-----------------
 
-	procedure Stress_Control is
-		a : integer;
+	procedure Query_Test is
+		use kow_ent;
+		type lol is array( 1 .. 2 ) of integer;
+
+		la: lol := ( 1,2 );
+
+
+		type value_ptr is access all value_Type;
+
+		procedure free is new ada.unchecked_Deallocation(
+				object	=> value_type,
+				name	=> value_ptr
+			);
+
+		type criteria_type is new Ada.Finalization.Controlled with record
+			Property_Name	: Property_Name_Type;
+			Value		: Value_Ptr;
+		end record;
+
+		overriding
+		procedure Adjust( C: in out Criteria_Type );
+		overriding
+		procedure Finalize( C : in out Criteria_Type );
+
+
+		overriding
+		procedure Adjust( C: in out Criteria_Type ) is
+		begin
+			ada.text_io.put_line( "adjusting" );
+			C.Value := new Value_Type'( C.Value.all );
+			ada.text_io.Put_line( apq.apq_Integer'Image( C.Value.INteger_Value ) );
+		end Adjust;
+
+		overriding
+		procedure Finalize( C : in out Criteria_Type ) is
+		begin
+			if C.Value /= null then
+				ada.text_io.put_line( "freeing" );
+				Free( C.Value );
+			end if;
+		end FInalize;
+
+
+
+		function New_Criteria( Property : in Property_Type'Class ) return Criteria_Type is
+			C: Criteria_Type;
+		begin
+			C.Value := new Value_Type'( Get_Value( Property ) );
+			C.Property_Name := Property.Name;
+			return C;
+		end New_Criteria;
+
+
+		C		: Criteria_Type;
+		Container	: My_Container;
 	begin
-		for i in 1 .. 1_000_000 loop
-			a := i;
-		end loop;
-	end Stress_Control;
+		Container.My_Int.value.integer_value := 13;
+		C := New_Criteria( Container.My_Int );
+	end Query_Test;
+
+
 
 end KOW_Ent_Tests;
