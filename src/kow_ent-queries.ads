@@ -137,7 +137,7 @@ package KOW_Ent.Queries is
 	-- Finally The Query Type --
 	----------------------------
 
-	type Query_Type is tagged record
+	type Query_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		Logic_Criteria	: Logic_Criteria_Type;
 	end record;
@@ -146,7 +146,7 @@ package KOW_Ent.Queries is
 	-- And now the Joined Query Type --
 	-----------------------------------
 
-	type Joined_Query_Type is tagged record
+	type Joined_Query_Type is record
 		Left_Query	: Query_Type;
 		Right_Query	: Query_Type;
 		Join		: Join_Type;

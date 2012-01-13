@@ -43,11 +43,14 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Strings;
+with Ada.Strings.Fixed;
 
 -------------------
 -- KOW Framework --
 -------------------
 with APQ;
+with KOW_Ent.Data_Storages;
 with KOW_Lib.String_Util;
 
 package body KOW_Ent is
@@ -216,6 +219,61 @@ package body KOW_Ent is
 		Property_Lists.Iterate( Container.Properties, Inner_Iterator'Access );
 	end Iterate;
 
+
+	---------------------------
+	-- The Entity Alias Type --
+	---------------------------
+
+	function To_Alias( Alias_String : in String ) return Entity_Alias_Type is
+		-- convenient way for converting an alias string (any length) into an entity alias string
+		Alias : Entity_Alias_Type;
+	begin
+		KOW_Lib.String_Util.Copy( From => Alias_String, To => Alias );
+		return Alias;
+	end To_Alias;
+
+
+	function Trim( Alias : in Entity_Alias_Type ) return String is
+		-- convenient way for returning the trimmed version of the alias
+	begin
+		Ada.Strings.Fixed.Trim(
+					Alias,
+					Ada.Strings.Right
+				);
+	end Trim;
+
+
+	---------------------
+	-- The Entity Type --
+	---------------------
+	procedure Store( Entity : in out Entity_Type ) is
+		-- procedure used to store the entity;
+		-- for retrieving please read the documentation of the used data storage
+	begin
+		if Entity.Data_Storage /= null and then Entity.Data_Storage.all in Data_Storages.Data_Storage_Type'Class then
+			Data_Storages.Store(
+					Data_Storages.Data_Storage_Type'Class( Entity.Data_Storage.all ),
+					Entity
+				);
+		else
+			raise PROGRAM_ERROR with "don't know how to store the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity ) );
+		end if;
+	end Store;
+
+
+
+	function Get_Alias( Entity : in Entity_Type ) return Entity_Alias_Type is
+	begin
+		if Entity.Data_Storage /= null and then Entity.Data_Storage.all in Data_Storages.Data_Storage_Type'Class then
+			return Data_Storages.Get_Alias(
+					Data_Storages.Data_Storage_Type'Class( Entity.Data_Storage.all ),
+					Entity_Type'Class( Entity )'Tag
+				);
+		else
+			raise PROGRAM_ERROR with "don't know how to get the alias for the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity ) );
+		end if;
+
+	end Get_Alias;
 
 
 --	---------------------------

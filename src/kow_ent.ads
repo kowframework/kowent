@@ -248,16 +248,35 @@ package KOW_Ent is
 	-- The Data Storage Type --
 	---------------------------
 
-	type Data_Storage_Type is interface;
+	type Data_Storage_Interface is interface;
 	-- this is the type that actually handles storing and retrieving data
-	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
+	-- for the complete definition of this type please see also
+	-- 	KOW_Ent.Data_Storages
+	type Data_Storage_Ptr is access all Data_Storage_Interface'Class;
+
+
+
+
+	---------------------------
+	-- The Entity Alias Type --
+	---------------------------
+
+	type Entity_Alias_Type is String( 1 .. 2**8 );
+	-- this type is used all over the framework to identify the name used when storing an entity
+	
+	function To_Alias( Alias_String : in String ) return Entity_Alias_Type;
+	-- convenient way for converting an alias string (any length) into an entity alias string
+	
+	function Trim( Alias : in Entity_Alias_Type ) return String;
+	-- convenient way for returning the trimmed version of the alias
 
 
 	---------------------
 	-- The Entity Type --
 	---------------------
 
-	type Entity_Type is new Property_Container_Type with record
+
+	type Entity_Type is abstract new Property_Container_Type with record
 		-- conceptually the entity is a property container which
 		-- is linked to a data storage backend, thus being able to
 		-- be stored and retrieved later on
@@ -266,6 +285,19 @@ package KOW_Ent is
 		-- the data storage is an abstract concept described later
 		Data_Storage : Data_Storage_Ptr;
 	end record;
+
+	procedure Store( Entity : in out Entity_Type );
+	-- procedure used to store the entity;
+	-- for retrieving please read the documentation of the used data storage
+
+
+	function Get_Alias( Entity : in Entity_Type ) return Entity_Alias_Type;
+	-- get the alias from the data_storage
+
+
+	function Primary_Key( Entity : in Entity_Type ) return Property_Type'Class is abstract;
+	-- get the pripary key for the given entity
+
 
 
 --	procedure Read(
