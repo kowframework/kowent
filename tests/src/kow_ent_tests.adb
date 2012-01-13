@@ -55,6 +55,8 @@ with Ahven.Framework;
 with APQ;
 with KOW_Ent;
 with KOW_Ent.Properties;
+with KOW_Ent.Queries;
+with KOW_Ent.Queries.Logic_Operations;
 
 with ada.text_io;
 
@@ -265,63 +267,30 @@ package body KOW_Ent_Tests is
 	-----------------
 
 	procedure Query_Test is
-		use kow_ent;
-		type lol is array( 1 .. 2 ) of integer;
+		use KOW_Ent;
+		use KOW_Ent.Queries;
+		use KOW_Ent.Queries.Logic_Operations;
 
-		la: lol := ( 1,2 );
-
-
-		type value_ptr is access all value_Type;
-
-		procedure free is new ada.unchecked_Deallocation(
-				object	=> value_type,
-				name	=> value_ptr
-			);
-
-		type criteria_type is new Ada.Finalization.Controlled with record
-			Property_Name	: Property_Name_Type;
-			Value		: Value_Ptr;
-		end record;
-
-		overriding
-		procedure Adjust( C: in out Criteria_Type );
-		overriding
-		procedure Finalize( C : in out Criteria_Type );
-
-
-		overriding
-		procedure Adjust( C: in out Criteria_Type ) is
-		begin
-			ada.text_io.put_line( "adjusting" );
-			C.Value := new Value_Type'( C.Value.all );
-			ada.text_io.Put_line( apq.apq_Integer'Image( C.Value.INteger_Value ) );
-		end Adjust;
-
-		overriding
-		procedure Finalize( C : in out Criteria_Type ) is
-		begin
-			if C.Value /= null then
-				ada.text_io.put_line( "freeing" );
-				Free( C.Value );
-			end if;
-		end FInalize;
-
-
-
-		function New_Criteria( Property : in Property_Type'Class ) return Criteria_Type is
-			C: Criteria_Type;
-		begin
-			C.Value := new Value_Type'( Get_Value( Property ) );
-			C.Property_Name := Property.Name;
-			return C;
-		end New_Criteria;
-
-
-		C		: Criteria_Type;
-		Container	: My_Container;
+		Joined_Query : Joined_Query_Type;
 	begin
-		Container.My_Int.value.integer_value := 13;
-		C := New_Criteria( Container.My_Int );
+
+
+		-- setup left query:
+		Joined_Query.Left_Query.Entity_Tag := My_Container'Tag;
+		Joined_Query.Right_Query.Entity_Tag := My_Container'Tag;
+
+		Append(
+				Joined_Query.Left_Query.Logic_Criteria,
+				Stored_Vs_Value_Operation'(
+							Ada.Finalization.Controlled with
+							Property_Name	=> My_Int_Name,
+							Value		=> new Value_Type'( Type_Of => APQ_Integer, String_Length => 0, Integer_Value => 2, others => <> ),
+							Operator	=> Operator_Equal_To,
+							Appender	=> Appender_And
+						)
+			);
+		
+
 	end Query_Test;
 
 
