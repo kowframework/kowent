@@ -42,7 +42,7 @@
 -------------------
 with APQ;
 with KOW_Ent.Data_Storages;
-with KOW_Ent.Queries;
+with KOW_Ent.Queries;				use KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Operations;
 
 
@@ -66,20 +66,98 @@ package KOW_Ent.SQL is
 			);
 
 
-	procedure Generate_Join(
+	procedure Add_Table(
 				Generator	: in out Generator_Type;
-				Query		: in     KOW_Ent.Queries.Joined_Query_Type;
-				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
+				Entity_Tag	: in     Ada.Tags.Tag
 			);
+
+
+	--procedure Generate_Join(
+	--			Generator	: in out Generator_Type;
+	--			Query		: in     KOW_Ent.Queries.Joined_Query_Type;
+	--			Connection	: in     APQ.Root_Connection_Type'Class;
+	--			Q		: in out APQ.Root_Query_Type'Class
+	--		);
 	
 	
 	-----------------------------
 	-- Select Query Generation --
 	-----------------------------
 
+
+	procedure Append_Table_Name(
+				Generator	: in out Generator_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	
+
+	procedure Append_Column_Name(
+				Generator	: in out Generator_Type;
+				Property	: in     Property_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	
+	procedure Append_Logic_Operation(
+				Generator	: in out Generator_Type;
+				Property	: in     Logic_Operation_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	
+	procedure Append_Logic_Criteria(
+				Generator	: in out Generator_Type;
+				Criteria	: in     Logic_Criteria_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+
+
+	procedure Append_Operation_Stored_Vs_Value(
+				Generator	: in out Generator_Type;
+				Operation	: in     Logic_Operations.Stored_Vs_Value_Operation'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+	procedure Append_Operation_Stored_Vs_Stored(
+				Generator	: in out Generator_Type;
+				Operation	: in     Logic_Operations.Stored_Vs_Stored_Operation'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+	procedure Append_Operation_Logic_Criteria(
+				Generator	: in out Generator_Type;
+				Operation	: in     Logic_Operations.Logic_Criteria_Operation'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+
+
 	-- Append_Select
 	-- Append_Table_Name
 	-- Append_
+
+
+private
+
+	type Table_Specification_Type is record
+		Table_Name	: String( 1 .. 2**8 );
+		Table_Alias	: String( 1 .. 2**8 );
+	end record;
+
+
+	package Table_Specification_Lists is new Ada.Containers.Doubly_Linked_Lists( Table_Specification_Type );
+
+
+	type Generator_Type is tagged private
+		Tables_To_Select	: Table_Specification_Lists.List;
+		Current_Table		: Natural := 0;
+	end record;
 
 end KOW_Ent.SQL;
