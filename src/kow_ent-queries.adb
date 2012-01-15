@@ -104,7 +104,7 @@ package body KOW_Ent.Queries is
 	end Iterate;
 
 
-	function Is_Empty( Criteira : in Logic_Criteria_Type ) return Boolean is
+	function Is_Empty( Criteria : in Logic_Criteria_Type ) return Boolean is
 	begin
 		return Logic_Relation_Lists.Is_Empty( Criteria.Operations );
 	end Is_Empty;

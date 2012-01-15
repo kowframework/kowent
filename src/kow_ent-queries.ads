@@ -131,7 +131,7 @@ package KOW_Ent.Queries is
 				Iterator	: access procedure( Operation : in Logic_Relation_Type'Class )
 			);
 
-	function Is_Empty( Criteira : in Logic_Criteria_Type ) return Boolean;
+	function Is_Empty( Criteria : in Logic_Criteria_Type ) return Boolean;
 	-- check if there is any operation appended into the criteria
 
 

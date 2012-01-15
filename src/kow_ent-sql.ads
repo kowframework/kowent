@@ -36,6 +36,10 @@
 
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Tags;
 
 -------------------
 -- KOW Framework --
@@ -183,12 +187,12 @@ private
 	package Table_Specification_Lists is new Ada.Containers.Doubly_Linked_Lists( Table_Specification_Type );
 
 
-	type Generator_Type is tagged private
+	type Generator_Type is tagged record
 		Tables_To_Select	: Table_Specification_Lists.List;
 		Current_Table		: Natural := 0;
 
 
-		Is_Fist_Logic_Relation	: Boolean := True;
+		Is_First_Logic_Relation	: Boolean := True;
 	end record;
 
 end KOW_Ent.SQL;

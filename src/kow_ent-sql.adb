@@ -63,10 +63,10 @@ package body KOW_Ent.SQL is
 
 		procedure Append_Smallint is new APQ.Append_Integer( APQ.APQ_Smallint );
 		procedure Append_Integer is new APQ.Append_Integer( APQ.APQ_Integer );
-		procedure Append_Bigint is new APQ.Append_Bigint( APQ.APQ_Bigint );
+		procedure Append_Bigint is new APQ.Append_Integer( APQ.APQ_Bigint );
 
-		procedure Append_Real is new APQ.Append_Fixed( APQ.APQ_Real );
-		procedure Append_Double is new APQ.Append_Fixed( APQ.APQ_Double );
+		procedure Append_Real is new APQ.Append_Float( APQ.APQ_Real );
+		procedure Append_Double is new APQ.Append_Float( APQ.APQ_Double );
 
 		procedure Append_Serial is new APQ.Append_Integer( APQ.APQ_Serial );
 		procedure Append_Bigserial is new APQ.Append_Integer( APQ.APQ_Bigserial );
@@ -125,7 +125,7 @@ package body KOW_Ent.SQL is
 				Append_Second( Q, Value.Second_Value );
 
 			when APQ_String =>
-				APQ.Append_Quoted( Q, Connection, Ada.Strings.Fixed.Trim( Value.String_Value, Ada.Strings.Right );
+				APQ.Append_Quoted( Q, Connection, Ada.Strings.Fixed.Trim( Value.String_Value, Ada.Strings.Right ) );
 		end case;
 
 	end Append_Value;
@@ -143,9 +143,9 @@ package body KOW_Ent.SQL is
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
-		APQ.Append( Q, "SELECT " );
+		APQ.Append( Q, "SELECT * " );
 		
-		Append_Column_Names( Generator, Query, Connection, Q );
+		--TODO :: Append_Column_Names( Generator, Query, Connection, Q );
 
 		APQ.Append( Q, " FROM " );
 
@@ -166,7 +166,7 @@ package body KOW_Ent.SQL is
 		-- get the name for the table
 		use Data_Storages;
 	begin
-		return Trim( Get_Alias( Get_Data_Storage( Entity_Tag ).all, Entity_Tag ) );
+		return Trim( Get_Alias( Data_Storage_Type'Class( Get_Data_Storage( Entity_Tag ).all ), Entity_Tag ) );
 	end Get_Table_Name;
 
 	--procedure Generate_Join(
@@ -189,7 +189,7 @@ package body KOW_Ent.SQL is
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
-		APQ.Append( Q, Get_Table_Name( Generator, Query.Entiy_Tag ) );
+		APQ.Append( Q, Get_Table_Name( Generator_Type'Class( Generator ), Query.Entity_Tag ) );
 	end Append_Table_Name;
 	
 
@@ -338,13 +338,13 @@ package body KOW_Ent.SQL is
 			);
 
 		APQ.Append( Q, Operation.Property_Name.all );
-		Append_Logic_Relation(
+		Append_Relational_Operator(
 					Generator	=> Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
 					Connection	=> Connection,
 					Q		=> Q
 				);
-		Append_Value( Value_Ptr.all, Connection, Q );
+		Append_Value( Operation.Value.all, Connection, Q );
 	end Append_Operation_Stored_Vs_Value;
 
 	procedure Append_Operation_Stored_Vs_Stored(
@@ -361,7 +361,7 @@ package body KOW_Ent.SQL is
 				Q		=> Q
 			);
 		APQ.Append( Q, Operation.Left_Property_Name.all );
-		Append_Logic_Relation(
+		Append_Relational_Operator(
 					Generator	=> Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
 					Connection	=> Connection,
@@ -379,7 +379,7 @@ package body KOW_Ent.SQL is
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
-		if Is_Empty( Operation.Criteria ) then
+		if Is_Empty( Operation.Logic_Criteria ) then
 			return;
 		end if;
 		Append_Logic_Operator(
@@ -391,7 +391,7 @@ package body KOW_Ent.SQL is
 		APQ.Append( Q, "(" );
 		Append_Logic_Criteria(
 					Generator	=> Generator_Type'Class( Generator ),
-					Criteria	=> Operation.Criteria,
+					Criteria	=> Operation.Logic_Criteria,
 					Connection	=> Connection,
 					Q		=> Q
 				);
