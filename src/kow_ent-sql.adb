@@ -35,7 +35,11 @@
 
 
 
-
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Strings;
+with Ada.Strings.Fixed;
 
 -------------------
 -- KOW Framework --
@@ -48,6 +52,84 @@ with KOW_Ent.Queries.Logic_Relations;
 
 
 package body KOW_Ent.SQL is
+
+
+	procedure Append_Value(
+			Value		: in     Value_Type;
+			Connection	: in     APQ.Root_Connection_Type'Class;
+			Q		: in out APQ.Root_Query_Type'Class
+		) is
+
+
+		procedure Append_Smallint is new APQ.Append_Integer( APQ.APQ_Smallint );
+		procedure Append_Integer is new APQ.Append_Integer( APQ.APQ_Integer );
+		procedure Append_Bigint is new APQ.Append_Bigint( APQ.APQ_Bigint );
+
+		procedure Append_Real is new APQ.Append_Fixed( APQ.APQ_Real );
+		procedure Append_Double is new APQ.Append_Fixed( APQ.APQ_Double );
+
+		procedure Append_Serial is new APQ.Append_Integer( APQ.APQ_Serial );
+		procedure Append_Bigserial is new APQ.Append_Integer( APQ.APQ_Bigserial );
+
+		procedure Append_Hour is new APQ.Append_Integer( APQ.Hour_Number );
+		procedure Append_Minute is new APQ.Append_Integer( APQ.Minute_Number );
+		procedure Append_Second is new APQ.Append_Integer( APQ.Second_Number );
+
+	begin
+		case Value.Type_of is
+			when APQ_Smallint =>
+				Append_Smallint( Q, Value.Smallint_Value );
+
+			when APQ_Integer =>
+				Append_Integer( Q, Value.Integer_Value );
+
+			when APQ_Bigint =>
+				Append_Bigint( Q, Value.Bigint_Value );
+
+
+
+			when APQ_Real	=>
+				Append_Real( Q, Value.Real_Value );
+
+			when APQ_Double =>
+				Append_Double( Q, Value.Double_Value );
+
+
+
+			when APQ_Serial	=>
+				Append_Serial( Q, Value.Serial_Value );
+
+			when APQ_Bigserial =>
+				Append_Bigserial( Q, Value.Bigserial_Value );
+
+
+
+			when APQ_Date =>
+				APQ.Append( Q, Value.Date_Value );
+
+			when APQ_Time =>
+				APQ.Append( Q, Value.Time_Value );
+
+			when APQ_Timestamp =>
+				APQ.Append( Q, Value.TImestamp_Value );
+
+
+
+			when Hour_Number =>
+				Append_Hour( Q, Value.Hour_Value );
+			
+			when Minute_Number =>
+				Append_Minute( Q, Value.Minute_Value );
+
+			when Second_Number =>
+				Append_Second( Q, Value.Second_Value );
+
+			when APQ_String =>
+				APQ.Append_Quoted( Q, Connection, Ada.Strings.Fixed.Trim( Value.String_Value, Ada.Strings.Right );
+		end case;
+
+	end Append_Value;
+
 
 
 	------------------
@@ -120,6 +202,9 @@ package body KOW_Ent.SQL is
 	begin
 		APQ.Append( Q, Property.Name.all );
 	end Append_Column_Name;
+
+
+	
 	
 	procedure Append_Logic_Relation(
 				Generator	: in out Generator_Type;
@@ -158,6 +243,62 @@ package body KOW_Ent.SQL is
 	
 
 
+
+	procedure Append_Logic_Operator(
+				Generator	: in out Generator_Type;
+				Operator	: in     Logic_Operator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		if Generator.Is_First_Logic_Relation then
+			Generator.Is_First_Logic_Relation := False;
+		else
+			case Operator is
+				when Operator_And =>
+					APQ.Append( Q, " AND " );
+
+				when Operator_Or =>
+					APQ.Append( Q, " OR " );
+			end case;
+		end if;
+	end Append_Logic_Operator;
+
+
+	procedure Append_Relational_Operator(
+				Generator	: in out Generator_Type;
+				Relation	: in     Relational_Operator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		case Relation is
+			when Relation_Equal_To =>
+				APQ.Append( Q, "=" );
+
+			when Relation_Not_Equal_To =>
+				APQ.Append( Q, "!=" );
+
+			when Relation_Like =>
+				APQ.Append( Q, " LIKE " );
+
+			when Relation_Less_Than =>
+				APQ.Append( Q, "<" );
+
+			when Relation_Less_Than_Or_Equal_To =>
+				APQ.Append( Q, "<=" );
+
+			when Relation_Greater_Than =>
+				APQ.Append( Q, ">" );
+
+			when Relation_Greater_Than_Or_Equal_To =>
+				APQ.Append( Q, ">=" );
+		end case;
+	end Append_Relational_Operator;
+
+
+
+
 	procedure Append_Logic_Criteria(
 				Generator	: in out Generator_Type;
 				Criteria	: in     Logic_Criteria_Type'Class;
@@ -189,7 +330,21 @@ package body KOW_Ent.SQL is
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
-		Append_Operation
+		Append_Logic_Operator(
+				Generator	=> Generator_Type'Class( Generator ),
+				Operator	=> Operation.Operator,
+				Connection	=> Connection,
+				Q		=> Q
+			);
+
+		APQ.Append( Q, Operation.Property_Name.all );
+		Append_Logic_Relation(
+					Generator	=> Generator_Type'Class( Generator ),
+					Relation	=> Operation.Relation,
+					Connection	=> Connection,
+					Q		=> Q
+				);
+		Append_Value( Value_Ptr.all, Connection, Q );
 	end Append_Operation_Stored_Vs_Value;
 
 	procedure Append_Operation_Stored_Vs_Stored(
@@ -197,36 +352,50 @@ package body KOW_Ent.SQL is
 				Operation	: in     Logic_Relations.Stored_Vs_Stored_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		Append_Logic_Operator(
+				Generator	=> Generator_Type'Class( Generator ),
+				Operator	=> Operation.Operator,
+				Connection	=> Connection,
+				Q		=> Q
 			);
+		APQ.Append( Q, Operation.Left_Property_Name.all );
+		Append_Logic_Relation(
+					Generator	=> Generator_Type'Class( Generator ),
+					Relation	=> Operation.Relation,
+					Connection	=> Connection,
+					Q		=> Q
+				);
+		-- TODO :: support the right property from another table!
+		APQ.Append( Q, Operation.Right_Property_Name.all );
+
+	end Append_Operation_Stored_Vs_Stored;
 
 	procedure Append_Operation_Logic_Criteria(
 				Generator	: in out Generator_Type;
 				Operation	: in     Logic_Relations.Logic_Criteria_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
+			) is
+	begin
+		if Is_Empty( Operation.Criteria ) then
+			return;
+		end if;
+		Append_Logic_Operator(
+				Generator	=> Generator_Type'Class( Generator ),
+				Operator	=> Operation.Operator,
+				Connection	=> Connection,
+				Q		=> Q
 			);
-
-
-
-	-- Append_Select
-	-- Append_Table_Name
-	-- Append_
-
-
-private
-
-	type Table_Specification_Type is record
-		Table_Name	: String( 1 .. 2**8 );
-		Table_Alias	: String( 1 .. 2**8 );
-	end record;
-
-
-	package Table_Specification_Lists is new Ada.Containers.Doubly_Linked_Lists( Table_Specification_Type );
-
-
-	type Generator_Type is tagged private
-		Tables_To_Select	: Table_Specification_Lists.List;
-		Current_Table		: Natural := 0;
-	end record;
+		APQ.Append( Q, "(" );
+		Append_Logic_Criteria(
+					Generator	=> Generator_Type'Class( Generator ),
+					Criteria	=> Operation.Criteria,
+					Connection	=> Connection,
+					Q		=> Q
+				);
+		APQ.Append( Q, ")" );
+	end Append_Operation_Logic_Criteria;
 
 end KOW_Ent.SQL;

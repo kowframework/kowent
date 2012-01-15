@@ -50,6 +50,14 @@ with KOW_Ent.Queries.Logic_Relations;
 package KOW_Ent.SQL is
 
 
+
+	procedure Append_Value(
+			Value		: in     Value_Type;
+			Connection	: in     APQ.Root_Connection_Type'Class;
+			Q		: in out APQ.Root_Query_Type'Class
+		);
+
+
 	type Generator_Type is tagged private;
 
 
@@ -100,6 +108,7 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+
 	
 	procedure Append_Logic_Relation(
 				Generator	: in out Generator_Type;
@@ -114,6 +123,24 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+
+
+
+	procedure Append_Logic_Operator(
+				Generator	: in out Generator_Type;
+				Operator	: in     Logic_Operator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+	
+	procedure Append_Relational_Operator(
+				Generator	: in out Generator_Type;
+				Relation	: in     Relational_Operator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
 
 
 
@@ -161,7 +188,7 @@ private
 		Current_Table		: Natural := 0;
 
 
-		Fist_Logic_Relation	: Boolean := True;
+		Is_Fist_Logic_Relation	: Boolean := True;
 	end record;
 
 end KOW_Ent.SQL;

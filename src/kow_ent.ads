@@ -81,6 +81,7 @@ package KOW_Ent is
 
 				-- and this one is mapped back to String
 				APQ_String
+				-- TODO :: adicionar APQ_Boolean
 			);
 
 
