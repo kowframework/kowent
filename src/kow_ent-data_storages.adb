@@ -48,7 +48,7 @@ with Ada.Unchecked_Deallocation;
 -------------------
 with APQ;
 with KOW_Ent.Queries;
-with KOW_Ent.Queries.Logic_Operations;
+with KOW_Ent.Queries.Logic_Relations;
 
 package body KOW_Ent.Data_Storages is
 
@@ -63,7 +63,7 @@ package body KOW_Ent.Data_Storages is
 		use Queries;
 
 		Q	: Query_Type;
-		Op	: Logic_Operations.Stored_Vs_Value_Operation;
+		Op	: Logic_Relations.Stored_Vs_Value_Operation;
 	begin
 		Op.Property_Name := Filter.Name;
 		Op.Value := new Value_Type'(Get_Value( Filter ));

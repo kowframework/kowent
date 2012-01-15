@@ -53,22 +53,22 @@ package KOW_Ent.Queries is
 	-- Scalar Types --
 	------------------
 
-	type Logic_Appender_Type is (
-			Appender_AND,
-			Appender_OR
+	type Logic_Operator_Type is (
+			Operator_AND,
+			Operator_OR
 		);
 
-	type Logic_Operator_Type is (
+	type Relational_Operator_Type is (
 		-- all operators take into account:
 		-- 	Left-hand side of operation	=> Value inside the data storage
 		-- 	Right-hand side of operation	=> Parameter passed into the append procedure
-			Operator_Equal_To,
-			Operator_Not_Equal_To,
-			Operator_Like,
-			Operator_Less_Than,
-			Operator_Less_Than_Or_Equal_To,
-			Operator_Greater_Than,
-			Operator_Greater_Than_Or_Equal_To
+			Relation_Equal_To,
+			Relation_Not_Equal_To,
+			Relation_Like,
+			Relation_Less_Than,
+			Relation_Less_Than_Or_Equal_To,
+			Relation_Greater_Than,
+			Relation_Greater_Than_Or_Equal_To
 		);
 	
 
@@ -86,23 +86,23 @@ package KOW_Ent.Queries is
 
 
 
-	type Logic_Operation_Type is abstract new Ada.Finalization.Controlled with null record;
-	type Logic_Operation_Ptr is access all Logic_Operation_Type'Class;
+	type Logic_Relation_Type is abstract new Ada.Finalization.Controlled with null record;
+	type Logic_Relation_Ptr is access all Logic_Relation_Type'Class;
 
 	
 
 	procedure Free(
-				Operation	: in     Logic_Operation_Type;
-				Name		: in out Logic_Operation_Ptr
+				Operation	: in     Logic_Relation_Type;
+				Name		: in out Logic_Relation_Ptr
 			) is abstract;
 	-- frees the pointer of the given type
 
 	function Clone(
-				Operation	: in     Logic_Operation_Type
-			) return Logic_Operation_Ptr is abstract;
+				Operation	: in     Logic_Relation_Type
+			) return Logic_Relation_Ptr is abstract;
 
-	package Logic_Operation_Lists is new Ada.Containers.Doubly_Linked_Lists(
-								Element_Type => Logic_Operation_Ptr
+	package Logic_Relation_Lists is new Ada.Containers.Doubly_Linked_Lists(
+								Element_Type => Logic_Relation_Ptr
 							);
 
 	-------------------------
@@ -123,14 +123,16 @@ package KOW_Ent.Queries is
 
 	procedure Append(
 				Criteria	: in out Logic_Criteria_Type;
-				Operation	: in     Logic_Operation_Type'Class
+				Operation	: in     Logic_Relation_Type'Class
 			);
 	
 	procedure Iterate(
 				Criteria	: in     Logic_Criteria_Type;
-				Iterator	: access procedure( Operation : in Logic_Operation_Type'Class )
+				Iterator	: access procedure( Operation : in Logic_Relation_Type'Class )
 			);
 
+	function Is_Empty( Criteira : in Logic_Criteria_Type ) return Boolean;
+	-- check if there is any operation appended into the criteria
 
 
 	----------------------------
@@ -161,7 +163,7 @@ private
 	-------------------------
 
 	type Logic_Criteria_Type is new Ada.Finalization.Controlled with record
-		Operations : Logic_Operation_lists.List;
+		Operations : Logic_Relation_lists.List;
 	end record;
 
 end KOW_Ent.Queries;

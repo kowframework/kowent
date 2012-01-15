@@ -36,19 +36,19 @@
 
 
 
-package KOW_Ent.Queries.Logic_Operations is
+package KOW_Ent.Queries.Logic_Relations is
 
 
 	---------------------
 	-- Stored vs Value --
 	---------------------
 
-	type Stored_Vs_Value_Operation is new Logic_Operation_Type with record
+	type Stored_Vs_Value_Operation is new Logic_Relation_Type with record
 		Property_Name	: Property_Name_Type;
 		-- it's a pointer but always share the access to the same string value
 		Value		: Value_Ptr;
-		Operator	: Logic_Operator_Type := Operator_Equal_To;
-		Appender	: Logic_Appender_Type := Appender_AND;
+		Relation	: Relational_Operator_Type := Relation_Equal_To;
+		Operator	: Logic_Operator_Type := Operator_AND;
 	end record;
 	type Stored_Vs_Value_Ptr is access all Stored_Vs_Value_Operation;
 
@@ -63,26 +63,26 @@ package KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Value_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			);
 	
 	overriding
 	function Clone(
 				Operation	: in    Stored_Vs_Value_Operation 
-			) return Logic_Operation_Ptr;
+			) return Logic_Relation_Ptr;
 
 
 	----------------------
 	-- Stored vs Stored --
 	----------------------
 
-	type Stored_Vs_Stored_Operation is new Logic_Operation_Type with record
+	type Stored_Vs_Stored_Operation is new Logic_Relation_Type with record
 		Left_Property_Name	: Property_Name_Type;
 		Right_Property_Name	: Property_Name_Type;
 		Right_Property_Container_Tag : Ada.Tags.Tag;
 
-		Operator		: Logic_Operator_Type := Operator_Equal_To;
-		Appender		: Logic_Appender_Type := Appender_AND;
+		Relation		: Relational_Operator_Type := Relation_Equal_To;
+		Operator		: Logic_Operator_Type := Operator_AND;
 	end record;
 	type Stored_Vs_Stored_Ptr is access all Stored_Vs_Stored_Operation;
 
@@ -90,21 +90,21 @@ package KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Stored_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			);
 	
 	overriding
 	function Clone(
 				Operation	: in     Stored_Vs_Stored_Operation
-			) return Logic_Operation_Ptr;
+			) return Logic_Relation_Ptr;
 	
 	--------------------
 	-- Logic_Criteria --
 	--------------------
 
-	type Logic_Criteria_Operation is new Logic_Operation_Type with record
+	type Logic_Criteria_Operation is new Logic_Relation_Type with record
 		Logic_Criteria	: Logic_Criteria_Type;
-		Appender	: Logic_Appender_Type	:= Appender_AND;
+		Operator	: Logic_Operator_Type	:= Operator_AND;
 	end record;
 	type Logic_Criteria_Ptr is access all Logic_Criteria_Operation;
 
@@ -112,12 +112,12 @@ package KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Logic_Criteria_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			);
 	
 	overriding
 	function Clone(
 				Operation	: in     Logic_Criteria_Operation
-			) return Logic_Operation_Ptr;
+			) return Logic_Relation_Ptr;
 
-end KOW_Ent.Queries.Logic_Operations;
+end KOW_Ent.Queries.Logic_Relations;

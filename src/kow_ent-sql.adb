@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -47,11 +47,7 @@ with KOW_Ent.Queries.Logic_Relations;
 
 
 
-package KOW_Ent.SQL is
-
-
-	type Generator_Type is tagged private;
-
+package body KOW_Ent.SQL is
 
 
 	------------------
@@ -63,15 +59,33 @@ package KOW_Ent.SQL is
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+	begin
+		APQ.Append( Q, "SELECT " );
+		
+		Append_Column_Names( Generator, Query, Connection, Q );
+
+		APQ.Append( Q, " FROM " );
+
+		Append_Table_Name( Generator, Query, Connection, Q );
+
+		
+		if not Is_Empty( Query.Logic_Criteria ) then
+			APQ.Append( Q, " WHERE " );
+			Append_Logic_Criteria( Generator, Query.Logic_Criteria, Connection, Q );
+		end if;
+	end Generate_Select;
 
 
 	function Get_Table_Name(
 				Generator	: in     Generator_Type;
 				Entity_Tag	: in     Ada.Tags.Tag
-			) return String;
-	-- get the name for the table
-
+			) return String is
+		-- get the name for the table
+		use Data_Storages;
+	begin
+		return Trim( Get_Alias( Get_Data_Storage( Entity_Tag ).all, Entity_Tag ) );
+	end Get_Table_Name;
 
 	--procedure Generate_Join(
 	--			Generator	: in out Generator_Type;
@@ -91,7 +105,10 @@ package KOW_Ent.SQL is
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+	begin
+		APQ.Append( Q, Get_Table_Name( Generator, Query.Entiy_Tag ) );
+	end Append_Table_Name;
 	
 
 	procedure Append_Column_Name(
@@ -99,21 +116,69 @@ package KOW_Ent.SQL is
 				Property	: in     Property_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+	begin
+		APQ.Append( Q, Property.Name.all );
+	end Append_Column_Name;
 	
 	procedure Append_Logic_Relation(
 				Generator	: in out Generator_Type;
 				Operation	: in     Logic_Relation_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+
+
+	begin
+		if Operation in Logic_Relations.Stored_Vs_Value_Operation'Class then
+			Append_Operation_Stored_Vs_Value(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Stored_Vs_Value_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		elsif Operation in Logic_Relations.Stored_Vs_Stored_Operation'Class then
+			Append_Operation_Stored_Vs_Stored(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Stored_Vs_Stored_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		elsif Operation in Logic_Relations.Logic_Criteria_Operation'Class then
+			Append_Operation_Logic_Criteria(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Logic_Criteria_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		else
+			raise Program_Error with "I don't know how to append the given type :: " & Ada.Tags.Expanded_Name( Operation'Tag );
+		end if;
+	end Append_Logic_Relation;
 	
+
+
 	procedure Append_Logic_Criteria(
 				Generator	: in out Generator_Type;
 				Criteria	: in     Logic_Criteria_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+	
+		procedure Iterator( Operation : Logic_Relation_Type'Class ) is
+		begin
+			Append_Logic_Relation( Generator, Operation, Connection, Q );
+		end Iterator;
+	begin
+		Queries.Iterate( Criteria, Iterator'Access );
+	end Append_Logic_Criteria;
+
+
+
+
+	-------------------------
+	-- Internal procedures --
+	-------------------------
 
 
 
@@ -122,7 +187,10 @@ package KOW_Ent.SQL is
 				Operation	: in     Logic_Relations.Stored_Vs_Value_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
-			);
+			) is
+	begin
+		Append_Operation
+	end Append_Operation_Stored_Vs_Value;
 
 	procedure Append_Operation_Stored_Vs_Stored(
 				Generator	: in out Generator_Type;
@@ -159,9 +227,6 @@ private
 	type Generator_Type is tagged private
 		Tables_To_Select	: Table_Specification_Lists.List;
 		Current_Table		: Natural := 0;
-
-
-		Fist_Logic_Relation	: Boolean := True;
 	end record;
 
 end KOW_Ent.SQL;

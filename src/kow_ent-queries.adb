@@ -50,7 +50,7 @@ package body KOW_Ent.Queries is
 
 	overriding
 	procedure Adjust( Logic_Criteria : in out Logic_Criteria_Type ) is
-		use Logic_Operation_Lists;
+		use Logic_Relation_Lists;
 		-- reallocate all the operations
 		New_Operations : List;
 
@@ -66,10 +66,10 @@ package body KOW_Ent.Queries is
 	overriding
 	procedure Finalize( Logic_Criteria : in out Logic_Criteria_Type ) is
 		-- free the operations
-		use Logic_Operation_Lists;
+		use Logic_Relation_Lists;
 
 		procedure Iterator( C : in Cursor ) is
-			Ptr : Logic_Operation_Ptr := Element( C );
+			Ptr : Logic_Relation_Ptr := Element( C );
 		begin
 			Free( Ptr.all, Ptr );
 		end Iterator;
@@ -81,10 +81,10 @@ package body KOW_Ent.Queries is
 
 	procedure Append(
 				Criteria	: in out Logic_Criteria_Type;
-				Operation	: in     Logic_Operation_Type'Class
+				Operation	: in     Logic_Relation_Type'Class
 			) is
 	begin
-		Logic_Operation_Lists.Append(
+		Logic_Relation_Lists.Append(
 						Criteria.Operations,
 						Clone( Operation )
 					);
@@ -93,14 +93,21 @@ package body KOW_Ent.Queries is
 	
 	procedure Iterate(
 				Criteria	: in     Logic_Criteria_Type;
-				Iterator	: access procedure( Operation : in Logic_Operation_Type'Class )
+				Iterator	: access procedure( Operation : in Logic_Relation_Type'Class )
 			) is
-		procedure Inner_Iterator( C : Logic_Operation_Lists.Cursor ) is
+		procedure Inner_Iterator( C : Logic_Relation_Lists.Cursor ) is
 		begin
-			Iterator.all( Logic_Operation_Lists.Element( C ).all );
+			Iterator.all( Logic_Relation_Lists.Element( C ).all );
 		end Inner_Iterator;
 	begin
-		Logic_Operation_Lists.Iterate( Criteria.Operations, Inner_Iterator'Access );
+		Logic_Relation_Lists.Iterate( Criteria.Operations, Inner_Iterator'Access );
 	end Iterate;
+
+
+	function Is_Empty( Criteira : in Logic_Criteria_Type ) return Boolean is
+	begin
+		return Logic_Relation_Lists.Is_Empty( Criteria.Operations );
+	end Is_Empty;
+	-- check if there is any operation appended into the criteria
 
 end KOW_Ent.Queries;

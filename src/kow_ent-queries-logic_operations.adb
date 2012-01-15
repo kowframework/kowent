@@ -39,7 +39,7 @@
 --------------
 with Ada.Unchecked_Deallocation;
 
-package body KOW_Ent.Queries.Logic_Operations is
+package body KOW_Ent.Queries.Logic_Relations is
 
 
 	---------------------
@@ -68,7 +68,7 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Value_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			) is
 		procedure iFree is new Ada.Unchecked_Deallocation(
 							Object	=> Stored_Vs_Value_Operation,
@@ -82,10 +82,10 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	function Clone(
 				Operation	: in    Stored_Vs_Value_Operation 
-			) return Logic_Operation_Ptr is
+			) return Logic_Relation_Ptr is
 		Value : Stored_Vs_Value_Ptr := new Stored_Vs_Value_Operation'( Operation );
 	begin
-		return Logic_Operation_Ptr( Value );
+		return Logic_Relation_Ptr( Value );
 	end Clone;
 
 
@@ -96,7 +96,7 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Stored_Vs_Stored_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			) is
 		procedure iFree is new Ada.Unchecked_Deallocation(
 							Object	=> Stored_Vs_Stored_Operation,
@@ -110,10 +110,10 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	function Clone(
 				Operation	: in     Stored_Vs_Stored_Operation
-			) return Logic_Operation_Ptr is
+			) return Logic_Relation_Ptr is
 		Value : Stored_Vs_Stored_Ptr := new Stored_Vs_Stored_Operation'( Operation );
 	begin
-		return Logic_Operation_Ptr( Value );
+		return Logic_Relation_Ptr( Value );
 	end Clone;
 	
 	--------------------
@@ -123,7 +123,7 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	procedure Free(
 				Operation	: in     Logic_Criteria_Operation;
-				Name		: in out Logic_Operation_Ptr
+				Name		: in out Logic_Relation_Ptr
 			) is
 		procedure iFree is new Ada.Unchecked_Deallocation(
 							Object	=> Logic_Criteria_Operation,
@@ -136,10 +136,10 @@ package body KOW_Ent.Queries.Logic_Operations is
 	overriding
 	function Clone(
 				Operation	: in     Logic_Criteria_Operation
-			) return Logic_Operation_Ptr is
+			) return Logic_Relation_Ptr is
 		Value : Logic_Criteria_Ptr := new Logic_Criteria_Operation'( Operation );
 	begin
-		return Logic_Operation_Ptr( Value );
+		return Logic_Relation_Ptr( Value );
 	end Clone;
 
-end KOW_Ent.Queries.Logic_Operations;
+end KOW_Ent.Queries.Logic_Relations;
