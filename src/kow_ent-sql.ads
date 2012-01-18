@@ -79,11 +79,18 @@ package KOW_Ent.SQL is
 
 
 	function Get_Table_Name(
-				Generator	: in     Generator_Type;
-				Entity_Tag	: in     Ada.Tags.Tag
+				Generator	: in     Generator_Type
 			) return String;
-	-- get the name for the table
+	-- get the name for the current table (trimmed, of course)
 
+	procedure Append_Table_To_Select(
+				Generator	: in out Generator_Type;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Alias		:    out Entity_Alias_Type
+			);
+	-- append a entity to select, returning it's alias
+	-- if entity_Tag = no_tag return the first element in tables_to_select (ie, the current table)
+	-- if the given table is already in select list, don't append it twice (only return the alias)
 
 	--procedure Generate_Join(
 	--			Generator	: in out Generator_Type;
@@ -98,7 +105,7 @@ package KOW_Ent.SQL is
 	-----------------------------
 
 
-	procedure Append_Table_Name(
+	procedure Append_Table_Names(
 				Generator	: in out Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
@@ -108,10 +115,13 @@ package KOW_Ent.SQL is
 
 	procedure Append_Column_Name(
 				Generator	: in out Generator_Type;
-				Property	: in     Property_Type'Class;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Property_Name	: in     Property_Name_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+	-- append the column name.;
+	-- if entity_tag = no_tag, get the current query's entity
 
 	
 	procedure Append_Logic_Relation(
@@ -178,19 +188,12 @@ package KOW_Ent.SQL is
 
 private
 
-	type Table_Specification_Type is record
-		Table_Name	: String( 1 .. 2**8 );
-		Table_Alias	: String( 1 .. 2**8 );
-	end record;
-
-
-	package Table_Specification_Lists is new Ada.Containers.Doubly_Linked_Lists( Table_Specification_Type );
+	package Table_Alias_lists is new Ada.Containers.Doubly_Linked_Lists( Entity_Alias_Type );
 
 
 	type Generator_Type is tagged record
-		Tables_To_Select	: Table_Specification_Lists.List;
-		Current_Table		: Natural := 0;
-
+		Tables_To_Select	: Table_Alias_Lists.List;
+		-- the current table for a given query is aways the first one
 
 		Is_First_Logic_Relation	: Boolean := True;
 	end record;

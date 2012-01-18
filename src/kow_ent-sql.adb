@@ -142,14 +142,18 @@ package body KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
+		Alias : Entity_Alias_Type;
 	begin
+		Append_Table_To_Select( Generator, Query.Entity_Tag, Alias );
+		-- if the entity_tag is no_tag will raise cosntraint_error
+
 		APQ.Append( Q, "SELECT * " );
 		
 		--TODO :: Append_Column_Names( Generator, Query, Connection, Q );
 
 		APQ.Append( Q, " FROM " );
 
-		Append_Table_Name( Generator, Query, Connection, Q );
+		Append_Table_Names( Generator, Query, Connection, Q );
 
 		
 		if not Is_Empty( Query.Logic_Criteria ) then
@@ -160,14 +164,44 @@ package body KOW_Ent.SQL is
 
 
 	function Get_Table_Name(
-				Generator	: in     Generator_Type;
-				Entity_Tag	: in     Ada.Tags.Tag
+				Generator	: in     Generator_Type
 			) return String is
-		-- get the name for the table
-		use Data_Storages;
+		-- get the name for the current table (trimmed, of course)
 	begin
-		return Trim( Get_Alias( Data_Storage_Type'Class( Get_Data_Storage( Entity_Tag ).all ), Entity_Tag ) );
+		return Trim( Table_Alias_Lists.First_Element( Generator.Tables_To_Select ) );
 	end Get_Table_Name;
+
+
+
+	procedure Append_Table_To_Select(
+				Generator	: in out Generator_Type;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Alias		:    out Entity_Alias_Type
+			) is
+		-- append a entity to select, returning it's alias
+		-- if entity_Tag = no_tag return the first element in tables_to_select (ie, the current table)
+		-- if the given table is already in select list, don't append it twice (only return the alias)
+
+
+		use Ada.Tags;
+		use Table_Alias_Lists;
+	begin
+
+		if Entity_Tag = No_Tag then
+			Alias := First_Element( Generator.Tables_To_Select );
+		else
+			declare
+				use Data_Storages;
+				The_Alias : Entity_Alias_Type := Get_Alias( Data_Storage_Type'Class( Get_Data_Storage( Entity_Tag ).all ), Entity_Tag );
+			begin
+				if not Contains( Generator.Tables_To_Select, The_Alias ) then
+					Append( Generator.Tables_To_Select, The_Alias );
+				end if;
+				Alias := The_Alias;
+			end;
+		end if;
+	end Append_Table_To_Select;
+
 
 	--procedure Generate_Join(
 	--			Generator	: in out Generator_Type;
@@ -182,25 +216,41 @@ package body KOW_Ent.SQL is
 	-----------------------------
 
 
-	procedure Append_Table_Name(
+	procedure Append_Table_Names(
 				Generator	: in out Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
+		First : Boolean := True;
+
+		use Table_Alias_Lists;
+		procedure Iterator( C : Cursor ) is
+		begin
+			if First then
+				First := False;
+			else
+				APQ.Append( Q, "," );
+			end if;
+			APQ.Append( Q, Trim( Element( c ) ) );
+		end Iterator;
 	begin
-		APQ.Append( Q, Get_Table_Name( Generator_Type'Class( Generator ), Query.Entity_Tag ) );
-	end Append_Table_Name;
+		Iterate( Generator.Tables_To_Select, Iterator'Access );
+	end Append_Table_Names;
 	
 
 	procedure Append_Column_Name(
 				Generator	: in out Generator_Type;
-				Property	: in     Property_Type'Class;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Property_Name	: in     Property_Name_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
+
+		Alias : Entity_Alias_Type;
 	begin
-		APQ.Append( Q, Property.Name.all );
+		Append_Table_To_Select( Generator, Entity_Tag, Alias );
+		APQ.Append( Q, Trim( Alias ) & '.' & Property_Name.all );
 	end Append_Column_Name;
 
 
@@ -337,7 +387,14 @@ package body KOW_Ent.SQL is
 				Q		=> Q
 			);
 
-		APQ.Append( Q, Operation.Property_Name.all );
+		Append_Column_Name(
+				Generator	=> Generator,
+				Entity_Tag	=> Operation.Entity_Tag,
+				Property_Name	=> Operation.Property_Name,
+				Connection	=> Connection,
+				Q		=> Q
+			);
+
 		Append_Relational_Operator(
 					Generator	=> Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
@@ -360,15 +417,30 @@ package body KOW_Ent.SQL is
 				Connection	=> Connection,
 				Q		=> Q
 			);
-		APQ.Append( Q, Operation.Left_Property_Name.all );
+
+		Append_Column_Name(
+				Generator	=> Generator,
+				Entity_Tag	=> Operation.Left_Entity_Tag,
+				Property_Name	=> Operation.Left_Property_Name,
+				Connection	=> Connection,
+				Q		=> Q
+			);
+
+
 		Append_Relational_Operator(
 					Generator	=> Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
 					Connection	=> Connection,
 					Q		=> Q
 				);
-		-- TODO :: support the right property from another table!
-		APQ.Append( Q, Operation.Right_Property_Name.all );
+		Append_Column_Name(
+				Generator	=> Generator,
+				Entity_Tag	=> Operation.Right_Entity_Tag,
+				Property_Name	=> Operation.Right_Property_Name,
+				Connection	=> Connection,
+				Q		=> Q
+			);
+
 
 	end Append_Operation_Stored_Vs_Stored;
 

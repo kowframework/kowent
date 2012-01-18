@@ -34,6 +34,10 @@
 ------------------------------------------------------------------------------
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Tags;
 
 
 package KOW_Ent.Queries.Logic_Relations is
@@ -44,6 +48,7 @@ package KOW_Ent.Queries.Logic_Relations is
 	---------------------
 
 	type Stored_Vs_Value_Operation is new Logic_Relation_Type with record
+		Entity_Tag	: Ada.Tags.Tag := Ada.Tags.No_Tag;
 		Property_Name	: Property_Name_Type;
 		-- it's a pointer but always share the access to the same string value
 		Value		: Value_Ptr;
@@ -77,9 +82,11 @@ package KOW_Ent.Queries.Logic_Relations is
 	----------------------
 
 	type Stored_Vs_Stored_Operation is new Logic_Relation_Type with record
+		Left_Entity_Tag		: Ada.Tags.Tag;
 		Left_Property_Name	: Property_Name_Type;
+
+		Right_Entity_Tag	: Ada.Tags.Tag;
 		Right_Property_Name	: Property_Name_Type;
-		Right_Property_Container_Tag : Ada.Tags.Tag;
 
 		Relation		: Relational_Operator_Type := Relation_Equal_To;
 		Operator		: Logic_Operator_Type := Operator_AND;
