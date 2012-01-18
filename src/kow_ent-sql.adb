@@ -137,7 +137,7 @@ package body KOW_Ent.SQL is
 	------------------
 
 	procedure Generate_Select(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -164,7 +164,7 @@ package body KOW_Ent.SQL is
 
 
 	function Get_Table_Name(
-				Generator	: in     Generator_Type
+				Generator	: in     Select_Generator_Type
 			) return String is
 		-- get the name for the current table (trimmed, of course)
 	begin
@@ -174,7 +174,7 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Table_To_Select(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Entity_Tag	: in     Ada.Tags.Tag;
 				Alias		:    out Entity_Alias_Type
 			) is
@@ -204,7 +204,7 @@ package body KOW_Ent.SQL is
 
 
 	--procedure Generate_Join(
-	--			Generator	: in out Generator_Type;
+	--			Generator	: in out Select_Generator_Type;
 	--			Query		: in     KOW_Ent.Queries.Joined_Query_Type;
 	--			Connection	: in     APQ.Root_Connection_Type'Class;
 	--			Q		: in out APQ.Root_Query_Type'Class
@@ -217,7 +217,7 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Table_Names(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -240,7 +240,7 @@ package body KOW_Ent.SQL is
 	
 
 	procedure Append_Column_Name(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Entity_Tag	: in     Ada.Tags.Tag;
 				Property_Name	: in     Property_Name_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
@@ -257,7 +257,7 @@ package body KOW_Ent.SQL is
 	
 	
 	procedure Append_Logic_Relation(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Operation	: in     Logic_Relation_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -295,7 +295,7 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Logic_Operator(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Operator	: in     Logic_Operator_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -316,7 +316,7 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Relational_Operator(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Relation	: in     Relational_Operator_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -350,7 +350,7 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Logic_Criteria(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Criteria	: in     Logic_Criteria_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -374,14 +374,14 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Operation_Stored_Vs_Value(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Operation	: in     Logic_Relations.Stored_Vs_Value_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
 		Append_Logic_Operator(
-				Generator	=> Generator_Type'Class( Generator ),
+				Generator	=> Select_Generator_Type'Class( Generator ),
 				Operator	=> Operation.Operator,
 				Connection	=> Connection,
 				Q		=> Q
@@ -396,7 +396,7 @@ package body KOW_Ent.SQL is
 			);
 
 		Append_Relational_Operator(
-					Generator	=> Generator_Type'Class( Generator ),
+					Generator	=> Select_Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
 					Connection	=> Connection,
 					Q		=> Q
@@ -405,14 +405,14 @@ package body KOW_Ent.SQL is
 	end Append_Operation_Stored_Vs_Value;
 
 	procedure Append_Operation_Stored_Vs_Stored(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Operation	: in     Logic_Relations.Stored_Vs_Stored_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 	begin
 		Append_Logic_Operator(
-				Generator	=> Generator_Type'Class( Generator ),
+				Generator	=> Select_Generator_Type'Class( Generator ),
 				Operator	=> Operation.Operator,
 				Connection	=> Connection,
 				Q		=> Q
@@ -428,7 +428,7 @@ package body KOW_Ent.SQL is
 
 
 		Append_Relational_Operator(
-					Generator	=> Generator_Type'Class( Generator ),
+					Generator	=> Select_Generator_Type'Class( Generator ),
 					Relation	=> Operation.Relation,
 					Connection	=> Connection,
 					Q		=> Q
@@ -445,7 +445,7 @@ package body KOW_Ent.SQL is
 	end Append_Operation_Stored_Vs_Stored;
 
 	procedure Append_Operation_Logic_Criteria(
-				Generator	: in out Generator_Type;
+				Generator	: in out Select_Generator_Type;
 				Operation	: in     Logic_Relations.Logic_Criteria_Operation'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
@@ -455,14 +455,14 @@ package body KOW_Ent.SQL is
 			return;
 		end if;
 		Append_Logic_Operator(
-				Generator	=> Generator_Type'Class( Generator ),
+				Generator	=> Select_Generator_Type'Class( Generator ),
 				Operator	=> Operation.Operator,
 				Connection	=> Connection,
 				Q		=> Q
 			);
 		APQ.Append( Q, "(" );
 		Append_Logic_Criteria(
-					Generator	=> Generator_Type'Class( Generator ),
+					Generator	=> Select_Generator_Type'Class( Generator ),
 					Criteria	=> Operation.Logic_Criteria,
 					Connection	=> Connection,
 					Q		=> Q
