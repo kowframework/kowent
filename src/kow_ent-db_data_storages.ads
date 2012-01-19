@@ -60,4 +60,49 @@ package KOW_Ent.DB_Data_Storages is
 	type Root_DB_Storage_Type is abstract new KOW_Ent.Data_Storages.Data_Storage_Type with null record;
 	-- this db storage type just implements the data storage
 
+
+
+	overriding
+	function New_Loader(
+				Data_Storage	: in Root_DB_Storage_Type;
+				Query		: in Queries.Query_Type
+			) return Entity_Loader_Interface'Class;
+	-- return an object of the type Root_DB_Entity_Loader_Type'Class
+
+
+
+
+
+	type Root_DB_Entity_Loader_Type is abstract new KOW_Ent.Data_Storages.Entity_Loader_Interface with null record;
+	-- each entity type will have it's on instante of a generic entity loader
+	-- @see KOW_Ent.DB.Data_Storages
+
+
+	overriding
+	procedure Execute( Loader : in out Entity_Loader_Interface ) is abstract;
+	-- execute the query
+
+	overriding
+	procedure Fetch( Loader : in out Entity_Loader_Interface ) is abstract;
+	-- fetch the next result
+
+
+	overriding
+	function Has_Next( Loader : in Entity_Loader_Interface ) return Boolean is abstract;
+	-- check if there is a next result
+
+
+	overriding
+	procedure Load(
+			Loader	: in out Entity_Loader_Interface;
+			Entity	: in out Entity_Type'Class
+		) is abstract;
+	-- load the current query result into the entity
+	-- if the entity type is unknown to the loader interface, raises constraint_error
+
+
+
+	overriding
+	procedure Flush( Loader : in out Entity_Loader_Interface ) is abstract;
+
 end KOW_Ent.DB_Data_Storages;
