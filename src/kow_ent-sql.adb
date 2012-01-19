@@ -160,6 +160,14 @@ package body KOW_Ent.SQL is
 			APQ.Append( Q, " WHERE " );
 			Append_Logic_Criteria( Generator, Query.Logic_Criteria, Connection, Q );
 		end if;
+
+
+		Append_Limit_And_Offset(
+				Generator	=> Generator,
+				Query		=> Query,
+				Connection	=> Connection,
+				Q		=> Q
+			);
 	end Generate_Select;
 
 
@@ -216,6 +224,24 @@ package body KOW_Ent.SQL is
 	-----------------------------
 
 
+	--
+	-- Macro
+	--
+
+
+
+	procedure Append_Column_Names(
+			Generator	: in out Select_Generator_Type;
+			Query		: in     KOW_Ent.Queries.Query_Type;
+			Connection	: in     APQ.Root_Connection_Type'Class;
+			Q		: in out APQ.Root_Query_Type'Class
+			) is
+		-- append all the columns name
+		-- TODO :: actually implement me so I'll only get the relevant data
+	begin
+		APQ.Append( Q, " * " );
+	end Append_Column_Names;
+	
 	procedure Append_Table_Names(
 				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
@@ -237,6 +263,50 @@ package body KOW_Ent.SQL is
 	begin
 		Iterate( Generator.Tables_To_Select, Iterator'Access );
 	end Append_Table_Names;
+
+
+
+
+	procedure Append_Logic_Criteria(
+				Generator	: in out Select_Generator_Type;
+				Criteria	: in     Logic_Criteria_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+	
+		procedure Iterator( Operation : Logic_Relation_Type'Class ) is
+		begin
+			Append_Logic_Relation( Generator, Operation, Connection, Q );
+		end Iterator;
+	begin
+		Queries.Iterate( Criteria, Iterator'Access );
+	end Append_Logic_Criteria;
+
+
+
+	
+	procedure Append_Limit_And_Offset(
+				Generator	: in out Select_Generator_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+		-- append the limit and offset values when needed
+		-- the following syntax is valid for both MySQL and PostgreSQL; check if it's also valid for other vendors
+	begin
+		if Query.Limit /= 0 then
+			APQ.Append( Q, " LIMIT " & Natural'Image( Query.Limit ) );
+		end if;
+		if Query.Offset /= 1 then
+			APQ.Append( Q, " OFFSET " & Positive'Image( Query.Offset ) );
+		end if;
+	end Append_Limit_And_Offset;
+
+
+
+	--
+	-- Micro
+	--
 	
 
 	procedure Append_Column_Name(
@@ -255,41 +325,6 @@ package body KOW_Ent.SQL is
 
 
 	
-	
-	procedure Append_Logic_Relation(
-				Generator	: in out Select_Generator_Type;
-				Operation	: in     Logic_Relation_Type'Class;
-				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
-			) is
-
-
-	begin
-		if Operation in Logic_Relations.Stored_Vs_Value_Operation'Class then
-			Append_Operation_Stored_Vs_Value(
-								Generator	=> Generator,
-								Operation	=> Logic_Relations.Stored_Vs_Value_Operation'Class( Operation ),
-								Connection	=> Connection,
-								Q		=> Q
-							);
-		elsif Operation in Logic_Relations.Stored_Vs_Stored_Operation'Class then
-			Append_Operation_Stored_Vs_Stored(
-								Generator	=> Generator,
-								Operation	=> Logic_Relations.Stored_Vs_Stored_Operation'Class( Operation ),
-								Connection	=> Connection,
-								Q		=> Q
-							);
-		elsif Operation in Logic_Relations.Logic_Criteria_Operation'Class then
-			Append_Operation_Logic_Criteria(
-								Generator	=> Generator,
-								Operation	=> Logic_Relations.Logic_Criteria_Operation'Class( Operation ),
-								Connection	=> Connection,
-								Q		=> Q
-							);
-		else
-			raise Program_Error with "I don't know how to append the given type :: " & Ada.Tags.Expanded_Name( Operation'Tag );
-		end if;
-	end Append_Logic_Relation;
 	
 
 
@@ -349,27 +384,50 @@ package body KOW_Ent.SQL is
 
 
 
-	procedure Append_Logic_Criteria(
+
+
+
+
+	--
+	-- Logic relations
+	--
+
+
+	procedure Append_Logic_Relation(
 				Generator	: in out Select_Generator_Type;
-				Criteria	: in     Logic_Criteria_Type'Class;
+				Operation	: in     Logic_Relation_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
-	
-		procedure Iterator( Operation : Logic_Relation_Type'Class ) is
-		begin
-			Append_Logic_Relation( Generator, Operation, Connection, Q );
-		end Iterator;
+
+
 	begin
-		Queries.Iterate( Criteria, Iterator'Access );
-	end Append_Logic_Criteria;
-
-
-
-
-	-------------------------
-	-- Internal procedures --
-	-------------------------
+		if Operation in Logic_Relations.Stored_Vs_Value_Operation'Class then
+			Append_Operation_Stored_Vs_Value(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Stored_Vs_Value_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		elsif Operation in Logic_Relations.Stored_Vs_Stored_Operation'Class then
+			Append_Operation_Stored_Vs_Stored(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Stored_Vs_Stored_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		elsif Operation in Logic_Relations.Logic_Criteria_Operation'Class then
+			Append_Operation_Logic_Criteria(
+								Generator	=> Generator,
+								Operation	=> Logic_Relations.Logic_Criteria_Operation'Class( Operation ),
+								Connection	=> Connection,
+								Q		=> Q
+							);
+		else
+			raise Program_Error with "I don't know how to append the given type :: " & Ada.Tags.Expanded_Name( Operation'Tag );
+		end if;
+	end Append_Logic_Relation;
+	
 
 
 

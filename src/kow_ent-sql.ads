@@ -104,6 +104,28 @@ package KOW_Ent.SQL is
 	-- Select Query Generation --
 	-----------------------------
 
+	-- the SELECT query structure in KOW_Ent language:
+	--
+	-- SELECT
+	-- 	[COLUMN NAMES]
+	-- FROM
+	-- 	[TABLE_NAMES]
+	-- WHERE
+	-- 	[LOGIC_CRITERIA]
+	--
+	-- [LIMIT_AND_OFFSET]
+
+
+	--
+	-- Macro
+	--
+	procedure Append_Column_Names(
+				Generator	: in out Select_Generator_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	-- append all the columns name
 
 	procedure Append_Table_Names(
 				Generator	: in out Select_Generator_Type;
@@ -111,7 +133,31 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+	-- append all the tables that should be queried
 	
+
+	procedure Append_Logic_Criteria(
+				Generator	: in out Select_Generator_Type;
+				Criteria	: in     Logic_Criteria_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	-- append the logic criteria
+
+	
+	procedure Append_Limit_And_Offset(
+				Generator	: in out Select_Generator_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	-- append the limit and offset values when needed
+	
+
+	-- 
+	-- Micro
+	--
+
 
 	procedure Append_Column_Name(
 				Generator	: in out Select_Generator_Type;
@@ -124,20 +170,6 @@ package KOW_Ent.SQL is
 	-- if entity_tag = no_tag, get the current query's entity
 
 	
-	procedure Append_Logic_Relation(
-				Generator	: in out Select_Generator_Type;
-				Operation	: in     Logic_Relation_Type'Class;
-				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
-			);
-	
-	procedure Append_Logic_Criteria(
-				Generator	: in out Select_Generator_Type;
-				Criteria	: in     Logic_Criteria_Type'Class;
-				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
-			);
-
 
 
 	procedure Append_Logic_Operator(
@@ -146,6 +178,7 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+	-- append AND or OR accordingly
 
 	
 	procedure Append_Relational_Operator(
@@ -154,8 +187,22 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+	-- append the operator, such as =, !=, <, LIKE, ILIKE, ...
 
 
+
+	--
+	-- Logic Relations
+	--
+
+	procedure Append_Logic_Relation(
+				Generator	: in out Select_Generator_Type;
+				Operation	: in     Logic_Relation_Type'Class;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+	-- Specific logic relations...
 
 
 	procedure Append_Operation_Stored_Vs_Value(
@@ -180,10 +227,6 @@ package KOW_Ent.SQL is
 			);
 
 
-
-	-- Append_Select
-	-- Append_Table_Name
-	-- Append_
 
 
 private

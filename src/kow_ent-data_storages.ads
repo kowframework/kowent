@@ -152,7 +152,8 @@ package KOW_Ent.Data_Storages is
 			Loader	: in out Entity_Loader_Interface;
 			Entity	: in out Entity_Type'Class
 		) is abstract;
-	-- load the current query result into the query
+	-- load the current query result into the entity
+	-- if the entity type is unknown to the loader interface, raises constraint_error
 
 
 	procedure Flush( Loader : in out Entity_Loader_Interface ) is abstract;
@@ -203,5 +204,5 @@ private
 						Hash		=> Hash
 					);
 	
-	Storages :Data_Storage_Maps.Map;
+	Storages : Data_Storage_Maps.Map;
 end KOW_Ent.Data_Storages;
