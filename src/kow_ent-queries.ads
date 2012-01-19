@@ -142,6 +142,11 @@ package KOW_Ent.Queries is
 	type Query_Type is record
 		Entity_Tag	: Ada.Tags.Tag;
 		Logic_Criteria	: Logic_Criteria_Type;
+
+		From		: Positive := 1;
+		-- from what result should the query be returning.
+		Limit		: Natural := 0;
+		-- how many maximum results to return. When 0 then it has no limit
 	end record;
 
 	-----------------------------------
