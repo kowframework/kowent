@@ -51,6 +51,15 @@ with KOW_Ent.Queries;
 package KOW_Ent.Data_Storages is
 
 
+	UNICITY_ERROR : Exception;
+	-- raised whenever only one result is expected but found more
+
+
+	NO_RESULT : Exception;
+	-- raised whenever there is no result to be loaded
+
+
+
 	---------------------------
 	-- The Data Storage Type --
 	---------------------------
@@ -88,19 +97,29 @@ package KOW_Ent.Data_Storages is
 	--------------------
 	function Load(
 				Data_Storage	: in     Data_Storage_Type;
-				Filter		: in     Property_Type'Class
+				Filter		: in     Property_Type'Class;
+				Unique		: in     Boolean := True
 			) return KOW_Ent.Entity_Type'Class;
-	-- build the query and then return the type
+	-- build the query and then return the first result
+	-- if unique=true and there are more results, raise UNICITY_ERROR
 	
 	function Load(
 				Data_Storage	: in     Data_Storage_Type;
-				Query		: in     Queries.Query_Type
+				Query		: in     Queries.Query_Type;
+				Unique		: in     Boolean := True
 			) return KOW_Ent.Entity_Type'Class is abstract;
+	-- build the query and then return the first result
+	-- if unique=true and there are more results, raise UNICITY_ERROR
 
-	function Load(
-				Data_Storage	: in     Data_Storage_Type;
-				Query		: in     Queries.Joined_Query_Type
-			) return KOW_Ent.Entity_Type'Class is abstract;
+
+	-- TODO :: figure out how to load from joined queries
+	--function Load(
+	--			Data_Storage	: in     Data_Storage_Type;
+	--			Query		: in     Queries.Joined_Query_Type;
+	--			Unique		: in     Boolean := True
+	--		) return KOW_Ent.Entity_Type'Class is abstract;
+	-- build the query and then return the first result
+	-- if unique=true and there are more results, raise UNICITY_ERROR
 
 
 	
@@ -123,8 +142,6 @@ package KOW_Ent.Data_Storages is
 	-- Entity Query Interface --
 	----------------------------
 
-	No_Result : Exception;
-	-- raised whenever there is no result to be loaded
 
 	type Entity_Loader_Interface is interface;
 	-- a type that actually deals with query
@@ -145,8 +162,8 @@ package KOW_Ent.Data_Storages is
 	procedure Fetch( Loader : in out Entity_Loader_Interface ) is abstract;
 	-- fetch the next result
 
-	function Has_Next( Loader : in Entity_Loader_Interface ) return Boolean is abstract;
-	-- check if there is a next result
+	function Has_Element( Loader : in Entity_Loader_Interface ) return Boolean is abstract;
+	-- check if there is fetched element
 
 	procedure Load(
 			Loader	: in out Entity_Loader_Interface;
@@ -158,6 +175,7 @@ package KOW_Ent.Data_Storages is
 
 	procedure Flush( Loader : in out Entity_Loader_Interface ) is abstract;
 	-- discard all the remaining results
+	-- when calling this the query should be ready to executed again.. and again.
 
 	-- typical use of the given interface is:
 	--
@@ -167,8 +185,9 @@ package KOW_Ent.Data_Storages is
 	--
 	-- Execute( Loader );
 	--
-	-- while Has_Next( Loader ) loop
+	-- loop
 	-- 	Fetch( Loader );
+	-- 	exit when not Has_Element( Loader );
 	-- 	Load( Loader, Entity );
 	-- 	-- do something with the entity..
 	-- end loop;

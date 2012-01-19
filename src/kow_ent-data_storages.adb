@@ -58,7 +58,8 @@ package body KOW_Ent.Data_Storages is
 	--------------------
 	function Load(
 				Data_Storage	: in     Data_Storage_Type;
-				Filter		: in     Property_Type'Class
+				Filter		: in     Property_Type'Class;
+				Unique		: in     Boolean := True
 			) return KOW_Ent.Entity_Type'Class is
 		use Queries;
 
@@ -71,7 +72,7 @@ package body KOW_Ent.Data_Storages is
 	
 		Append( Q.Logic_Criteria, Op );
 
-		return Load( Data_Storage_Type'Class( Data_Storage ), Q );
+		return Load( Data_Storage_Type'Class( Data_Storage ), Q, Unique );
 	end Load;
 
 
