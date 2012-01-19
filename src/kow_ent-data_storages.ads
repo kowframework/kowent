@@ -83,7 +83,6 @@ package KOW_Ent.Data_Storages is
 
 
 
-
 	--------------------
 	-- Load Functions --
 	--------------------
@@ -117,6 +116,76 @@ package KOW_Ent.Data_Storages is
 	-- create a relation between an entity and a data storage.
 
 	function Get_Data_Storage( Entity_Tag : in Ada.Tags.Tag ) return Data_Storage_Ptr;
+
+
+
+	----------------------------
+	-- Entity Query Interface --
+	----------------------------
+
+	No_Result : Exception;
+	-- raised whenever there is no result to be loaded
+
+	type Entity_Loader_Interface is interface;
+	-- a type that actually deals with query
+
+	
+	function New_Loader(
+				Data_Storage	: in Data_Storage_Type;
+				Query		: in Queries.Query_Type
+			) return Entity_Loader_Interface'Class is abstract;
+	-- a new query type for the given query representation
+	-- the query must be intialized, but not yet executed
+
+
+
+	procedure Execute( Loader : in out Entity_Loader_Interface ) is abstract;
+	-- execute the query
+
+	procedure Fetch( Loader : in out Entity_Loader_Interface ) is abstract;
+	-- fetch the next result
+
+	function Has_Next( Loader : in Entity_Loader_Interface ) return Boolean is abstract;
+	-- check if there is a next result
+
+	procedure Load(
+			Loader	: in out Entity_Loader_Interface;
+			Entity	: in out Entity_Type'Class
+		) is abstract;
+	-- load the current query result into the query
+
+
+	procedure Flush( Loader : in out Entity_Loader_Interface ) is abstract;
+	-- discard all the remaining results
+
+	-- typical use of the given interface is:
+	--
+	-- Loader : Entity_Loader_Interface'Class := New_Loader( Storage, Query );
+	-- Entity : Some_Entity_Type;
+	-- begin
+	--
+	-- Execute( Loader );
+	--
+	-- while Has_Next( Loader ) loop
+	-- 	Fetch( Loader );
+	-- 	Load( Loader, Entity );
+	-- 	-- do something with the entity..
+	-- end loop;
+	--
+	--
+	-- But this scenario is also valid (even though not recomended):
+	--
+	-- begin
+	--
+	-- Execute( Loader );
+	-- loop
+	-- 	Fetch( Loader );
+	-- 	Load( Loader, Entity );
+	-- 	...
+	-- end loop
+	-- exception
+	-- 	when No_Result => null;
+
 private
 
 
