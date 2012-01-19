@@ -43,6 +43,7 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Tags;
 with Ada.Unchecked_Deallocation;
 
 -------------------
@@ -60,7 +61,7 @@ with KOW_Ent.Queries;
 
 
 generic
-	with type Entity_Type is new KOW_Ent.Entity_Type with private;
+	type Entity_Type is new KOW_Ent.Entity_Type with private;
 	Entity_Alias : String;
 package KOW_Ent.DB.Data_Storages is
 
@@ -72,7 +73,7 @@ package KOW_Ent.DB.Data_Storages is
 
 	overriding
 	function Get_Alias(
-				Data_Entity	: in    DB_Data_Storage_Type;
+				Data_Entity	: in    DB_Storage_Type;
 				Entity_Tag	: in    Ada.Tags.Tag
 			) return Entity_Alias_Type;
 	-- get the alias for the given entity
@@ -84,8 +85,8 @@ package KOW_Ent.DB.Data_Storages is
 
 	overriding
 	procedure Store(
-				Data_Storage	: in out DB_Data_Storage_Type;
-				Entity		: in out Entity_Type'Class
+				Data_Storage	: in out DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class
 			) is null;
 	-- store the entity
 	-- TODO :: implement-me!
@@ -98,7 +99,7 @@ package KOW_Ent.DB.Data_Storages is
 	
 	overriding
 	function Load(
-				Data_Storage	: in     DB_Data_Storage_Type;
+				Data_Storage	: in     DB_Storage_Type;
 				Query		: in     Queries.Query_Type;
 				Unique		: in     Boolean := True
 			) return KOW_Ent.Entity_Type'Class;
@@ -108,7 +109,7 @@ package KOW_Ent.DB.Data_Storages is
 
 	overriding
 	function New_Loader(
-				Data_Storage	: in     DB_Data_Storage_Type;
+				Data_Storage	: in     DB_Storage_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type
 			) return KOW_Ent.Data_Storages.Entity_Loader_Interface'Class;
 
@@ -118,28 +119,28 @@ package KOW_Ent.DB.Data_Storages is
 	-- Entity Loader --
 	-------------------
 
-	type DB_Entity_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
+	type DB_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
 
 
 
 	overriding
-	procedure Execute( Loader : in out DB_Entity_Loader_Type );
+	procedure Execute( Loader : in out DB_Loader_Type );
 	-- execute the query
 
 	overriding
-	procedure Fetch( Loader : in out DB_Entity_Loader_Type );
+	procedure Fetch( Loader : in out DB_Loader_Type );
 	-- fetch the next result
 
 
 	overriding
-	function Has_Element( Loader : in DB_Entity_Loader_Type ) return Boolean;
+	function Has_Element( Loader : in DB_Loader_Type ) return Boolean;
 	-- check if there is a next result
 
 
 	overriding
 	procedure Load(
-			Loader	: in out DB_Entity_Loader_Type;
-			Entity	: in out Entity_Type'Class
+			Loader	: in out DB_Loader_Type;
+			Entity	: in out KOW_Ent.Entity_Type'Class
 		);
 	-- load the current query result into the entity
 	-- if the entity type is unknown to the loader interface, raises constraint_error
@@ -147,17 +148,17 @@ package KOW_Ent.DB.Data_Storages is
 
 
 	overriding
-	procedure Flush( Loader : in out DB_Entity_Loader_Type );
+	procedure Flush( Loader : in out DB_Loader_Type );
 
 
 private
 
 
-	type DB_Data_Storage_Type is new KOW_Ent.Data_Storages.Data_Storage_Type with null record;
+	type DB_Storage_Type is new KOW_Ent.Data_Storages.Data_Storage_Type with null record;
 
 	package Entity_Lists is new Ada.Containers.Doubly_Linked_Lists( Entity_Type );
 
-	type DB_Entity_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Type with record
+	type DB_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with record
 		Cache	: Entity_Lists.List;
 		-- where the results are cached when execute is called as APQ_Provide require
 		-- us to fetch all the results at once and then release the connection for good
@@ -173,6 +174,6 @@ private
 	-- where the entity alias is actually stored (it's copied from the Entity_Alias string on elaboration time)
 
 
-	Storage : constant DB_Data_Storage_Type;
+	Storage : aliased DB_Storage_Type;
 	-- the actual data storage instance is a singleton object for each entity type (at least for entities in the database backend)
 end KOW_Ent.DB.Data_Storages;
