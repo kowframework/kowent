@@ -112,6 +112,31 @@ package KOW_Ent.Data_Storages is
 	-- if unique=true and there are more results, raise UNICITY_ERROR
 
 
+	------------
+	-- Insert --
+	------------
+	procedure Insert(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class
+			) is abstract;
+	
+
+	------------
+	-- Update --
+	------------
+	procedure Update(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Filter		: in     KOW_Ent.Property_Type'Class
+			);
+
+	procedure Update(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
+			) is abstract;
+
+
 	-- TODO :: figure out how to load from joined queries
 	--function Load(
 	--			Data_Storage	: in     Data_Storage_Type;

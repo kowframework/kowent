@@ -107,6 +107,30 @@ package KOW_Ent.DB.Data_Storages is
 	-- if unique=true and there are more results, raise UNICITY_ERROR
 
 
+	------------
+	-- Insert --
+	------------
+
+	overriding
+	procedure Insert(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class
+			);
+	
+
+	------------
+	-- Update --
+	------------
+
+	overriding
+	procedure Update(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
+			);
+
+
+
 	overriding
 	function New_Loader(
 				Data_Storage	: in     DB_Storage_Type;

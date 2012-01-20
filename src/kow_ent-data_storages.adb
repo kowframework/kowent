@@ -75,6 +75,37 @@ package body KOW_Ent.Data_Storages is
 		return Load( Data_Storage_Type'Class( Data_Storage ), Q, Unique );
 	end Load;
 
+	------------
+	-- Update --
+	------------
+	procedure Update(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Filter		: in     KOW_Ent.Property_Type'Class
+			) is
+		use KOW_Ent.Queries;
+		use KOW_Ent.Queries.Logic_Relations;
+
+
+		Operation : Logic_Relations.Stored_Vs_Value_Operation;
+		Criteria  : Logic_Criteria_Type;
+
+	begin
+		Operation.Entity_Tag	:= Entity'Tag;
+		Operation.Property_Name	:= Filter.Name;
+		Operation.Value		:= new Value_Type'( Get_Value( Filter ) );
+		Operation.Relation	:= Relation_Equal_To;
+		Operation.Operator	:= Operator_AND;
+
+		Append( Criteria, Operation );
+
+
+		Update(
+				Data_Storage	=> Data_Storage_Type'Class( Data_Storage ),
+				Entity		=> Entity,
+				Criteria	=> Criteria
+			);
+	end Update;
 
 	
 	------------------------

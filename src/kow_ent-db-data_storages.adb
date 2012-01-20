@@ -52,6 +52,7 @@ with APQ;
 with APQ_Provider;
 with KOW_Ent.Data_Storages;
 with KOW_Ent.Queries;
+with KOW_Ent.Queries.Logic_Relations;
 with KOW_Ent.SQL;
 
 
@@ -221,6 +222,37 @@ package body KOW_Ent.DB.Data_Storages is
 
 		Entity := KOW_Ent.Entity_Type'Class( Element( Loader.Current ) );
 	end Load;
+
+
+
+	------------
+	-- Insert --
+	------------
+
+	overriding
+	procedure Insert(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class
+			) is
+	begin
+		raise PROGRAM_ERROR with "not implemented";
+	end Insert;
+	
+
+	------------
+	-- Update --
+	------------
+
+	overriding
+	procedure Update(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
+			) is
+	begin
+		raise PROGRAM_ERROR with "not implemented";
+	end Update;
+
 
 
 	overriding
