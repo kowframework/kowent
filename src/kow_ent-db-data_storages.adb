@@ -76,6 +76,20 @@ package body KOW_Ent.DB.Data_Storages is
 		return THE_Entity_Alias;
 	end Get_Alias;
 
+
+	overriding
+	function Create(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag
+			) return KOW_Ent.Entity_Type'Class is
+		Entity : Entity_Type;
+	begin
+		Entity.Data_Storage := Storage'Access;
+		return Entity;
+	end Create;
+
+
+
 	--------------------
 	-- Load Functions --
 	--------------------

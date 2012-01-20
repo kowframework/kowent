@@ -74,11 +74,19 @@ package KOW_Ent.Data_Storages is
 	--------------
 
 	function Get_Alias(
-				Data_Entity	: in    Data_Storage_Type;
+				Data_Storage	: in    Data_Storage_Type;
 				Entity_Tag	: in    Ada.Tags.Tag
 			) return Entity_Alias_Type is abstract;
 	-- get the alias for the given entity
 	-- for database backend, it's the table name
+
+
+
+	function Create(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag
+			) return KOW_Ent.Entity_Type'Class is abstract;
+	-- allocate for the given entity
 
 	---------------------
 	-- Store Procedure --
