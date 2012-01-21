@@ -60,6 +60,19 @@ package KOW_Ent.SQL is
 			Connection	: in     APQ.Root_Connection_Type'Class;
 			Q		: in out APQ.Root_Query_Type'Class
 		);
+	
+	procedure Load_Value(
+			Value		: in out Value_Type;
+			Connection	: in     APQ.Root_Connection_Type'Class;
+			Q		: in     APQ.Root_Query_Type'Class;
+			Column_Name	: in     String
+		);
+
+
+
+	------------------------
+	-- The Generator Type --
+	------------------------
 
 
 	type Select_Generator_Type is tagged private;

@@ -179,8 +179,25 @@ package body KOW_Ent.DB.Data_Storages is
 			loop
 				APQ.Fetch( Query );
 				declare
-					E : Entity_Type;
+					E		: Entity_Type;
+					Table_Name	: constant String := SQL.Get_Table_Name( Generator );
+
+					procedure Iterator( P : in Property_Ptr ) is
+						
+						Value : Value_Type := Get_Value( P.all );
+					begin
+						SQL.Load_Value( 
+								Value		=> Value,
+								Connection	=> Connection,
+								Q		=> Query,
+								Column_Name	=> Table_Name & '.' & P.Name.all
+							);
+					end Iterator;
 				begin
+					Iterate(
+							Container	=> E,
+							Iterator	=> Iterator'Access
+						);
 					-- TODO :: set all the data in the entity type...
 					Entity_Lists.Append( Loader.Cache, E );
 				end;

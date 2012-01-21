@@ -48,6 +48,7 @@ with APQ;
 with KOW_Ent.Data_Storages;
 with KOW_Ent.Queries;				use KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
+with KOW_Lib.String_Util;
 
 
 
@@ -129,6 +130,100 @@ package body KOW_Ent.SQL is
 		end case;
 
 	end Append_Value;
+
+
+
+
+	procedure Load_Value(
+			Value		: in out Value_Type;
+			Connection	: in     APQ.Root_Connection_Type'Class;
+			Q		: in     APQ.Root_Query_Type'Class;
+			Column_Name	: in     String
+		) is
+
+
+		function Smallint_Value is new APQ.Integer_Value( APQ.APQ_Smallint );
+		function Integer_Value is new APQ.Integer_Value( APQ.APQ_Integer );
+		function Bigint_Value is new APQ.Integer_Value( APQ.APQ_Bigint );
+
+		function Real_Value is new APQ.Float_Value( APQ.APQ_Real );
+		function Double_Value is new APQ.Float_Value( APQ.APQ_Double );
+
+		function Serial_Value is new APQ.Integer_Value( APQ.APQ_Serial );
+		function Bigserial_Value is new APQ.Integer_Value( APQ.APQ_Bigserial );
+
+
+		function Date_Value is new APQ.Date_Value( APQ.APQ_Date );
+		function Time_Value is new APQ.Time_Value( APQ.APQ_Time );
+		function Timestamp_Value is new APQ.Timestamp_Value( APQ.APQ_Timestamp );
+
+		function Hour_Value is new APQ.Integer_Value( APQ.Hour_Number );
+		function Minute_Value is new APQ.Integer_Value( APQ.Minute_Number );
+		function Second_Value is new APQ.Integer_Value( APQ.Second_Number );
+
+
+		Idx : APQ.Column_Index_Type := APQ.Column_Index( Q, Column_Name );
+
+	begin
+		
+		case Value.Type_of is
+			when APQ_Smallint =>
+				Value.Smallint_Value := Smallint_Value( Q, Idx );
+
+			when APQ_Integer =>
+				Value.Integer_Value := Integer_Value( Q, Idx );
+
+			when APQ_Bigint =>
+				Value.Bigint_Value := Bigint_Value( Q, Idx );
+
+
+
+			when APQ_Real	=>
+				Value.Real_Value := Real_Value( Q, Idx );
+
+			when APQ_Double =>
+				Value.Double_Value := Double_Value( Q, Idx );
+
+
+
+			when APQ_Serial	=>
+				Value.Serial_Value := Serial_Value( Q, Idx );
+
+			when APQ_Bigserial =>
+				Value.Bigserial_Value := Bigserial_Value( Q, Idx );
+
+
+
+			when APQ_Date =>
+				Value.Date_Value := Date_Value( Q, Idx );
+
+			when APQ_Time =>
+				Value.Time_Value := Time_Value( Q, Idx );
+
+			when APQ_Timestamp =>
+				Value.Timestamp_Value := Timestamp_Value( Q, Idx );
+
+
+
+			when Hour_Number =>
+				Value.Hour_Value := Hour_Value( Q, Idx );
+			
+			when Minute_Number =>
+				Value.Minute_Value := Minute_Value( Q, Idx );
+
+			when Second_Number =>
+				Value.Second_Value := Second_Value( Q, Idx );
+
+			when APQ_String =>
+				declare
+					Val : constant String := APQ.Value( Q, Idx );
+				begin
+					KOW_Lib.String_Util.Copy( From => Val, To => Value.String_Value );
+				end;
+		end case;
+
+	end Load_Value;
+
 
 
 
