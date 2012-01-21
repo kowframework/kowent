@@ -70,9 +70,23 @@ package KOW_Ent.SQL is
 
 
 
-	------------------------
-	-- The Generator Type --
-	------------------------
+	-------------------------------
+	-- The Insert Generator Type --
+	-------------------------------
+
+	type Insert_Generator_Type is tagged private;
+
+
+	procedure Generate_Insert(
+				Generator	: in out Insert_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class;
+				Entity		: in out KOW_Ent.Entity_Type'Class
+			);
+
+	-------------------------------
+	-- The Select Generator Type --
+	-------------------------------
 
 
 	type Select_Generator_Type is tagged private;
@@ -241,10 +255,39 @@ package KOW_Ent.SQL is
 
 
 
+	-------------------------------
+	-- The Update_Generator Type --
+	-------------------------------
+
+	type Update_Generator_Type is new Select_Generator_Type with private;
+
+
+	procedure Generate_Update(
+				Generator	: in out Update_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
+			);
+
+
+
 
 private
 
 	package Table_Alias_lists is new Ada.Containers.Doubly_Linked_Lists( Entity_Alias_Type );
+
+
+	-------------------------------
+	-- The Insert Generator Type --
+	-------------------------------
+
+	type Insert_Generator_Type is tagged null record;
+
+
+	-------------------------------
+	-- The Select Generator Type --
+	-------------------------------
 
 
 	type Select_Generator_Type is tagged record
@@ -253,5 +296,12 @@ private
 
 		Is_First_Logic_Relation	: Boolean := True;
 	end record;
+
+
+	-------------------------------
+	-- The Update_Generator Type --
+	-------------------------------
+
+	type Update_Generator_Type is new Select_Generator_Type with null record;
 
 end KOW_Ent.SQL;

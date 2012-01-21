@@ -227,6 +227,65 @@ package body KOW_Ent.SQL is
 
 
 
+
+
+	-------------------------------
+	-- The Insert Generator Type --
+	-------------------------------
+
+	procedure Generate_Insert(
+				Generator	: in out Insert_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class;
+				Entity		: in out KOW_Ent.Entity_Type'Class
+			) is
+
+		Is_First_Name, Is_First_Value : Boolean := True;
+
+		procedure Name_Iterator( Property : in Property_Ptr ) is
+		begin
+			if Is_First_Name then
+				Is_First_Name := False;
+			else
+				APQ.Append( Q, "," );
+			end if;
+
+			APQ.Append( Q, Property.Name.all );
+		end Name_Iterator;
+
+
+		procedure Value_Iterator( Property : in Property_Ptr ) is
+		begin
+			if Is_First_Value then
+				Is_First_Value := False;
+			else
+				APQ.Append( Q, "," );
+			end if;
+
+			Append_Value( 
+					Value		=> Get_Value( Property.all ),
+					Connection	=> Connection,
+					Q		=> Q
+				);
+		end Value_Iterator;
+
+
+		Table_Name : constant String := Trim( Get_Alias( Entity ) );
+	begin
+
+		APQ.Append( Q, "INSERT INTO " & Table_Name & "(" );
+			Iterate( Entity, Name_Iterator'Access );
+		APQ.Append( Q, ") VALUES(" );
+			Iterate( Entity, Value_Iterator'Access );
+		APQ.Append( Q, ")" );
+	end Generate_Insert;
+
+	-------------------------------
+	-- The Select Generator Type --
+	-------------------------------
+
+
+
 	------------------
 	-- Main Methods --
 	------------------
@@ -643,4 +702,47 @@ package body KOW_Ent.SQL is
 		APQ.Append( Q, ")" );
 	end Append_Operation_Logic_Criteria;
 
+
+	-------------------------------
+	-- The Update_Generator Type --
+	-------------------------------
+
+
+	procedure Generate_Update(
+				Generator	: in out Update_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
+			) is
+
+		Table_Name : constant String := Trim( Get_Alias( Entity ) );
+
+		Is_First : Boolean := False;
+
+
+		procedure Iterator( P : in Property_Ptr ) is
+		begin
+			if Is_First then
+				Is_First := False;
+			else
+				APQ.Append( Q, "," );
+			end if;
+
+			APQ.Append( Q, P.Name.all & "=" );
+			Append_Value( Get_Value( P.all ), Connection, Q );
+		end Iterator;
+	begin
+		
+		APQ.Append( Q, "UPDATE " & Table_Name & " SET " );
+
+		Iterate( Entity, Iterator'Access );
+
+		
+
+		if not Is_Empty( Criteria ) then
+			APQ.Append( Q, " WHERE " );
+			Append_Logic_Criteria( Generator, Criteria, Connection, Q );
+		end if;
+	end Generate_Update;
 end KOW_Ent.SQL;

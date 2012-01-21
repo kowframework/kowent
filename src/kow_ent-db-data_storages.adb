@@ -265,8 +265,21 @@ package body KOW_Ent.DB.Data_Storages is
 				Data_Storage	: in     DB_Storage_Type;
 				Entity		: in out KOW_Ent.Entity_Type'Class
 			) is
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Generator : SQL.Insert_Generator_Type;
+			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			SQL.Generate_Insert( Generator, Connection, Query, Entity );
+			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT INSERT QUERY" );
+			-- TODO :: implement auto incrementing ID support
+		end Runner;
 	begin
-		raise PROGRAM_ERROR with "not implemented";
+		APQ_Provider.Run(
+					Provider		=> KOW_Ent.DB.Provider.all,
+					Connection_Runner	=> Runner'Access,
+					Queue_On_OOI		=> True
+				);
+
 	end Insert;
 	
 
@@ -280,8 +293,20 @@ package body KOW_Ent.DB.Data_Storages is
 				Entity		: in out KOW_Ent.Entity_Type'Class;
 				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
 			) is
+
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Generator : SQL.Update_Generator_Type;
+			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			SQL.Generate_Update( Generator, Connection, Query, Entity, Criteria );
+			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT UPDATE QUERY" );
+		end Runner;
 	begin
-		raise PROGRAM_ERROR with "not implemented";
+		APQ_Provider.Run(
+					Provider		=> KOW_Ent.DB.Provider.all,
+					Connection_Runner	=> Runner'Access,
+					Queue_On_OOI		=> True
+				);
 	end Update;
 
 
