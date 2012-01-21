@@ -147,9 +147,9 @@ package body KOW_Ent.SQL is
 		Append_Table_To_Select( Generator, Query.Entity_Tag, Alias );
 		-- if the entity_tag is no_tag will raise cosntraint_error
 
-		APQ.Append( Q, "SELECT * " );
+		APQ.Append( Q, "SELECT " );
 		
-		--TODO :: Append_Column_Names( Generator, Query, Connection, Q );
+		Append_Column_Names( Generator, Query, Connection, Q );
 
 		APQ.Append( Q, " FROM " );
 
@@ -238,8 +238,28 @@ package body KOW_Ent.SQL is
 			) is
 		-- append all the columns name
 		-- TODO :: actually implement me so I'll only get the relevant data
+		use KOW_Ent.Data_Storages;
+		Table_Name	: constant String := Get_Table_Name( Generator );
+		Template	: KOW_Ent.Entity_Type'Class := Create(
+									Data_Storage_Type'Class( Get_Data_Storage( Query.Entity_Tag ).all ),
+									Query.Entity_Tag
+								);
+		Is_First : Boolean := True;
+
+		procedure Iterator( P : in Property_Ptr ) is
+		begin
+			if Is_First then
+				Is_First := False;
+			else
+				APQ.Append( Q, "," );
+			end if;
+			APQ.Append( Q, Table_Name & '.' & P.Name.all );
+		end Iterator;
 	begin
-		APQ.Append( Q, " * " );
+		KOW_Ent.Iterate( 
+				Container	=> Template, 
+				Iterator	=> Iterator'Access
+			);
 	end Append_Column_Names;
 	
 	procedure Append_Table_Names(
