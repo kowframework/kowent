@@ -1,0 +1,6 @@
+
+
+
+1. Fix up the order of events in SELECT generation (the table name appending should be the last bit processed)
+2. Fix up the order of events in UPDATE generation (same thing)
+3. Use append table names in the UPDATE generation as well so the filter can relate to other entities as well
