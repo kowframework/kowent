@@ -391,7 +391,6 @@ package body KOW_Ent.SQL is
 			Q		: in out APQ.Root_Query_Type'Class
 			) is
 		-- append all the columns name
-		-- TODO :: actually implement me so I'll only get the relevant data
 		use KOW_Ent.Data_Storages;
 		Table_Name	: constant String := Get_Table_Name( Generator );
 		Template	: KOW_Ent.Entity_Type'Class := Create(
