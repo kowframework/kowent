@@ -33,6 +33,7 @@
 -- Package for creating SQL queries in KOW Ent                              --
 ------------------------------------------------------------------------------
 
+with ada.text_io;
 
 
 --------------
@@ -321,6 +322,7 @@ package body KOW_Ent.SQL is
 		function Get_Where return String is
 			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
+			Append_Table_To_Select( Generator, Query.Entity_Tag, Alias );
 			if not Is_Empty( Query.Logic_Criteria ) then
 				Append_Logic_Criteria( Generator, Query.Logic_Criteria, Connection, Tmp_Q );
 				return APQ.To_String( Tmp_Q );
@@ -332,27 +334,22 @@ package body KOW_Ent.SQL is
 
 		Where : constant String := Get_Where;
 	begin
-		Append_Table_To_Select( Generator, Query.Entity_Tag, Alias );
-		-- if the entity_tag is no_tag will raise cosntraint_error
-
-
-		-- we need to run this first so I know what tables to select
-
-
-
-
 		APQ.Append( Q, "SELECT " );
 		
 		Append_Column_Names( Generator, Query, Connection, Q );
+		ada.text_io.put_line( "z" );
 
 		APQ.Append( Q, " FROM " );
+		ada.text_io.put_line( "z" );
 
 		Append_Table_Names( Generator, Connection, Q );
+		ada.text_io.put_line( "z" );
 
 
 		-- and now we append the "WHERE" part
 		if where /= "" then
 			APQ.Append( Q, " WHERE " & Where);
+		ada.text_io.put_line( "z" );
 		end if;
 
 		
@@ -363,6 +360,7 @@ package body KOW_Ent.SQL is
 				Connection	=> Connection,
 				Q		=> Q
 			);
+		ada.text_io.put_line( "z" );
 	end Generate_Select;
 
 
@@ -447,13 +445,18 @@ package body KOW_Ent.SQL is
 			else
 				APQ.Append( Q, "," );
 			end if;
+		ada.text_io.put_line( table_name );
+		ada.text_io.put_line( p.all.name.all );
 			APQ.Append( Q, Table_Name & '.' & P.Name.all );
+			ada.text_io.put_line( "omg");
 		end Iterator;
 	begin
+		ada.text_io.put_line( "z1 => " & ada.tags.expanded_Name( query.entity_tag));
 		KOW_Ent.Iterate( 
 				Container	=> Template, 
 				Iterator	=> Iterator'Access
 			);
+		ada.text_io.put_line( "z1" );
 	end Append_Column_Names;
 	
 	procedure Append_Table_Names(
@@ -782,6 +785,7 @@ package body KOW_Ent.SQL is
 		function Get_Where return String is
 			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
+			Append_Table_To_Select( Generator, Entity'Tag, Alias );
 			if not Is_Empty( Criteria ) then
 				Append_Logic_Criteria( Generator, Criteria, Connection, Tmp_Q );
 				return APQ.To_String( Tmp_Q );
@@ -792,7 +796,6 @@ package body KOW_Ent.SQL is
 
 		Where : constant String := Get_Where;
 	begin
-		Append_Table_To_Select( Generator, Entity'Tag, Alias );
 		
 		APQ.Append( Q, "UPDATE " );
 			Append_Table_Names( Generator, Connection, Q );

@@ -36,6 +36,7 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
+with ada.text_io;
 
 
 --------------
@@ -181,16 +182,20 @@ package body KOW_Ent.DB.Data_Storages is
 
 			Generator : SQL.SELECT_Generator_Type;
 		begin
+				ada.text_io.put_line( "doing" );
 			SQL.Generate_Select(
 					Generator	=> Generator,
 					Query		=> Loader.Query,
 					Connection	=> Connection,
 					Q		=> Query
 				);
+				ada.text_io.put_line( "doing" );
 
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT SELECT QUERY" );
 
 			loop
+				ada.text_io.put_line( "doing" );
+
 				APQ.Fetch( Query );
 				declare
 					E		: Entity_Type;
