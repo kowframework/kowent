@@ -203,6 +203,15 @@ package KOW_Ent is
 	-- set the value, respecting results of get_type
 
 
+
+	function Ignore_For_Insert( Property : in Property_Type ) return Boolean;
+	-- should the framework ignore this property in insert queries?
+	-- default: false
+
+	function Ignore_For_Update( Porperty : in Property_Type ) return Boolean;
+	-- should the framework ignore this property in update queries?
+	-- default: false
+
 	-----------------------
 	-- The Property List --
 	-----------------------

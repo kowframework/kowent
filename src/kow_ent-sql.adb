@@ -244,6 +244,10 @@ package body KOW_Ent.SQL is
 
 		procedure Name_Iterator( Property : in Property_Ptr ) is
 		begin
+			if Ignore_For_Insert( Property.all ) then
+				return;
+			end if;
+
 			if Is_First_Name then
 				Is_First_Name := False;
 			else
@@ -256,6 +260,11 @@ package body KOW_Ent.SQL is
 
 		procedure Value_Iterator( Property : in Property_Ptr ) is
 		begin
+			if Ignore_For_Insert( Property.all ) then
+				return;
+			end if;
+
+
 			if Is_First_Value then
 				Is_First_Value := False;
 			else
@@ -746,6 +755,11 @@ package body KOW_Ent.SQL is
 
 		procedure Iterator( P : in Property_Ptr ) is
 		begin
+			if Ignore_For_Update( P.all ) then
+				return;
+			end if;
+
+
 			if Is_First then
 				Is_First := False;
 			else

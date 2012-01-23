@@ -189,7 +189,17 @@ package body KOW_Ent is
 		Register( Property.Container.all, Property'Unrestricted_Access );
 	end Initialize;
 
+	function Ignore_For_Insert( Property : in Property_Type ) return Boolean is
+		-- should the framework ignore this property in insert queries?
+	begin
+		return false;
+	end Ignore_For_Insert;
 
+	function Ignore_For_Update( Porperty : in Property_Type ) return Boolean is
+		-- should the framework ignore this property in update queries?
+	begin
+		return false;
+	end Ignore_For_Update;
 
 	
 
