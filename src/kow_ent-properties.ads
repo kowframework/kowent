@@ -182,4 +182,8 @@ package KOW_Ent.Properties is
 	function Ignore_For_Update( Property : in Id_Property ) return Boolean;
 	-- don't update it's value
 
+	overriding
+	function Is_Id( Property : in Id_Property ) return Boolean;
+	-- return true :)
+
 end KOW_Ent.Properties;

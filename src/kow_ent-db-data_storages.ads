@@ -87,20 +87,6 @@ package KOW_Ent.DB.Data_Storages is
 			) return KOW_Ent.Entity_Type'Class;
 
 
-	---------------------
-	-- Store Procedure --
-	---------------------
-
-	overriding
-	procedure Store(
-				Data_Storage	: in out DB_Storage_Type;
-				Entity		: in out KOW_Ent.Entity_Type'Class
-			) is null;
-	-- store the entity
-	-- TODO :: implement-me!
-
-
-
 	--------------------
 	-- Load Functions --
 	--------------------

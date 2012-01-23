@@ -212,6 +212,12 @@ package KOW_Ent is
 	-- should the framework ignore this property in update queries?
 	-- default: false
 
+
+	function Is_Id( Property : in Property_Type ) return Boolean;
+	-- if true, when updating use this to index the value
+	-- used only by the get_id(entity) function
+
+
 	-----------------------
 	-- The Property List --
 	-----------------------
@@ -306,6 +312,10 @@ package KOW_Ent is
 
 
 
+	function Get_id( Entity : in Entity_Type ) return Property_Type'Class;
+	-- get the ID property
+	-- the default implementation look for elements where Is_Id( Property ) = true
+	-- if none found, raises constraint error with an informative message
 
 --	procedure Read(
 --			Data_Storage	: in out Data_Storage_Type;

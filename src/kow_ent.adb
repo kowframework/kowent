@@ -201,7 +201,12 @@ package body KOW_Ent is
 		return false;
 	end Ignore_For_Update;
 
-	
+
+	function Is_Id( Property : in Property_Type ) return Boolean is
+		-- if true, when updating use this to index the value
+	begin
+		return False;
+	end Is_Id;
 
 	---------------------------------
 	-- The Property Container Type --
@@ -262,12 +267,16 @@ package body KOW_Ent is
 		-- for retrieving please read the documentation of the used data storage
 	begin
 		if Entity.Data_Storage /= null and then Entity.Data_Storage.all in Data_Storages.Data_Storage_Type'Class then
-			Data_Storages.Store(
+			Data_Storages.Update(
 					Data_Storages.Data_Storage_Type'Class( Entity.Data_Storage.all ),
-					Entity
+					Entity,
+					Get_Id( Entity_Type'Class( Entity ) )
 				);
 		else
-			raise PROGRAM_ERROR with "don't know how to store the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'Tag );
+			Data_Storages.Insert(
+					Data_Storages.Data_Storage_Type'Class( Data_Storages.Get_Data_Storage( Entity_Type'Class( Entity )'Tag ).all ),
+					Entity
+				);
 		end if;
 	end Store;
 
@@ -281,11 +290,38 @@ package body KOW_Ent is
 					Entity_Type'Class( Entity )'Tag
 				);
 		else
-			raise PROGRAM_ERROR with "don't know how to get the alias for the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'Tag );
+			return Data_Storages.Get_Alias(
+					Data_Storages.Data_Storage_Type'Class( Data_Storages.Get_Data_Storage( Entity_Type'Class( Entity )'tag).all ),
+					Entity_Type'Class( Entity )'Tag
+				);
 		end if;
+
+	exception
+		when CONSTRAINT_ERROR =>
+			raise PROGRAM_ERROR with "don't know how to get the alias for the entity " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'Tag );
 
 	end Get_Alias;
 
+	function Get_id( Entity : in Entity_Type ) return Property_Type'Class is
+		-- get the ID property
+		-- the default implementation look for elements where Is_Id( Property ) = true
+		-- if none found, raises constraint error with an informative message
+		ID : Property_Ptr := null;
+		procedure Iterator( Prop : in Property_Ptr ) is
+		begin
+			if Is_Id( Prop.all ) then
+				ID := Prop;
+			end if;
+		end Iterator;
+		Copy : Entity_Type'Class := Entity;
+	begin
+		Iterate( Copy, Iterator'Access );
+		if ID = null then
+			raise CONSTRAINT_ERROR with "there is no ID property in this entity: " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'tag );
+		end if;
+
+		return ID.All;
+	end Get_Id;
 
 --	---------------------------
 --	-- The Data Storage Type --

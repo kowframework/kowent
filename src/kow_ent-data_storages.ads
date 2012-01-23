@@ -92,14 +92,6 @@ package KOW_Ent.Data_Storages is
 	-- Store Procedure --
 	---------------------
 
-	procedure Store(
-				Data_Storage	: in out Data_Storage_Type;
-				Entity		: in out Entity_Type'Class
-			) is abstract;
-	-- store the entity
-
-
-
 	--------------------
 	-- Load Functions --
 	--------------------

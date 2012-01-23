@@ -90,4 +90,11 @@ package body KOW_Ent.Properties is
 		return True;
 	end Ignore_For_Update;
 
+
+	overriding
+	function Is_Id( Property : in Id_Property ) return Boolean is
+	begin
+		return True;
+	end Is_Id;
+
 end KOW_Ent.Properties;
