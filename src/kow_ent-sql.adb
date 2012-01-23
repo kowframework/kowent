@@ -758,7 +758,7 @@ package body KOW_Ent.SQL is
 		Alias		: Entity_Alias_Type := Get_Alias( Entity );
 		Table_Name	: constant String := Trim( Alias );
 
-		Is_First : Boolean := False;
+		Is_First : Boolean := True;
 
 
 		procedure Iterator( P : in Property_Ptr ) is

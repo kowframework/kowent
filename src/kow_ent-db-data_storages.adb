@@ -64,6 +64,19 @@ with KOW_Ent.SQL;
 package body KOW_Ent.DB.Data_Storages is
 
 
+	------------------------
+	-- private procedures --
+	------------------------
+	procedure Check_Provider( For_Query : in String ) is
+		use APQ_Provider;
+	begin
+		if KOW_Ent.DB.Provider = null then
+			raise PROGRAM_ERROR with "provider not set when trying to " & For_Query;
+		end if;
+	end Check_Provider;
+
+
+
 
 	overriding
 	function Get_Alias(
@@ -211,6 +224,7 @@ package body KOW_Ent.DB.Data_Storages is
 			raise PROGRAM_ERROR with "Trying to execute a query in a not-flushed entity loader";
 		end if;
 
+		Check_Provider( "SELECT" );
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
@@ -285,6 +299,7 @@ package body KOW_Ent.DB.Data_Storages is
 			end if;
 		end Runner;
 	begin
+		Check_Provider( "INSERT" );
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
@@ -313,6 +328,7 @@ package body KOW_Ent.DB.Data_Storages is
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT UPDATE QUERY" );
 		end Runner;
 	begin
+		Check_Provider( "UPDATE" );
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
