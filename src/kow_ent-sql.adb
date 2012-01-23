@@ -297,9 +297,32 @@ package body KOW_Ent.SQL is
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
 		Alias : Entity_Alias_Type;
+
+
+
+
+		function Get_Where return String is
+			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			if not Is_Empty( Query.Logic_Criteria ) then
+				Append_Logic_Criteria( Generator, Query.Logic_Criteria, Connection, Tmp_Q );
+				return APQ.To_String( Tmp_Q );
+			else
+				return "";
+			end if;
+		end Get_Where;
+
+
+		Where : constant String := Get_Where;
 	begin
 		Append_Table_To_Select( Generator, Query.Entity_Tag, Alias );
 		-- if the entity_tag is no_tag will raise cosntraint_error
+
+
+		-- we need to run this first so I know what tables to select
+
+
+
 
 		APQ.Append( Q, "SELECT " );
 		
@@ -307,15 +330,16 @@ package body KOW_Ent.SQL is
 
 		APQ.Append( Q, " FROM " );
 
-		Append_Table_Names( Generator, Query, Connection, Q );
+		Append_Table_Names( Generator, Connection, Q );
 
-		
-		if not Is_Empty( Query.Logic_Criteria ) then
-			APQ.Append( Q, " WHERE " );
-			Append_Logic_Criteria( Generator, Query.Logic_Criteria, Connection, Q );
+
+		-- and now we append the "WHERE" part
+		if where /= "" then
+			APQ.Append( Q, " WHERE " & Where);
 		end if;
 
-
+		
+		
 		Append_Limit_And_Offset(
 				Generator	=> Generator,
 				Query		=> Query,
@@ -417,7 +441,6 @@ package body KOW_Ent.SQL is
 	
 	procedure Append_Table_Names(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
@@ -715,7 +738,8 @@ package body KOW_Ent.SQL is
 				Criteria	: in     KOW_Ent.Queries.Logic_Criteria_Type
 			) is
 
-		Table_Name : constant String := Trim( Get_Alias( Entity ) );
+		Alias		: Entity_Alias_Type := Get_Alias( Entity );
+		Table_Name	: constant String := Trim( Alias );
 
 		Is_First : Boolean := False;
 
@@ -728,20 +752,35 @@ package body KOW_Ent.SQL is
 				APQ.Append( Q, "," );
 			end if;
 
-			APQ.Append( Q, P.Name.all & "=" );
+			APQ.Append( Q, Table_Name & '.' & P.Name.all & "=" );
 			Append_Value( Get_Value( P.all ), Connection, Q );
 		end Iterator;
+
+
+		function Get_Where return String is
+			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			if not Is_Empty( Criteria ) then
+				Append_Logic_Criteria( Generator, Criteria, Connection, Tmp_Q );
+				return APQ.To_String( Tmp_Q );
+			else
+				return "";
+			end if;
+		end Get_Where;
+
+		Where : constant String := Get_Where;
 	begin
+		Append_Table_To_Select( Generator, Entity'Tag, Alias );
 		
-		APQ.Append( Q, "UPDATE " & Table_Name & " SET " );
+		APQ.Append( Q, "UPDATE " );
+			Append_Table_Names( Generator, Connection, Q );
+
+		APQ.Append( Q, " SET " );
 
 		Iterate( Entity, Iterator'Access );
 
-		
-
-		if not Is_Empty( Criteria ) then
-			APQ.Append( Q, " WHERE " );
-			Append_Logic_Criteria( Generator, Criteria, Connection, Q );
+		if Where /= "" then
+			APQ.Append( Q, " WHERE " & Where );
 		end if;
 	end Generate_Update;
 end KOW_Ent.SQL;

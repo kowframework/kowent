@@ -156,7 +156,6 @@ package KOW_Ent.SQL is
 
 	procedure Append_Table_Names(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
