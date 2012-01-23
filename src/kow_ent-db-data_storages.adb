@@ -51,6 +51,7 @@ with Ada.Unchecked_Deallocation;
 with APQ;
 with APQ_Provider;
 with KOW_Ent.Data_Storages;
+with KOW_Ent.Properties;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
 with KOW_Ent.SQL;
@@ -198,7 +199,6 @@ package body KOW_Ent.DB.Data_Storages is
 							Container	=> E,
 							Iterator	=> Iterator'Access
 						);
-					-- TODO :: set all the data in the entity type...
 					Entity_Lists.Append( Loader.Cache, E );
 				end;
 			end loop;
@@ -266,12 +266,23 @@ package body KOW_Ent.DB.Data_Storages is
 				Entity		: in out KOW_Ent.Entity_Type'Class
 			) is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Generator : SQL.Insert_Generator_Type;
-			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Generator	: SQL.Insert_Generator_Type;
+			Query		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Id_Property	: Property_Ptr;
 		begin
-			SQL.Generate_Insert( Generator, Connection, Query, Entity );
+			SQL.Generate_Insert( Generator, Connection, Query, Entity, Id_Property );
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT INSERT QUERY" );
-			-- TODO :: implement auto incrementing ID support
+
+			if Id_Property /= null then
+				-- set the ID value from DB
+				declare
+					OID : APQ.Row_Id_Type;
+				begin
+					OID := APQ.Command_OID( Query );
+					Properties.Id_Property( Id_Property.all ).Value.Bigserial_Value := APQ.APQ_Bigserial( OID );
+					-- the Id_Property pointer is only set if it's in the id_property type
+				end;
+			end if;
 		end Runner;
 	begin
 		APQ_Provider.Run(

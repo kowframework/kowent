@@ -81,8 +81,11 @@ package KOW_Ent.SQL is
 				Generator	: in out Insert_Generator_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class;
-				Entity		: in out KOW_Ent.Entity_Type'Class
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Id_Property	:    out Property_Ptr
 			);
+	-- if the entity has one ID property, sets the Id_Property
+	-- otherwise, it's null
 
 	-------------------------------
 	-- The Select Generator Type --

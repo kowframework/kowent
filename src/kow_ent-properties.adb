@@ -72,4 +72,22 @@ package body KOW_Ent.Properties is
 	end From_String;
 
 
+
+	---------------------
+	-- The Id Property --
+	---------------------
+
+	overriding
+	function Ignore_For_Insert( Property : in Id_Property ) return Boolean is
+	begin
+		return True;
+	end Ignore_For_Insert;
+
+
+	overriding
+	function Ignore_For_Update( Property : in Id_Property ) return Boolean is
+	begin
+		return True;
+	end Ignore_For_Update;
+
 end KOW_Ent.Properties;

@@ -46,6 +46,7 @@ with Ada.Strings.Fixed;
 -------------------
 with APQ;
 with KOW_Ent.Data_Storages;
+with KOW_Ent.Properties;
 with KOW_Ent.Queries;				use KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
 with KOW_Lib.String_Util;
@@ -237,7 +238,8 @@ package body KOW_Ent.SQL is
 				Generator	: in out Insert_Generator_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class;
-				Entity		: in out KOW_Ent.Entity_Type'Class
+				Entity		: in out KOW_Ent.Entity_Type'Class;
+				Id_Property	:    out Property_Ptr
 			) is
 
 		Is_First_Name, Is_First_Value : Boolean := True;
@@ -245,6 +247,10 @@ package body KOW_Ent.SQL is
 		procedure Name_Iterator( Property : in Property_Ptr ) is
 		begin
 			if Ignore_For_Insert( Property.all ) then
+				if Property.all in Properties.Id_Property'Class then
+					Id_Property := Property;
+				end if;
+
 				return;
 			end if;
 
@@ -281,6 +287,8 @@ package body KOW_Ent.SQL is
 
 		Table_Name : constant String := Trim( Get_Alias( Entity ) );
 	begin
+		Id_Property := null;
+		-- initialize as null
 
 		APQ.Append( Q, "INSERT INTO " & Table_Name & "(" );
 			Iterate( Entity, Name_Iterator'Access );

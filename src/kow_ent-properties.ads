@@ -162,4 +162,24 @@ package KOW_Ent.Properties is
 				String_Length	: Positive
 			) is new Valued_Property_Type( Name, Container, KOW_Ent.APQ_String, String_Length ) with null record;
 
+
+	
+
+	---------------------
+	-- The ID Property --
+	---------------------
+
+	type Id_Property(
+				Name		: Property_Name_Type;
+				Container	: KOW_Ent.Property_Container_PTr
+			) is new Valued_Property_Type( Name, Container, KOW_Ent.APQ_Bigserial, 0 ) with null record;
+	
+	overriding
+	function Ignore_For_Insert( Property : in Id_Property ) return Boolean;
+	-- don't insert it's value
+
+	overriding
+	function Ignore_For_Update( Property : in Id_Property ) return Boolean;
+	-- don't update it's value
+
 end KOW_Ent.Properties;
