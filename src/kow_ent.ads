@@ -305,9 +305,6 @@ package KOW_Ent is
 	-- get the alias from the data_storage
 
 
-	function Primary_Key( Entity : in Entity_Type ) return Property_Type'Class is abstract;
-	-- get the pripary key for the given entity
-
 
 
 --	procedure Read(
