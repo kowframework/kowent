@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -38,27 +38,19 @@
 
 
 
---------------
--- Ada 2005 --
---------------
-with Ada.Containers.Doubly_Linked_Lists;
-with Ada.Finalization;
-with Ada.Unchecked_Deallocation;
-
 -------------------
 -- KOW Framework --
 -------------------
-with APQ;
 with APQ_Provider;
-with KOW_Ent.Data_Storages;
-
-package KOW_Ent.DB is
-
-	Provider : APQ_Provider.Connection_Provider_Ptr;
-	-- all the data storages instances in instances of the
-	-- generic child packages will actually perform queries in this provider
+with KOW_Config;
 
 
-	procedure Setup;
-	-- load the kow_ent.cfg APQ_Provider file and setup the provider
+
+package body KOW_Ent.DB is
+	procedure Setup is
+		-- looks for the kow_ent configuration file and initializes the provider
+	begin
+		Provider := new APQ_Provider.Connection_Provider_Type;
+		Provider.Setup( KOW_Config.New_Config_File( "kow_ent" ) );
+	end Setup;
 end KOW_Ent.DB;
