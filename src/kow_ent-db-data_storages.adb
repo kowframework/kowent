@@ -85,7 +85,7 @@ package body KOW_Ent.DB.Data_Storages is
 			) return KOW_Ent.Entity_Type'Class is
 		Entity : Entity_Type;
 	begin
-		Entity.Data_Storage := Storage'Access;
+		Entity.Data_Storage := Storage'Unrestricted_Access;
 		return Entity;
 	end Create;
 
@@ -290,7 +290,7 @@ package body KOW_Ent.DB.Data_Storages is
 					Connection_Runner	=> Runner'Access,
 					Queue_On_OOI		=> True
 				);
-
+		Entity.Data_Storage := Data_Storage'Unrestricted_Access;
 	end Insert;
 	
 
@@ -318,6 +318,7 @@ package body KOW_Ent.DB.Data_Storages is
 					Connection_Runner	=> Runner'Access,
 					Queue_On_OOI		=> True
 				);
+		Entity.Data_Storage := Data_Storage'Unrestricted_Access;
 	end Update;
 
 
@@ -335,6 +336,6 @@ begin
 	THE_Entity_Alias := To_Alias( Entity_Alias );
 	KOW_Ent.Data_Storages.Register_Entity(
 					Entity_Tag	=> Entity_Type'Tag,
-					Data_Storage	=> Storage'Access
+					Data_Storage	=> Storage'Unrestricted_Access
 				);
 end KOW_Ent.DB.Data_Storages;

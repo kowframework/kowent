@@ -56,7 +56,7 @@ with APQ;
 with KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Ent.Queries;
-with KOW_Ent.Queries.Logic_Operations;
+with KOW_Ent.Queries.Logic_Relations;
 
 with ada.text_io;
 
@@ -269,7 +269,7 @@ package body KOW_Ent_Tests is
 	procedure Query_Test is
 		use KOW_Ent;
 		use KOW_Ent.Queries;
-		use KOW_Ent.Queries.Logic_Operations;
+		use KOW_Ent.Queries.Logic_Relations;
 
 		Joined_Query : Joined_Query_Type;
 	begin
