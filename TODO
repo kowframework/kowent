@@ -1,4 +1,14 @@
 
 
-1. Use the Is_ID function in property types in the UPDATE statements.
+1. Implement joined queries
+2. Implement entity labels
+3. Implement extra properties
+	=> Locale_Property
+	=> Foreign_Key property
+4. Test all the filtering facilities
 
+
+
+Once this is finished I'll start yet another refactoring on KOW_View (remove all the unbounded_strings references in favour of streams).
+
+With that finished I can code the brand new kowview-entities from scratch once again.
