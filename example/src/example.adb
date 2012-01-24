@@ -18,39 +18,14 @@ with KOW_Lib.String_Util;
 
 
 
+
+with users;
+use users;
+
+
+
 procedure Example is
-
-
-	Id_Name		: constant KOW_Ent.Property_Name_Type := new String'( "id" );
-	Name_Name	: constant KOW_Ent.Property_Name_Type := new String'( "name" );
-
-
-	type User_Entity is new KOW_Ent.Entity_Type with record
-		ID	: KOW_Ent.Properties.Id_Property(
-							Name		=> Id_Name,
-							Container	=> User_Entity'Unrestricted_Access
-					);
-		Name	: KOW_Ent.Properties.String_Property(
-							Name		=> Name_Name,
-							Container	=> User_Entity'Unrestricted_Access,
-							String_Length	=> 20
-						);
-	end record;
-
-
-	package User_Storages is new KOW_Ent.DB.Data_Storages(
-						Entity_Type	=> User_Entity,
-						Entity_Alias	=> "users"
-					);
-
-
-
-	procedure Put( Usr : User_Entity ) is
-	begin
-		Ada.Text_IO.Put_line( "     * " & APQ.APQ_Bigserial'Image( Usr.Id.Value.Bigserial_Value ) & " => " & Usr.Name.Value.String_Value );
-	end Put;
-
-
+	
 	U : User_Entity;
 begin
 	KOW_Config.Add_Config_Path( "." );
