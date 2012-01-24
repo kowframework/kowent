@@ -230,30 +230,77 @@ package body KOW_Ent.DB.Data_Storages is
 					Values		: Value_Lists.List;
 					Table_Name	: constant String := SQL.Get_Table_Name( Generator );
 
-					procedure Iterator( P : in Property_Ptr ) is
+
+
+					function Fetch_Value( TN : in String; P : in Property_Type'Class ) return Value_Container_Type is
+						-- fetch a value using TN as table name for the given property
 						V : Value_Container_Type;
 					begin
-						V.Value := new Value_Type'( Get_Value( P.all ) );
+						V.Value := new Value_Type'( Get_Value( P ) );
 
 						SQL.Load_Value( 
 								Value		=> V.Value.all,
 								Connection	=> Connection,
 								Q		=> Query,
-								Column_Name	=> Table_Name & '_' & P.Name.all
+								Column_Name	=> TN & '_' & P.Name.all
 							);
+						return V;
+					end Fetch_Value;
 
-						Value_Lists.Append( Values, V );
+					procedure Iterator( P : in Property_Ptr ) is
+					begin
+						Value_Lists.Append( Values, Fetch_Value( Table_Name, P.all ) );
 					end Iterator;
+
+
+					------------------
+					-- Join Queries --
+					------------------
+					procedure Join_Iterator( Description : in Join_Description_Type ) is
+						-- Note: this is quite slow. Need a nice refactoring
+						use KOW_Ent.Data_Storages;
+						Join_Values	: Value_Lists.List;
+						Entity_Values	: Entity_Values_Lists.List;
+						Tpl		: Entity_Ptr := Create(
+											Data_Storage	=> Data_Storage_Type'Class( Get_Data_Storage( Description.Query.Entity_Tag ).all ),
+										      	Entity_Tag	=> Description.Query.Entity_Tag
+										);
+						Join_Table_Name	: constant String := Trim( Get_Alias( Tpl.all ) );
+
+						procedure Join_Values_Iterator( P : in Property_Ptr ) is
+						begin
+							Value_Lists.Append( Join_Values, Fetch_Value( Join_Table_Name, P.all ) );
+						end Join_Values_Iterator;
+					begin
+						if Join_Entity_Values_Maps.Contains( Loader.Join_Cache, Tpl.all'Tag ) then
+							Entity_Values := Join_Entity_Values_Maps.Element( Loader.Join_Cache, Tpl.all'Tag );
+						end if;
+
+						Iterate( Tpl.all, Join_Values_Iterator'Access );
+						Entity_Values_Lists.Append( Entity_Values, Join_Values );
+						Join_Entity_Values_Maps.Include( Loader.Join_Cache, Tpl.all'Tag, Entity_Values );
+					end Join_Iterator;
+
+					--------------------------
+					-- End of Join Queries --
+					--------------------------
 				begin
+					-- 
+					-- Append the main query elements..
+					--
 					Iterate(
 							Container	=> Template_Entity,
 							Iterator	=> Iterator'Access
 						);
-
-					if Loader.Query.all in Queries.Join_Query_Type'Class then
-						null;
-					end if;
 					Entity_Values_Lists.Append( Loader.Cache, Values );
+
+					-- append the join elements.
+					if Loader.Query.all in Queries.Join_Query_Type'Class then
+						Queries.Iterate(
+								Join_Query	=> Queries.Join_Query_Type'Class( Loader.Query.all ),
+								Iterator	=> Join_Iterator'Access
+							);
+					end if;
 				end;
 			end loop;
 		exception
