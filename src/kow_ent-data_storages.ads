@@ -81,9 +81,25 @@ package KOW_Ent.Data_Storages is
 	-- for database backend, it's the table name
 
 
-	---------------------
-	-- Store Procedure --
-	---------------------
+	------------------------
+	-- A template factory --
+	------------------------
+	function Create(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag
+			) return KOW_Ent.Entity_Ptr is abstract;
+	-- every data storage should implement a factory function
+	-- this is for the KOW_Ent internals, but could be used by
+	-- the user application.
+	-- @see KOW_Ent.SQL for more information
+
+
+	procedure Free(
+				Data_Storage	: in     Data_Storage_Type;
+				Entity		: in out Entity_Ptr
+			) is abstract;
+	-- deallocate the given pointer
+	-- used by the same procedures that uses create
 
 	--------------------
 	-- Load Functions --

@@ -62,6 +62,10 @@ with KOW_Ent.SQL;
 package body KOW_Ent.DB.Data_Storages is
 
 
+
+	type Entity_Access is access all Entity_Type;
+	procedure Free is new Ada.Unchecked_Deallocation( Name => Entity_Access, Object => Entity_Type );
+
 	------------------------
 	-- private procedures --
 	------------------------
@@ -89,6 +93,31 @@ package body KOW_Ent.DB.Data_Storages is
 	end Get_Alias;
 
 
+	overriding
+	function Create(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag
+			) return KOW_Ent.Entity_Ptr is
+		-- this factory creates data with no default value changed or whatsoever;
+
+		Ent : Entity_Access := new Entity_Type;
+	begin
+		return Entity_Ptr( Ent );
+	end Create;
+
+
+	overriding
+	procedure Free(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Ptr
+			) is
+		use Ada.Tags;
+	begin
+		if Entity /= null then
+			pragma Assert( Entity.all'Tag = Entity_Type'Tag, "I can't free object from a type I don't manage.. sorry" );
+			Free( Entity_Access( Entity ) );
+		end if;
+	end Free;
 
 	--------------------
 	-- Load Functions --
@@ -170,8 +199,7 @@ package body KOW_Ent.DB.Data_Storages is
 					Generator	=> Generator,
 					Query		=> Loader.Query,
 					Connection	=> Connection,
-					Q		=> Query,
-					Template	=> Template_Entity
+					Q		=> Query
 				);
 
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT SELECT QUERY" );

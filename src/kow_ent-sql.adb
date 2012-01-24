@@ -310,8 +310,7 @@ package body KOW_Ent.SQL is
 				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class;
-				Template	: in out KOW_Ent.Entity_Type'Class
+				Q		: in out APQ.Root_Query_Type'Class
 			) is
 		Alias : Entity_Alias_Type;
 
@@ -332,10 +331,16 @@ package body KOW_Ent.SQL is
 
 
 		Where : constant String := Get_Where;
+
+		Storage	: Data_Storage_Ptr := Data_Storages.Get_Data_Storage( Query.Entity_Tag );
+		Template_Ptr : KOW_Ent.Entity_Ptr := Data_Storages.Create(
+								Data_Storage	=> Data_Storages.Data_Storage_Type'Class( Storage.all ),
+								Entity_Tag	=> Query.Entity_Tag
+							  );
 	begin
 		APQ.Append( Q, "SELECT " );
 		
-		Append_Column_Names( Generator, Query, Connection, Q, Template );
+		Append_Column_Names( Generator, Query, Connection, Q, Template_Ptr.all );
 
 		APQ.Append( Q, " FROM " );
 
@@ -354,6 +359,11 @@ package body KOW_Ent.SQL is
 				Query		=> Query,
 				Connection	=> Connection,
 				Q		=> Q
+			);
+
+		Data_Storages.Free(
+				Data_Storage	=> Data_Storages.Data_Storage_Type'Class( Storage.all ),
+				Entity		=> Template_Ptr
 			);
 	end Generate_Select;
 

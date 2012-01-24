@@ -294,6 +294,7 @@ package KOW_Ent is
 
 
 	type Entity_Type is abstract new Property_Container_Type with private;
+	type Entity_Ptr is access all Entity_Type'Class;
 
 	procedure Store( Entity : in out Entity_Type );
 	-- procedure used to store the entity;

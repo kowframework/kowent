@@ -79,6 +79,18 @@ package KOW_Ent.DB.Data_Storages is
 	-- get the alias for the given entity
 	-- for database backend, it's the table name
 
+	overriding
+	function Create(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag
+			) return KOW_Ent.Entity_Ptr;
+	-- this factory creates data with no default value changed or whatsoever;
+	
+	overriding
+	procedure Free(
+				Data_Storage	: in     DB_Storage_Type;
+				Entity		: in out KOW_Ent.Entity_Ptr
+			);
 
 	--------------------
 	-- Load Functions --
