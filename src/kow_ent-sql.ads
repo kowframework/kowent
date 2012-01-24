@@ -102,7 +102,7 @@ package KOW_Ent.SQL is
 
 	procedure Generate_Select(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
@@ -152,7 +152,7 @@ package KOW_Ent.SQL is
 	--
 	procedure Append_Column_Names(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class;
 				Template	: in out KOW_Ent.Entity_Type'Class
@@ -179,7 +179,7 @@ package KOW_Ent.SQL is
 	
 	procedure Append_Limit_And_Offset(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
@@ -257,6 +257,15 @@ package KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			);
+
+
+	procedure Append_Join(
+					Generator	: in out Select_Generator_Type;
+					Description	: in     Join_Description_Type;
+					Connection	: in     APQ.Root_Connection_Type'Class;
+					Query		: in out APQ.Root_Query_Type'Class
+				);
+	-- append the given join expression
 
 
 

@@ -308,7 +308,7 @@ package body KOW_Ent.SQL is
 
 	procedure Generate_Select(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
@@ -316,6 +316,16 @@ package body KOW_Ent.SQL is
 
 
 
+
+		procedure Inner_Append_Join( Description : in KOW_Ent.Queries.Join_Description_Type ) is
+		begin
+			Append_Join(
+					Generator	=> Select_Generator_Type'Class( Generator ),
+					Description	=> Description,
+					Connection	=> Connection,
+					Query		=> Q
+				);
+		end Inner_Append_Join;
 
 		function Get_Where return String is
 			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
@@ -353,6 +363,10 @@ package body KOW_Ent.SQL is
 		end if;
 
 		
+
+		if Query in KOW_Ent.Queries.Join_Query_Type'Class then
+			Iterate( KOW_Ent.Queries.Join_Query_Type'Class( Query ), Inner_Append_Join'Access );
+		end if;
 		
 		Append_Limit_And_Offset(
 				Generator	=> Generator,
@@ -360,6 +374,7 @@ package body KOW_Ent.SQL is
 				Connection	=> Connection,
 				Q		=> Q
 			);
+
 
 		Data_Storages.Free(
 				Data_Storage	=> Data_Storages.Data_Storage_Type'Class( Storage.all ),
@@ -429,7 +444,7 @@ package body KOW_Ent.SQL is
 
 	procedure Append_Column_Names(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class;
 				Template	: in out KOW_Ent.Entity_Type'Class
@@ -500,7 +515,7 @@ package body KOW_Ent.SQL is
 	
 	procedure Append_Limit_And_Offset(
 				Generator	: in out Select_Generator_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type'Class;
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
@@ -740,6 +755,42 @@ package body KOW_Ent.SQL is
 				);
 		APQ.Append( Q, ")" );
 	end Append_Operation_Logic_Criteria;
+
+
+
+	procedure Append_Join(
+					Generator	: in out Select_Generator_Type;
+					Description	: in     Join_Description_Type;
+					Connection	: in     APQ.Root_Connection_Type'Class;
+					Query		: in out APQ.Root_Query_Type'Class
+				) is
+	begin
+		case Description.Join is
+			when Queries.LEFT_JOIN =>
+				APQ.Append( Query, " LEFT JOIN " );
+			when Queries.RIGHT_JOIN =>
+				APQ.Append( Query, " RIGHT JOIN " );
+			when Queries.INNER_JOIN =>
+				APQ.Append( Query, " INNER JOIN " );
+		end case;
+
+		APQ.Append( Query, " (" );
+		APQ.Append( Query, ") on (" );
+
+		if Is_Empty( Description.Condition ) then
+			raise PROGRAM_ERROR with "trying to join without an appropriate condition";
+		end if;
+
+		Append_Logic_Criteria(
+					Generator	=> Select_Generator_Type'Class (Generator ),
+					Criteria	=> Description.Condition,
+					Connection	=> Connection,
+					Q		=> Query
+				);
+		APQ.Append( Query, ")" );
+
+		
+	end Append_Join;
 
 
 	-------------------------------
