@@ -182,6 +182,9 @@ private
 	
 
 	package Value_Lists is new Ada.Containers.Doubly_Linked_Lists( Value_Container_TYpe );
+	-- I've tested with array of fixed length as well
+	-- and the curious thing is that... well, the fixed-lenthg array wasn't significantly faster
+	-- so, the doubly linked list a somewhat whise choice then :)
 
 	package Entity_Values_Lists is new Ada.Containers.Doubly_Linked_Lists(
 									Element_Type	=> Value_Lists.List,
