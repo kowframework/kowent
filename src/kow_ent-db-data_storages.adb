@@ -36,9 +36,6 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
-with ada.text_io;
-
-
 --------------
 -- Ada 2005 --
 --------------
@@ -92,33 +89,21 @@ package body KOW_Ent.DB.Data_Storages is
 	end Get_Alias;
 
 
-	overriding
-	function Create(
-				Data_Storage	: in     DB_Storage_Type;
-				Entity_Tag	: in     Ada.Tags.Tag
-			) return KOW_Ent.Entity_Type'Class is
-		Entity : Entity_Type;
-	begin
-		Entity.Data_Storage := Storage'Unrestricted_Access;
-		return Entity;
-	end Create;
-
-
 
 	--------------------
 	-- Load Functions --
 	--------------------
 
 	overriding
-	function Load(
+	procedure Load(
 				Data_Storage	: in     DB_Storage_Type;
 				Query		: in     Queries.Query_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
 				Unique		: in     Boolean := True
-			) return KOW_Ent.Entity_Type'Class is
+			) is 
 		-- build the query and then return the first result
 		-- if unique=true and there are more results, raise UNICITY_ERROR
 
-		Entity : Entity_Type;
 		Loader : DB_Loader_Type;
 	begin
 		Loader.Query := Query;
@@ -146,8 +131,6 @@ package body KOW_Ent.DB.Data_Storages is
 				raise KOW_Ent.Data_Storages.UNICITY_ERROR with "At least two results for entity " & Entity_Alias;
 			end if;
 		end if;
-
-		return Entity;
 	end Load;
 
 
@@ -178,46 +161,48 @@ package body KOW_Ent.DB.Data_Storages is
 	procedure Execute( Loader : in out DB_Loader_Type ) is
 		-- execute the query
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
-			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Query		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 
-			Generator : SQL.SELECT_Generator_Type;
+			Generator	: SQL.SELECT_Generator_Type;
+			Template_Entity	: Entity_Type;
 		begin
-				ada.text_io.put_line( "doing" );
 			SQL.Generate_Select(
 					Generator	=> Generator,
 					Query		=> Loader.Query,
 					Connection	=> Connection,
-					Q		=> Query
+					Q		=> Query,
+					Template	=> Template_Entity
 				);
-				ada.text_io.put_line( "doing" );
 
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT SELECT QUERY" );
 
 			loop
-				ada.text_io.put_line( "doing" );
 
 				APQ.Fetch( Query );
 				declare
-					E		: Entity_Type;
+					Values		: Value_Lists.List;
 					Table_Name	: constant String := SQL.Get_Table_Name( Generator );
 
 					procedure Iterator( P : in Property_Ptr ) is
-						
-						Value : Value_Type := Get_Value( P.all );
+						V : Value_Container_Type;
 					begin
+						V.Value := new Value_Type'( Get_Value( P.all ) );
+
 						SQL.Load_Value( 
-								Value		=> Value,
+								Value		=> V.Value.all,
 								Connection	=> Connection,
 								Q		=> Query,
-								Column_Name	=> Table_Name & '.' & P.Name.all
+								Column_Name	=> Table_Name & '_' & P.Name.all
 							);
+
+						Value_Lists.Append( Values, V );
 					end Iterator;
 				begin
 					Iterate(
-							Container	=> E,
+							Container	=> Template_Entity,
 							Iterator	=> Iterator'Access
 						);
-					Entity_Lists.Append( Loader.Cache, E );
+					Entity_Values_Lists.Append( Loader.Cache, Values );
 				end;
 			end loop;
 		exception
@@ -225,7 +210,7 @@ package body KOW_Ent.DB.Data_Storages is
 				null;
 		end Runner;
 	begin
-		if not Entity_Lists.Is_Empty( Loader.Cache ) then
+		if not Entity_Values_Lists.Is_Empty( Loader.Cache ) then
 			raise PROGRAM_ERROR with "Trying to execute a query in a not-flushed entity loader";
 		end if;
 
@@ -241,7 +226,7 @@ package body KOW_Ent.DB.Data_Storages is
 	overriding
 	procedure Fetch( Loader : in out DB_Loader_Type ) is
 		-- fetch the next result
-		use Entity_Lists;
+		use Entity_Values_Lists;
 	begin
 		if Loader.Current = No_Element then
 			Loader.Current := First( Loader.Cache );
@@ -254,7 +239,7 @@ package body KOW_Ent.DB.Data_Storages is
 	function Has_Element( Loader : in DB_Loader_Type ) return Boolean is
 		-- check if there is a element fetched
 	begin
-		return Entity_Lists.Has_Element( Loader.Current );
+		return Entity_Values_Lists.Has_Element( Loader.Current );
 	end Has_Element;
 
 	overriding
@@ -264,13 +249,38 @@ package body KOW_Ent.DB.Data_Storages is
 		) is
 		-- load the current query result into the entity
 		-- if the entity type is unknown to the loader interface, raises constraint_error
-		use Entity_Lists;
+		use Entity_Values_Lists;
+
+
+		Values : Value_Lists.List;
+		C : Value_Lists.Cursor;
+
+		function Next_Value return Value_Type is
+			Val : Value_Type := Value_Lists.Element( C ).Value.all;
+		begin
+			Value_Lists.Next( C );
+			return Val;
+		end Next_Value;
+
+		procedure Iterator( P : in Property_Ptr ) is
+			-- set the current value
+		begin
+			Set_Value( P.all, Next_Value );
+		end Iterator;
+
 	begin
 		if Loader.Current = No_Element then
 			raise KOW_Ent.Data_Storages.NO_RESULT with "while trying to load the result";
 		end if;
 
-		Entity := KOW_Ent.Entity_Type'Class( Element( Loader.Current ) );
+		Values := Element( Loader.Current );
+
+
+		if not Value_Lists.Is_Empty( Values ) then
+			C := Value_Lists.First( Values );
+		end if;
+
+		Iterate( Entity, Iterator'Access );
 	end Load;
 
 
@@ -346,11 +356,31 @@ package body KOW_Ent.DB.Data_Storages is
 
 	overriding
 	procedure Flush( Loader : in out DB_Loader_Type ) is
-		use Entity_Lists;
+		use Entity_Values_Lists;
 	begin
 		Loader.Current := No_Element;
 		Clear( Loader.Cache );
 	end Flush;
+
+-- private
+
+	overriding
+	procedure Adjust( V : in out Value_Container_Type ) is
+	begin
+		if V.Value /= null then
+			V.Value := new Value_Type'( V.Value.all );
+		end if;
+	end Adjust;
+
+
+	overriding
+	procedure Finalize( V: in out Value_Container_Type ) is
+	begin
+		if V.Value /= null then
+			KOW_Ent.Free( V.Value );
+		end if;
+	end Finalize;
+	
 
 
 begin

@@ -104,8 +104,12 @@ package KOW_Ent.SQL is
 				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
+				Q		: in out APQ.Root_Query_Type'Class;
+				Template	: in out KOW_Ent.Entity_Type'Class
 			);
+	-- generate the select
+	-- the Template is an entity from where the given method will query the column names
+	-- whenever needed
 
 
 	function Get_Table_Name(
@@ -153,9 +157,11 @@ package KOW_Ent.SQL is
 				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
+				Q		: in out APQ.Root_Query_Type'Class;
+				Template	: in out KOW_Ent.Entity_Type'Class
 			);
-	-- append all the columns name
+	-- append all the columns name using the following template:
+	--	table_name.column_name as table_name_column_name
 
 	procedure Append_Table_Names(
 				Generator	: in out Select_Generator_Type;

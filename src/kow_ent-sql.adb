@@ -33,8 +33,6 @@
 -- Package for creating SQL queries in KOW Ent                              --
 ------------------------------------------------------------------------------
 
-with ada.text_io;
-
 
 --------------
 -- Ada 2005 --
@@ -312,7 +310,8 @@ package body KOW_Ent.SQL is
 				Generator	: in out Select_Generator_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
-				Q		: in out APQ.Root_Query_Type'Class
+				Q		: in out APQ.Root_Query_Type'Class;
+				Template	: in out KOW_Ent.Entity_Type'Class
 			) is
 		Alias : Entity_Alias_Type;
 
@@ -336,20 +335,16 @@ package body KOW_Ent.SQL is
 	begin
 		APQ.Append( Q, "SELECT " );
 		
-		Append_Column_Names( Generator, Query, Connection, Q );
-		ada.text_io.put_line( "z" );
+		Append_Column_Names( Generator, Query, Connection, Q, Template );
 
 		APQ.Append( Q, " FROM " );
-		ada.text_io.put_line( "z" );
 
 		Append_Table_Names( Generator, Connection, Q );
-		ada.text_io.put_line( "z" );
 
 
 		-- and now we append the "WHERE" part
 		if where /= "" then
 			APQ.Append( Q, " WHERE " & Where);
-		ada.text_io.put_line( "z" );
 		end if;
 
 		
@@ -360,11 +355,10 @@ package body KOW_Ent.SQL is
 				Connection	=> Connection,
 				Q		=> Q
 			);
-		ada.text_io.put_line( "z" );
 	end Generate_Select;
 
 
-	function Get_Table_Name(
+		function Get_Table_Name(
 				Generator	: in     Select_Generator_Type
 			) return String is
 		-- get the name for the current table (trimmed, of course)
@@ -424,39 +418,32 @@ package body KOW_Ent.SQL is
 
 
 	procedure Append_Column_Names(
-			Generator	: in out Select_Generator_Type;
-			Query		: in     KOW_Ent.Queries.Query_Type;
-			Connection	: in     APQ.Root_Connection_Type'Class;
-			Q		: in out APQ.Root_Query_Type'Class
+				Generator	: in out Select_Generator_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class;
+				Template	: in out KOW_Ent.Entity_Type'Class
 			) is
 		-- append all the columns name
 		use KOW_Ent.Data_Storages;
 		Table_Name	: constant String := Get_Table_Name( Generator );
-		Template	: KOW_Ent.Entity_Type'Class := Create(
-									Data_Storage_Type'Class( Get_Data_Storage( Query.Entity_Tag ).all ),
-									Query.Entity_Tag
-								);
 		Is_First : Boolean := True;
 
-		procedure Iterator( P : in Property_Ptr ) is
+		procedure Iterator( Property : in Property_Ptr ) is
+			PN : constant String := Property.name.all;
 		begin
 			if Is_First then
 				Is_First := False;
 			else
 				APQ.Append( Q, "," );
 			end if;
-		ada.text_io.put_line( table_name );
-		ada.text_io.put_line( p.all.name.all );
-			APQ.Append( Q, Table_Name & '.' & P.Name.all );
-			ada.text_io.put_line( "omg");
+			APQ.Append( Q, Table_Name & '.' & PN & " as " & Table_name & '_' & PN );
 		end Iterator;
 	begin
-		ada.text_io.put_line( "z1 => " & ada.tags.expanded_Name( query.entity_tag));
 		KOW_Ent.Iterate( 
 				Container	=> Template, 
 				Iterator	=> Iterator'Access
 			);
-		ada.text_io.put_line( "z1" );
 	end Append_Column_Names;
 	
 	procedure Append_Table_Names(

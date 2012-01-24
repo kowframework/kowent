@@ -80,23 +80,18 @@ package KOW_Ent.DB.Data_Storages is
 	-- for database backend, it's the table name
 
 
-	overriding
-	function Create(
-				Data_Storage	: in     DB_Storage_Type;
-				Entity_Tag	: in     Ada.Tags.Tag
-			) return KOW_Ent.Entity_Type'Class;
-
-
 	--------------------
 	-- Load Functions --
 	--------------------
 	
+
 	overriding
-	function Load(
+	procedure Load(
 				Data_Storage	: in     DB_Storage_Type;
 				Query		: in     Queries.Query_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
 				Unique		: in     Boolean := True
-			) return KOW_Ent.Entity_Type'Class;
+			);
 	-- build the query and then return the first result
 	-- if unique=true and there are more results, raise UNICITY_ERROR
 
@@ -174,15 +169,32 @@ private
 
 	type DB_Storage_Type is new KOW_Ent.Data_Storages.Data_Storage_Type with null record;
 
-	package Entity_Lists is new Ada.Containers.Doubly_Linked_Lists( Entity_Type );
+	type Value_Container_Type is new Ada.Finalization.Controlled with record
+		Value : Value_Ptr;
+	end record;
+
+
+	overriding
+	procedure Adjust( V : in out Value_Container_Type );
+
+	overriding
+	procedure Finalize( V: in out Value_Container_Type );
+	
+
+	package Value_Lists is new Ada.Containers.Doubly_Linked_Lists( Value_Container_TYpe );
+
+	package Entity_Values_Lists is new Ada.Containers.Doubly_Linked_Lists(
+									Element_Type	=> Value_Lists.List,
+								       	"="		=> Value_lists."="
+								      	);
 
 	type DB_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with record
-		Cache	: Entity_Lists.List;
+		Cache	: Entity_Values_Lists.List;
 		-- where the results are cached when execute is called as APQ_Provide require
 		-- us to fetch all the results at once and then release the connection for good
 
 
-		Current	: Entity_Lists.Cursor := Entity_Lists.No_Element;
+		Current	: Entity_Values_Lists.Cursor := Entity_Values_Lists.No_Element;
 
 		Query	: KOW_Ent.Queries.Query_Type;
 	end record;

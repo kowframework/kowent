@@ -170,6 +170,8 @@ package body KOW_Ent is
 	end From_String;
 
 
+
+
 	-----------------------
 	-- The Property Type --
 	-----------------------
@@ -211,6 +213,40 @@ package body KOW_Ent is
 	---------------------------------
 	-- The Property Container Type --
 	---------------------------------
+
+
+	procedure Clone(
+			From	: in     Property_Container_Type;
+			To	: in out Property_Container_Type'Class
+		) is
+		-- clone the data from [From] to [To]
+		-- the cloning procedure copy only values from registered properties
+		use Ada.Tags;
+		use Property_Lists;
+
+		C_From, C_To : Cursor;
+		P_From, P_To : Property_Ptr;
+	begin
+		pragma Assert( Property_Container_Type'Class( From )'Tag = To'Tag, "I can only clone between elements of the same type");
+
+		if Is_Empty( From.Properties ) then
+			-- nothing to do...
+			return;
+		end if;
+
+
+		loop
+			C_From := First( From.Properties );
+			C_To := First( To.Properties );
+			exit when not Has_Element( C_From );
+
+			pragma Assert( Has_Element( C_To ), "some weird problem with ammount of properties in the container... you should check your code and don't call Register in the container yourself" );
+
+			P_From := Element( C_From );
+			P_TO := Element( C_To );
+			Set_Value( P_To.all, Get_Value( P_From.all ) );
+		end loop;
+	end Clone;
 
 	procedure Register(
 			Container	: in out Property_Container_Type;
@@ -307,15 +343,15 @@ package body KOW_Ent is
 		-- the default implementation look for elements where Is_Id( Property ) = true
 		-- if none found, raises constraint error with an informative message
 		ID : Property_Ptr := null;
-		procedure Iterator( Prop : in Property_Ptr ) is
+		procedure Iterator( C : in Property_Lists.Cursor ) is
+			Prop : Property_Ptr := Property_Lists.Element( C );
 		begin
 			if Is_Id( Prop.all ) then
 				ID := Prop;
 			end if;
 		end Iterator;
-		Copy : Entity_Type'Class := Entity;
 	begin
-		Iterate( Copy, Iterator'Access );
+		Property_Lists.Iterate( Entity.Properties, Iterator'Access );
 		if ID = null then
 			raise CONSTRAINT_ERROR with "there is no ID property in this entity: " & Ada.Tags.Expanded_Name( Entity_Type'Class( Entity )'tag );
 		end if;

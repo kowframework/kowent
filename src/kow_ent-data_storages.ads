@@ -81,13 +81,6 @@ package KOW_Ent.Data_Storages is
 	-- for database backend, it's the table name
 
 
-
-	function Create(
-				Data_Storage	: in     Data_Storage_Type;
-				Entity_Tag	: in     Ada.Tags.Tag
-			) return KOW_Ent.Entity_Type'Class is abstract;
-	-- allocate for the given entity
-
 	---------------------
 	-- Store Procedure --
 	---------------------
@@ -95,19 +88,21 @@ package KOW_Ent.Data_Storages is
 	--------------------
 	-- Load Functions --
 	--------------------
-	function Load(
+	procedure Load(
 				Data_Storage	: in     Data_Storage_Type;
 				Filter		: in     Property_Type'Class;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
 				Unique		: in     Boolean := True
-			) return KOW_Ent.Entity_Type'Class;
+			);
 	-- build the query and then return the first result
 	-- if unique=true and there are more results, raise UNICITY_ERROR
 	
-	function Load(
+	procedure Load(
 				Data_Storage	: in     Data_Storage_Type;
-				Query		: in     Queries.Query_Type;
+				Query		: in     KOW_Ent.Queries.Query_Type;
+				Entity		: in out KOW_Ent.Entity_Type'Class;
 				Unique		: in     Boolean := True
-			) return KOW_Ent.Entity_Type'Class is abstract;
+			) is abstract;
 	-- build the query and then return the first result
 	-- if unique=true and there are more results, raise UNICITY_ERROR
 

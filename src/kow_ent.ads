@@ -162,10 +162,20 @@ package KOW_Ent is
 	-- Property Container Interface --
 	----------------------------------
 
-	type Property_Container_Type is abstract tagged;
-	-- this interface is so the Property_Type has 
+	type Property_Container_Type is abstract tagged limited private;
+	-- the property container type is limited so the relation that the property initialization
+	-- is sane.
+	--
+	-- but a clone method is available for entities of the same type
+
 	type Property_Container_Ptr is access all Property_Container_Type'Class;
 
+	procedure Clone(
+			From	: in     Property_Container_Type;
+			To	: in out Property_Container_Type'Class
+		);
+	-- clone the data from [From] to [To]
+	-- the cloning procedure copy only values from registered properties
 
 	-----------------------
 	-- The Property Type --
@@ -230,16 +240,7 @@ package KOW_Ent is
 	-- The Property Container Type --
 	---------------------------------
 
-	type Property_Container_Type is abstract tagged record
-		-- the property container type is a stucture with
-		-- properties.
-		--
-		-- it's basically an Entity that doesn't know where 
-		-- to be stored
 
-
-		Properties : Property_Lists.List;
-	end record;
 
 	procedure Register(
 			Container	: in out Property_Container_Type;
@@ -292,15 +293,7 @@ package KOW_Ent is
 	---------------------
 
 
-	type Entity_Type is abstract new Property_Container_Type with record
-		-- conceptually the entity is a property container which
-		-- is linked to a data storage backend, thus being able to
-		-- be stored and retrieved later on
-		--
-		--
-		-- the data storage is an abstract concept described later
-		Data_Storage : Data_Storage_Ptr;
-	end record;
+	type Entity_Type is abstract new Property_Container_Type with private;
 
 	procedure Store( Entity : in out Entity_Type );
 	-- procedure used to store the entity;
@@ -338,5 +331,30 @@ package KOW_Ent is
 --	end record;
 --
 --	procedure Load()
+
+	
+private
+
+	type Property_Container_Type is abstract tagged limited record
+		-- the property container type is a stucture with
+		-- properties.
+		--
+		-- it's basically an Entity that doesn't know where 
+		-- to be stored
+
+
+		Properties : Property_Lists.List;
+	end record;
+
+	type Entity_Type is abstract new Property_Container_Type with record
+		-- conceptually the entity is a property container which
+		-- is linked to a data storage backend, thus being able to
+		-- be stored and retrieved later on
+		--
+		--
+		-- the data storage is an abstract concept described later
+		Data_Storage : Data_Storage_Ptr;
+	end record;
+
 
 end KOW_Ent;
