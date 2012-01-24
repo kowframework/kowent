@@ -114,9 +114,51 @@ package body KOW_Ent.Queries is
 	end Is_Empty;
 	-- check if there is any operation appended into the criteria
 
+
+	----------------------------
+	-- Finally The Query Type --
+	----------------------------
+
+
+	type Query_Access is access all Query_Type;
+	procedure Free is new Ada.Unchecked_Deallocation( Name => Query_Access, Object => Query_Type );
+
+
+	function Clone( Query : in Query_Type ) return Query_Ptr is
+		Q : Query_Access := new Query_Type'( Query );
+	begin
+		return Query_Ptr( Q );
+	end Clone;
+
+	procedure Free( Query : in Query_Type; Name : in out Query_Ptr ) is
+	begin
+		if Name /= null then
+			Free( Query_Access( Name ) );
+		end if;
+	end Free;
+
 	---------------------------------
 	-- And now the Join Query Type --
 	---------------------------------
+
+
+	type Join_Query_Access is access all Join_Query_Type;
+	procedure Free is new Ada.Unchecked_Deallocation( Name => Join_Query_Access, Object => Join_Query_Type );
+
+	overriding
+	function Clone( Query : in Join_Query_Type ) return Query_Ptr is
+		Q : Join_Query_Access := new Join_Query_Type'( Query );
+	begin
+		return Query_Ptr( Q );
+	end Clone;
+
+	overriding
+	procedure Free( Query : in Join_Query_Type; Name : in out Query_Ptr ) is
+	begin
+		if Name /= null then
+			Free( Join_Query_Access( Name ) );
+		end if;
+	end Free;
 
 	procedure Append( 
 				Join_Query	: in out Join_Query_Type;

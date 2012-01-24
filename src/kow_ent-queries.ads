@@ -150,6 +150,11 @@ package KOW_Ent.Queries is
 		-- from which result should the query be returning.
 	end record;
 
+	type Query_Ptr is access all Query_Type'Class;
+
+	function Clone( Query : in Query_Type ) return Query_Ptr;
+	procedure Free( Query : in Query_Type; Name : in out Query_Ptr );
+
 	---------------------------------
 	-- And now the Join Query Type --
 	---------------------------------
@@ -163,6 +168,13 @@ package KOW_Ent.Queries is
 
 
 	type Join_Query_Type is new Query_Type with private;
+
+
+	overriding
+	function Clone( Query : in Join_Query_Type ) return Query_Ptr;
+
+	overriding
+	procedure Free( Query : in Join_Query_Type; Name : in out Query_Ptr );
 
 	procedure Append( 
 				Join_Query	: in out Join_Query_Type;

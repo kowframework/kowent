@@ -41,6 +41,7 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Strings.Hash;
 with Ada.Unchecked_Deallocation;
 
 -------------------
@@ -133,9 +134,8 @@ package body KOW_Ent.DB.Data_Storages is
 		-- build the query and then return the first result
 		-- if unique=true and there are more results, raise UNICITY_ERROR
 
-		Loader : DB_Loader_Type;
+		Loader : DB_Loader_Type := DB_Loader_Type( New_Loader( Data_Storage, Query ) );
 	begin
-		Loader.Query := Query;
 
 		if Unique = True then
 			Loader.Query.Limit := 2;
@@ -168,11 +168,11 @@ package body KOW_Ent.DB.Data_Storages is
 	overriding
 	function New_Loader(
 				Data_Storage	: in     DB_Storage_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type
+				Query		: in     KOW_Ent.Queries.Query_Type'Class
 			) return KOW_Ent.Data_Storages.Entity_Loader_Interface'Class is
 		Loader : DB_Loader_Type;
 	begin
-		Loader.Query := Query;
+		Loader.Query := KOW_Ent.Queries.Clone( Query );
 		Loader.Query.Entity_Tag := Entity_Type'Tag;
 
 		return Loader;
@@ -185,9 +185,28 @@ package body KOW_Ent.DB.Data_Storages is
 	-------------------
 
 
+	overriding
+	procedure Adjust( Loader : in out DB_Loader_Type ) is
+		use KOW_Ent.Queries;
+	begin
+		if Loader.Query /= null then
+			Loader.Query := Clone( Loader.Query.all );
+		end if;
+	end Adjust;
+
+	overriding
+	procedure Finalize( Loader : in out DB_Loader_Type ) is
+		-- make sure we don't leave garbage in the memory
+		use KOW_Ent.Queries;
+	begin
+		if Loader.Query /= null then
+			Free( Loader.Query.all, Loader.Query );
+		end if;
+	end Finalize;
 
 	overriding
 	procedure Execute( Loader : in out DB_Loader_Type ) is
+		use KOW_Ent.Queries;
 		-- execute the query
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Query		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
@@ -197,7 +216,7 @@ package body KOW_Ent.DB.Data_Storages is
 		begin
 			SQL.Generate_Select(
 					Generator	=> Generator,
-					Query		=> Loader.Query,
+					Query		=> Loader.Query.all,
 					Connection	=> Connection,
 					Q		=> Query
 				);
@@ -230,6 +249,10 @@ package body KOW_Ent.DB.Data_Storages is
 							Container	=> Template_Entity,
 							Iterator	=> Iterator'Access
 						);
+
+					if Loader.Query.all in Queries.Join_Query_Type'Class then
+						null;
+					end if;
 					Entity_Values_Lists.Append( Loader.Cache, Values );
 				end;
 			end loop;
@@ -238,6 +261,7 @@ package body KOW_Ent.DB.Data_Storages is
 				null;
 		end Runner;
 	begin
+		pragma Assert( Loader.Query /= null, "Seems like you are working with a non initialized loader!" );
 		if not Entity_Values_Lists.Is_Empty( Loader.Cache ) then
 			raise PROGRAM_ERROR with "Trying to execute a query in a not-flushed entity loader";
 		end if;
@@ -410,6 +434,10 @@ package body KOW_Ent.DB.Data_Storages is
 	end Finalize;
 	
 
+	function Hash( Tag : in Ada.Tags.Tag ) return Ada.Containers.Hash_Type is
+	begin
+		return Ada.Strings.Hash( Ada.Tags.Expanded_Name( Tag ) );
+	end Hash;
 
 begin
 	THE_Entity_Alias := To_Alias( Entity_Alias );

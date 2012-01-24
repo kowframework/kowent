@@ -41,7 +41,9 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Containers;
 with Ada.Containers.Doubly_Linked_Lists;
+with Ada.Containers.Hashed_Maps;
 with Ada.Finalization;
 with Ada.Tags;
 with Ada.Unchecked_Deallocation;
@@ -135,7 +137,7 @@ package KOW_Ent.DB.Data_Storages is
 	overriding
 	function New_Loader(
 				Data_Storage	: in     DB_Storage_Type;
-				Query		: in     KOW_Ent.Queries.Query_Type
+				Query		: in     KOW_Ent.Queries.Query_Type'class
 			) return KOW_Ent.Data_Storages.Entity_Loader_Interface'Class;
 
 	
@@ -144,8 +146,16 @@ package KOW_Ent.DB.Data_Storages is
 	-- Entity Loader --
 	-------------------
 
-	type DB_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
+	type DB_Loader_Type is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
 
+
+	overriding
+	procedure Adjust( Loader : in out DB_Loader_Type );
+	-- reallocate the pointers :)
+
+	overriding
+	procedure Finalize( Loader : in out DB_Loader_Type );
+	-- make sure we don't leave garbage in the memory
 
 
 	overriding
@@ -208,17 +218,28 @@ private
 	package Entity_Values_Lists is new Ada.Containers.Doubly_Linked_Lists(
 									Element_Type	=> Value_Lists.List,
 								       	"="		=> Value_lists."="
-								      	);
+							      	);
+	
+	function Hash( Tag : in Ada.Tags.Tag ) return Ada.Containers.Hash_Type;
+	package Join_Entity_Values_Maps is new Ada.Containers.Hashed_Maps(
+									Key_Type	=> Ada.Tags.Tag,
+									Element_Type	=> Entity_Values_Lists.List,
+									Hash		=> Hash,
+									Equivalent_Keys	=> Ada.Tags."=",
+									"="		=> Entity_Values_Lists."="
+								);
 
-	type DB_Loader_Type is new KOW_Ent.Data_Storages.Entity_Loader_Interface with record
+	type DB_Loader_Type is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with record
 		Cache	: Entity_Values_Lists.List;
 		-- where the results are cached when execute is called as APQ_Provide require
 		-- us to fetch all the results at once and then release the connection for good
 
+		Join_Cache : Join_Entity_Values_Maps.Map;
+		-- in case it's a join query... that's where the joined values are stored
 
 		Current	: Entity_Values_Lists.Cursor := Entity_Values_Lists.No_Element;
 
-		Query	: KOW_Ent.Queries.Query_Type;
+		Query	: KOW_Ent.Queries.Query_Ptr;
 	end record;
 
 

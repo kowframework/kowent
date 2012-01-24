@@ -185,7 +185,7 @@ package KOW_Ent.Data_Storages is
 	
 	function New_Loader(
 				Data_Storage	: in Data_Storage_Type;
-				Query		: in Queries.Query_Type
+				Query		: in Queries.Query_Type'Class
 			) return Entity_Loader_Interface'Class is abstract;
 	-- a new query type for the given query representation
 	-- the query must be intialized, but not yet executed
@@ -207,6 +207,8 @@ package KOW_Ent.Data_Storages is
 		) is abstract;
 	-- load the current query result into the entity
 	-- if the entity type is unknown to the loader interface, raises constraint_error
+	-- 
+	-- this should be used in both select and join select queries
 
 
 	procedure Flush( Loader : in out Entity_Loader_Interface ) is abstract;
