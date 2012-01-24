@@ -185,6 +185,13 @@ private
 	-- I've tested with array of fixed length as well
 	-- and the curious thing is that... well, the fixed-lenthg array wasn't significantly faster
 	-- so, the doubly linked list a somewhat whise choice then :)
+	--
+	-- in some cases it's probably - a lot - faster to use cursors; the cursor would have a randomized name.
+	-- for that we would have to:
+	-- 	1. find out if a cursor can be reused by another connection
+	-- 	2. implement efficient cursor in every APQ supported driver
+	--
+	-- but thanks to how APQ_Provider works, it's probably a bad idea
 
 	package Entity_Values_Lists is new Ada.Containers.Doubly_Linked_Lists(
 									Element_Type	=> Value_Lists.List,
