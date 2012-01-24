@@ -48,6 +48,10 @@ with Ada.Tags;
 
 package body KOW_Ent.Queries is
 
+	-------------------------
+	-- Logic Criteria Type --
+	-------------------------
+
 	overriding
 	procedure Adjust( Logic_Criteria : in out Logic_Criteria_Type ) is
 		use Logic_Relation_Lists;
@@ -110,4 +114,30 @@ package body KOW_Ent.Queries is
 	end Is_Empty;
 	-- check if there is any operation appended into the criteria
 
+	---------------------------------
+	-- And now the Join Query Type --
+	---------------------------------
+
+	procedure Append( 
+				Join_Query	: in out Join_Query_Type;
+				Join_Description: in     Join_Description_Type
+			) is
+		-- append a join description type
+	begin
+		Join_Description_Lists.Append( Join_Query.Joins, Join_Description );
+	end Append;
+
+	procedure Iterate(
+				Join_Query	: in Join_Query_Type;
+				Iterator	: access procedure( Description : in Join_Description_Type )
+			) is
+		-- iterate over all the appended descriptions
+		use Join_Description_Lists;
+		procedure Inner_Iterator( C : Cursor ) is
+		begin
+			Iterator.all( Element( C ) );
+		end Inner_iterator;
+	begin
+		Iterate( Join_Query.Joins, Inner_Iterator'Access );
+	end Iterate;
 end KOW_Ent.Queries;

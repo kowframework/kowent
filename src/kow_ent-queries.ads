@@ -139,7 +139,7 @@ package KOW_Ent.Queries is
 	-- Finally The Query Type --
 	----------------------------
 
-	type Query_Type is record
+	type Query_Type is tagged record
 		Entity_Tag	: Ada.Tags.Tag;
 		Logic_Criteria	: Logic_Criteria_Type;
 
@@ -150,17 +150,31 @@ package KOW_Ent.Queries is
 		-- from which result should the query be returning.
 	end record;
 
-	-----------------------------------
-	-- And now the Joined Query Type --
-	-----------------------------------
+	---------------------------------
+	-- And now the Join Query Type --
+	---------------------------------
 
-	type Joined_Query_Type is record
-		Left_Query	: Query_Type;
-		Right_Query	: Query_Type;
+
+	type Join_Description_Type is record
+		Query		: Query_Type;
 		Join		: Join_Type;
-		Having		: Logic_Criteria_Type;
+		Condition	: Logic_Criteria_Type;
 	end record;
 
+
+	type Join_Query_Type is new Query_Type with private;
+
+	procedure Append( 
+				Join_Query	: in out Join_Query_Type;
+				Join_Description: in     Join_Description_Type
+			);
+	-- append a join description type
+
+	procedure Iterate(
+				Join_Query	: in Join_Query_Type;
+				Iterator	: access procedure( Description : in Join_Description_Type )
+			);
+	-- iterate over all the appended descriptions
 
 private
 
@@ -170,6 +184,13 @@ private
 
 	type Logic_Criteria_Type is new Ada.Finalization.Controlled with record
 		Operations : Logic_Relation_lists.List;
+	end record;
+
+
+	package Join_Description_Lists is new Ada.Containers.Doubly_Linked_Lists( Join_Description_Type );
+
+	type Join_Query_Type is new Query_Type with record
+		Joins	: Join_Description_Lists.List;
 	end record;
 
 end KOW_Ent.Queries;
