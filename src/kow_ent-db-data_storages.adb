@@ -126,11 +126,11 @@ package body KOW_Ent.DB.Data_Storages is
 	procedure Install(
 				Data_Storage	: in out DB_Storage_Type
 			) is
+		Template_Entity	: Entity_Type;
 		-- create table for the given entity
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Q		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 			Generator	: KOW_Ent.SQL.Create.Create_Generator_Type;
-			Template_Entity	: Entity_Type;
 		begin
 			KOW_Ent.SQL.Create.Generate_Create(
 						Generator	=> Generator,
@@ -140,22 +140,45 @@ package body KOW_Ent.DB.Data_Storages is
 
 
 			APQ.Execute_Checked( Q, Connection, "ERROR RUNNING KOW_ENT CREATE QUERY" );
-
-			loop
-				-- fetch all the results so we won't trash our connection
-				APQ.Fetch( Q );
-			end loop;
-		exception
-			when APQ.No_Tuple =>
-				null;
+			-- ignore the results because I was getting an exception
+			-- trashing the connection is not such a big issue as this will only run
+			-- once for each installment and apq_provider is smart enough to reconnect
 		end Runner;
 	begin
+		Install_Table_Schema;
+		-- this actually runs only once;
+		-- that's where the existence of databases is tested.
+
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
 					Queue_On_OOI		=> True
 				);
+
+		-- if I got here it means I can continue informing I exist..
+
+		Insert_Table_Schema( Template_Entity );
+		-- this will make sure the framework knows what tables have been created
 	end Install;
+
+	overriding
+	function Type_Of(
+				Data_Storage	: in     DB_Storage_Type
+			) return String is
+		-- returns "DB::APQ_Provider"
+	begin
+		return "DB::APQ_Provider";
+	end Type_Of;
+
+
+	overriding
+	function Version_Of(
+				Data_Storage	: in     DB_Storage_Type
+			) return String is
+		-- return the current version
+	begin
+		return "1.0a";
+	end Version_Of;
 
 	--------------------
 	-- Load Functions --

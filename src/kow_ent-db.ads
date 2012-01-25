@@ -54,11 +54,57 @@ with KOW_Ent.Data_Storages;
 
 package KOW_Ent.DB is
 
+
+
+	---------------------
+	-- Every day Setup --
+	---------------------
+
+	procedure Setup;
+	-- load the kow_ent.cfg APQ_Provider file and setup the provider
+
+
+	-------------------------------------
+	-- Installation of the Core Schema --
+	-------------------------------------
+
+
+	-- As each database vendor choses a different way for informing what tables are available
+	-- with no universal API KOW_Ent will store a redundant record of such information.
+	--
+	-- This record links entity alias to entity tag and also the version.
+
+	ALREADY_INSTALLED : Exception;
+	-- throws whenever the instalce is already installed
+
+	procedure Install_Table_Schema;
+	-- this will do several things:
+	-- 	1. test the connection
+	-- 	2. check if the table is installed, if so raises ALREADY_INSTALLED
+	-- 	3. create the core schema
+
+
+	procedure Insert_Table_Schema( Template_Entity : in out KOW_Ent.Entity_Type'Class );
+	-- this will insert some valuable information about the given entity into the
+	-- schema
+
+private
+
+	Schema_Table_Name : constant String := "KOWENT_SCHEMA";
+
+	package Column_Names is
+		Entity_Alias	: constant String := "ENTITY_ALIAS";
+		Entity_Tag	: constant String := "ENTITY_TAG";
+		Schema_Version	: constant String := "SCHEMA_VERSION";
+		Storage_Type	: constant String := "STORAGE_TYPE";
+		Storage_Version	: constant String := "STORAGE_VERSION";
+	end Column_Names;
+
+
+
 	Provider : APQ_Provider.Connection_Provider_Ptr;
 	-- all the data storages instances in instances of the
 	-- generic child packages will actually perform queries in this provider
 
 
-	procedure Setup;
-	-- load the kow_ent.cfg APQ_Provider file and setup the provider
 end KOW_Ent.DB;

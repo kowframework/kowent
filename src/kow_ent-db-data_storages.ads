@@ -34,6 +34,8 @@
 --                                                                          --
 -- KOW_Ent is reponsible for handling persistent data in your application   --
 -- stored in Database backends using the native DB types.                   --
+--                                                                          --
+-- This backend relies on APQ Provider                                      --
 ------------------------------------------------------------------------------
 
 
@@ -99,6 +101,18 @@ package KOW_Ent.DB.Data_Storages is
 			);
 	-- create table for the given entity
 
+
+	overriding
+	function Type_Of(
+				Data_Storage	: in     DB_Storage_Type
+			) return String;
+	-- returns "DB::APQ_Provider"
+
+	overriding
+	function Version_Of(
+				Data_Storage	: in     DB_Storage_Type
+			) return String;
+	-- return the current version
 
 	--------------------
 	-- Load Functions --

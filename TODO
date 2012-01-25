@@ -1,13 +1,19 @@
 
 
-1. database initialization
-2. Implement entity labels
+
 3. Implement extra properties
 	=> Locale_Property
 	=> Foreign_Key property (maybe it's not really needed... is it?)
+	=> SHA1_Password_Property
+	=> MD5_Password_Property
 
 
 
 Once this is finished I'll start yet another refactoring on KOW_View (remove all the unbounded_strings references in favour of streams).
 
 With that finished I can code the brand new kowview-entities from scratch once again.
+
+
+
+Remember to implement in KOW_View.Entities:
+1. Implement entity labels

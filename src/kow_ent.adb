@@ -298,6 +298,13 @@ package body KOW_Ent is
 	---------------------
 	-- The Entity Type --
 	---------------------
+
+
+	function Version_Of( Entity : in Entity_Type ) return String is
+	begin
+		return "-1";
+	end Version_Of;
+
 	procedure Store( Entity : in out Entity_Type ) is
 		-- procedure used to store the entity;
 		-- for retrieving please read the documentation of the used data storage

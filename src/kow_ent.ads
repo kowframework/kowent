@@ -288,6 +288,17 @@ package KOW_Ent is
 	-- for DB storages, it means create the table structure for each one of the entities
 
 
+	function Type_Of(
+				Data_Storage	: in     Data_Storage_Interface
+			) return String is abstract;
+	-- return a string of up to 50 characters describing this data source
+
+
+	function Version_Of(
+				Data_Storage	: in     Data_Storage_Interface
+			) return String is abstract;
+	-- return the version number of the current data storage
+
 	---------------------------
 	-- The Entity Alias Type --
 	---------------------------
@@ -309,6 +320,13 @@ package KOW_Ent is
 
 	type Entity_Type is abstract new Property_Container_Type with private;
 	type Entity_Ptr is access all Entity_Type'Class;
+
+
+	function Version_Of( Entity : in Entity_Type ) return String;
+	-- this is used to identify the current installed version.
+	-- when -1 (default behavior), it means the entity is not versioned.
+	-- NOTE :: the complete versioning framework isn't really implemented.
+	-- it's just a place holder
 
 	procedure Store( Entity : in out Entity_Type );
 	-- procedure used to store the entity;
