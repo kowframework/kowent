@@ -92,6 +92,9 @@ package KOW_Ent is
 				Type_Of		: Type_Of_Data_Type;
 				String_Length	: Natural 		-- used only when Type_Of = APQ_String
 			) is record
+
+		Is_Null : Boolean := False;
+
 		case Type_Of is
 			when APQ_Smallint =>
 				Smallint_Value	: APQ.APQ_Smallint := APQ.APQ_Smallint'First;
@@ -136,7 +139,6 @@ package KOW_Ent is
 
 			when APQ_String =>
 				String_Value	: String( 1 .. String_Length );
-
 		end case;
 	end record;
 

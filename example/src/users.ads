@@ -32,7 +32,8 @@ package Users is
 		Name	: KOW_Ent.Properties.String_Property(
 							Name		=> Name_Name,
 							Container	=> User_Entity'Unrestricted_Access,
-							String_Length	=> 20
+							String_Length	=> 20,
+							Allow_Null	=> True
 						);
 	end record;
 	procedure Put( Usr : User_Entity );
@@ -54,12 +55,14 @@ package Users is
 						);
 		User_Id	: KOW_Ent.Properties.Bigserial_Property(
 							Name		=> User_ID_Name,
-							COntainer	=> Job_Entity'Unrestricted_Access
+							COntainer	=> Job_Entity'Unrestricted_Access,
+							Allow_Null	=> True
 						);
 		Title	: KOW_Ent.Properties.String_Property(
 							Name		=> Title_Name,
 							Container	=> Job_Entity'Unrestricted_Access,
-							String_Length	=> 100
+							String_Length	=> 100,
+							Allow_Null	=> True
 						);
 	end record;
 	package Job_Storages is new KOW_Ent.DB.Data_Storages(
