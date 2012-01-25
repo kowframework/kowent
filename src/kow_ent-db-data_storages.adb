@@ -326,11 +326,29 @@ package body KOW_Ent.DB.Data_Storages is
 	procedure Fetch( Loader : in out DB_Loader_Type ) is
 		-- fetch the next result
 		use Entity_Values_Lists;
+
+		procedure Initialize( C : in Join_Entity_Values_Maps.Cursor ) is
+			use Join_Entity_Values_Maps;
+			CC : Entity_Values_Lists.Cursor := Entity_Values_Lists.First( Element( C ) );
+		begin
+			Join_Entity_Cursor_Maps.Insert( Loader.Join_Cursors, Key( C ), CC );
+		end Initialize;
+
+
+		procedure Get_Next( C : in Join_Entity_Values_Maps.Cursor ) is
+			use Join_Entity_Values_Maps;
+			CC : Entity_Values_Lists.Cursor := Join_Entity_Cursor_Maps.Element( Loader.Join_Cursors, Key( C ) );
+		begin
+			Next( CC );
+			Join_Entity_Cursor_Maps.Include( Loader.Join_Cursors, Key( C ), CC );
+		end Get_Next;
 	begin
 		if Loader.Current = No_Element then
 			Loader.Current := First( Loader.Cache );
+			Join_Entity_Values_Maps.Iterate( Loader.Join_Cache, Initialize'Access );
 		else
 			Next( Loader.Current );
+			Join_Entity_Values_Maps.Iterate( Loader.Join_Cache, Get_Next'Access );
 		end if;
 	end Fetch;
 
@@ -348,6 +366,7 @@ package body KOW_Ent.DB.Data_Storages is
 		) is
 		-- load the current query result into the entity
 		-- if the entity type is unknown to the loader interface, raises constraint_error
+		use Ada.Tags;
 		use Entity_Values_Lists;
 
 
@@ -372,9 +391,17 @@ package body KOW_Ent.DB.Data_Storages is
 			raise KOW_Ent.Data_Storages.NO_RESULT with "while trying to load the result";
 		end if;
 
-		Values := Element( Loader.Current );
+		-- find out what cache element to load..
+		if Entity'Tag = Entity_Type'Tag then
+			Values := Element( Loader.Current );
+		else
+			if not Join_Entity_Values_Maps.Contains( Loader.Join_Cache, Entity'Tag ) then
+				raise PROGRAM_ERROR with "trying to Load an entity in from the results of a query that didn't fetch it";
+			end if;
+			Values := Element( Join_Entity_Cursor_Maps.Element( Loader.Join_Cursors, Entity'Tag ) );
+		end if;
 
-
+		-- now the load procedure is quite generic...
 		if not Value_Lists.Is_Empty( Values ) then
 			C := Value_Lists.First( Values );
 		end if;
