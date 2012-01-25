@@ -3,9 +3,7 @@
 
 3. Implement extra properties
 	=> Locale_Property
-	=> Foreign_Key property (maybe it's not really needed... is it?)
-	=> SHA1_Password_Property
-	=> MD5_Password_Property
+
 
 
 
