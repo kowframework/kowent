@@ -132,13 +132,27 @@ package body KOW_Ent.Data_Storages is
 
 	procedure Install is
 		-- run install in every registered data storage
+		use Ada.Containers;
 		use Data_Storage_Maps;
+
+		type Storage_Array is array( 1 .. Length( Storages ) ) of Data_Storage_Ptr;
+		St : Storage_Array;
+
+		i : Count_Type := St'First;
+
 		procedure Iterator( C : Cursor ) is
 		begin
-			Install( Element( C ).all );
+			St( i ) := Element( C );
+			i := i + 1;
 		end Iterator;
 	begin
 		Iterate( Storages, Iterator'Access );
+		-- fetch all the data storages..
+
+		for i in St'Range loop
+			Install( St( i ).all );
+		end loop;
+		-- run each of the install procedure
 	end Install;
 -- private
 

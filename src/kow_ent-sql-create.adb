@@ -88,6 +88,8 @@ package body KOW_Ent.SQL.Create is
 					Q		=> Q
 				);
 		end if;
+
+		APQ.Append( Q, ")" );
 	end Generate_Create;
 
 	
