@@ -182,4 +182,12 @@ package body KOW_Ent.Queries is
 	begin
 		Iterate( Join_Query.Joins, Inner_Iterator'Access );
 	end Iterate;
+
+	function Length(
+				Join_Query	: in Join_Query_Type
+			) return Natural is
+		-- count how many itens are registered in the join query
+	begin
+		return Natural( Join_Description_Lists.Length( Join_Query.Joins ) );
+	end Length;
 end KOW_Ent.Queries;

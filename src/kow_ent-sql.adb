@@ -473,6 +473,7 @@ package body KOW_Ent.SQL is
 								Entity_Tag	=> Description.Query.Entity_Tag
 							);
 		begin
+			APQ.Append( Q, "," );
 			Append_Column_Names(
 						Generator	=> Select_Generator_Type'Class( Generator ),
 						Query		=> Description.Query,
@@ -788,6 +789,22 @@ package body KOW_Ent.SQL is
 		use KOW_Ent.Data_Storages;
 		Storage	: Data_Storage_Ptr := Get_Data_Storage( Description.Query.Entity_Tag );
 		Table_Name : constant String := Trim( Get_Alias( Data_Storage_Type'Class( Storage.all ), Description.Query.Entity_Tag ) );
+
+
+		function Get_Where return String is
+			Tmp_Q : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+		begin
+			if not Is_Empty( Description.Query.Logic_Criteria ) then
+				Append_Logic_Criteria( Generator, Description.Query.Logic_Criteria, Connection, Tmp_Q );
+				return APQ.To_String( Tmp_Q );
+			else
+				return "";
+			end if;
+		end Get_Where;
+
+
+		Where : constant String := Get_Where;
+
 	begin
 		case Description.Join is
 			when Queries.LEFT_JOIN =>
@@ -798,7 +815,12 @@ package body KOW_Ent.SQL is
 				APQ.Append( Query, " INNER JOIN " );
 		end case;
 
-		APQ.Append( Query, " (" );
+		APQ.Append( Query, " ( select * from " & table_name );
+
+		if Where /= "" then
+			APQ.Append( Query, " WHERE " & Where );
+		end if;
+
 		APQ.Append( Query, ") " & Table_Name & " on (" );
 
 		if Is_Empty( Description.Condition ) then

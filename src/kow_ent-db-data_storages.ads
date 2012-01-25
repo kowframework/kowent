@@ -43,7 +43,6 @@
 --------------
 with Ada.Containers;
 with Ada.Containers.Doubly_Linked_Lists;
-with Ada.Containers.Hashed_Maps;
 with Ada.Finalization;
 with Ada.Tags;
 with Ada.Unchecked_Deallocation;
@@ -146,7 +145,7 @@ package KOW_Ent.DB.Data_Storages is
 	-- Entity Loader --
 	-------------------
 
-	type DB_Loader_Type is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
+	type DB_Loader_Type( Join_Count : Natural ) is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with private;
 
 
 	overriding
@@ -219,41 +218,58 @@ private
 									Element_Type	=> Value_Lists.List,
 								       	"="		=> Value_lists."="
 							      	);
-	
-	function Hash( Tag : in Ada.Tags.Tag ) return Ada.Containers.Hash_Type;
-	package Join_Entity_Values_Maps is new Ada.Containers.Hashed_Maps(
-									Key_Type	=> Ada.Tags.Tag,
-									Element_Type	=> Entity_Values_Lists.List,
-									Hash		=> Hash,
-									Equivalent_Keys	=> Ada.Tags."=",
-									"="		=> Entity_Values_Lists."="
-								);
-	package Join_Entity_Cursor_Maps is new Ada.Containers.Hashed_Maps(
-									KEy_Type	=> Ada.Tags.Tag,
-									Element_Type	=> Entity_Values_Lists.Cursor,
-									Hash		=> Hash,
-									Equivalent_Keys	=> Ada.Tags."=",
-									"="		=> Entity_Values_Lists."="
-								);
 
-	type DB_Loader_Type is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with record
+
+
+	---------------------------
+	-- Join Results Handling --
+	---------------------------
+	type Join_Entity_Type is record
+		Entity_Tag	: Ada.Tags.Tag;
 		Cache		: Entity_Values_Lists.List;
+		Current		: Entity_Values_Lists.Cursor;
+	end record;
+
+	type Join_Entity_Array is Array( Natural range <> ) of Join_Entity_Type;
+	procedure Search(
+			Join_Entities	: in out Join_Entity_Array;
+			Entity_Tag	: in     Ada.Tags.Tag;
+			Index		:    out Natural;
+			Auto_Assign	: in     Boolean := False
+		);
+	-- sequential search inside the array. if nothing is found and auto_assign is false raise CONSTRAINT_ERROR with informative message
+	-- if nothing is found tries to assign the ID
+
+
+	procedure Iterate(
+			Join_Entities	: in out Join_Entity_Array;
+			Iterator	: not null access procedure( Join_Entity : in out Join_Entity_Type )
+		);
+	-- iterate for each single one of values of the join_entities
+	
+
+
+	-------------------
+	-- The DB Loader --
+	-------------------
+	type DB_Loader_Type( Join_Count : Natural ) is new Ada.Finalization.Controlled and KOW_Ent.Data_Storages.Entity_Loader_Interface with record
+		Cache		: Entity_Values_Lists.List;
+		Current		: Entity_Values_Lists.Cursor := Entity_Values_Lists.No_Element;
 		-- where the results are cached when execute is called as APQ_Provide require
 		-- us to fetch all the results at once and then release the connection for good
 
-		Join_Cache	: Join_Entity_Values_Maps.Map;
-		-- in case it's a join query... that's where the joined values are stored
-		Join_Cursors	: Join_Entity_Cursor_Maps.Map;
-
-		Current		: Entity_Values_Lists.Cursor := Entity_Values_Lists.No_Element;
-
+		Join		: Join_Entity_Array( 1 .. Join_Count );
 		Query		: KOW_Ent.Queries.Query_Ptr;
 	end record;
 
 
+
+	---------------
+	-- Variables --
+	---------------
+
 	THE_Entity_Alias : Entity_Alias_Type;
 	-- where the entity alias is actually stored (it's copied from the Entity_Alias string on elaboration time)
-
 
 	Storage : aliased DB_Storage_Type;
 	-- the actual data storage instance is a singleton object for each entity type (at least for entities in the database backend)

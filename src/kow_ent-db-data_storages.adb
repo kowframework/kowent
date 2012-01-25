@@ -36,6 +36,8 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
+with ada.text_io;
+
 --------------
 -- Ada 2005 --
 --------------
@@ -170,7 +172,17 @@ package body KOW_Ent.DB.Data_Storages is
 				Data_Storage	: in     DB_Storage_Type;
 				Query		: in     KOW_Ent.Queries.Query_Type'Class
 			) return KOW_Ent.Data_Storages.Entity_Loader_Interface'Class is
-		Loader : DB_Loader_Type;
+
+		function Count_Joins return Natural is
+		begin
+			if Query in KOW_Ent.Queries.Join_Query_Type'Class then
+				return KOW_Ent.Queries.Length( KOW_Ent.Queries.Join_Query_Type'Class( Query ) );
+			else
+				return 0;
+			end if;
+		end Count_Joins;
+
+		Loader : DB_Loader_Type( Count_Joins );
 	begin
 		Loader.Query := KOW_Ent.Queries.Clone( Query );
 		Loader.Query.Entity_Tag := Entity_Type'Tag;
@@ -257,28 +269,31 @@ package body KOW_Ent.DB.Data_Storages is
 					-- Join Queries --
 					------------------
 					procedure Join_Iterator( Description : in Join_Description_Type ) is
-						-- Note: this is quite slow. Need a nice refactoring
 						use KOW_Ent.Data_Storages;
-						Join_Values	: Value_Lists.List;
-						Entity_Values	: Entity_Values_Lists.List;
 						Tpl		: Entity_Ptr := Create(
 											Data_Storage	=> Data_Storage_Type'Class( Get_Data_Storage( Description.Query.Entity_Tag ).all ),
 										      	Entity_Tag	=> Description.Query.Entity_Tag
 										);
 						Join_Table_Name	: constant String := Trim( Get_Alias( Tpl.all ) );
+						Index : Natural;
+
+						Join_Values : Value_lists.List;
 
 						procedure Join_Values_Iterator( P : in Property_Ptr ) is
 						begin
 							Value_Lists.Append( Join_Values, Fetch_Value( Join_Table_Name, P.all ) );
 						end Join_Values_Iterator;
 					begin
-						if Join_Entity_Values_Maps.Contains( Loader.Join_Cache, Tpl.all'Tag ) then
-							Entity_Values := Join_Entity_Values_Maps.Element( Loader.Join_Cache, Tpl.all'Tag );
-						end if;
+						Search(
+								Join_Entities	=> Loader.Join,
+								Entity_Tag	=> Description.Query.Entity_Tag,
+								Index		=> Index,
+								Auto_Assign	=> True
+							);
 
 						Iterate( Tpl.all, Join_Values_Iterator'Access );
-						Entity_Values_Lists.Append( Entity_Values, Join_Values );
-						Join_Entity_Values_Maps.Include( Loader.Join_Cache, Tpl.all'Tag, Entity_Values );
+
+						Entity_Values_Lists.Append( Loader.Join( Index ).Cache, Join_Values );
 					end Join_Iterator;
 
 					--------------------------
@@ -327,28 +342,26 @@ package body KOW_Ent.DB.Data_Storages is
 		-- fetch the next result
 		use Entity_Values_Lists;
 
-		procedure Initialize( C : in Join_Entity_Values_Maps.Cursor ) is
-			use Join_Entity_Values_Maps;
-			CC : Entity_Values_Lists.Cursor := Entity_Values_Lists.First( Element( C ) );
+		procedure Initialize( Join_Entity : in out Join_Entity_Type ) is
 		begin
-			Join_Entity_Cursor_Maps.Insert( Loader.Join_Cursors, Key( C ), CC );
+			Ada.Text_IO.Put_Line( "initializing" );
+			Join_Entity.Current := First( Join_Entity.Cache );
 		end Initialize;
 
 
-		procedure Get_Next( C : in Join_Entity_Values_Maps.Cursor ) is
-			use Join_Entity_Values_Maps;
-			CC : Entity_Values_Lists.Cursor := Join_Entity_Cursor_Maps.Element( Loader.Join_Cursors, Key( C ) );
+		procedure Get_Next( Join_Entity : in out Join_Entity_Type ) is
 		begin
-			Next( CC );
-			Join_Entity_Cursor_Maps.Include( Loader.Join_Cursors, Key( C ), CC );
+			Ada.Text_IO.Put_line( "getting next");
+			Next( Join_Entity.Current );
 		end Get_Next;
 	begin
+
 		if Loader.Current = No_Element then
 			Loader.Current := First( Loader.Cache );
-			Join_Entity_Values_Maps.Iterate( Loader.Join_Cache, Initialize'Access );
+			Iterate( Loader.Join, Initialize'Access );
 		else
 			Next( Loader.Current );
-			Join_Entity_Values_Maps.Iterate( Loader.Join_Cache, Get_Next'Access );
+			Iterate( Loader.Join, Get_Next'Access );
 		end if;
 	end Fetch;
 
@@ -395,14 +408,23 @@ package body KOW_Ent.DB.Data_Storages is
 		if Entity'Tag = Entity_Type'Tag then
 			Values := Element( Loader.Current );
 		else
-			if not Join_Entity_Values_Maps.Contains( Loader.Join_Cache, Entity'Tag ) then
-				raise PROGRAM_ERROR with "trying to Load an entity in from the results of a query that didn't fetch it";
-			end if;
-			Values := Element( Join_Entity_Cursor_Maps.Element( Loader.Join_Cursors, Entity'Tag ) );
+			declare
+				Index : Natural;
+			begin
+				Search(
+						Join_Entities	=> Loader.Join,
+						Entity_Tag	=> Entity'Tag,
+						Index		=> Index,
+						Auto_Assign	=> False
+					);
+				Values := Element( Loader.Join( Index ).Current );
+			end;
 		end if;
 
 		-- now the load procedure is quite generic...
-		if not Value_Lists.Is_Empty( Values ) then
+		if Value_Lists.Is_Empty( Values ) then
+			raise PROGRAM_ERROR with "empty values list... something should have gone wrong while executing the query";
+		else
 			C := Value_Lists.First( Values );
 		end if;
 
@@ -506,6 +528,60 @@ package body KOW_Ent.DB.Data_Storages is
 			KOW_Ent.Free( V.Value );
 		end if;
 	end Finalize;
+
+
+	---------------------------
+	-- Join Results Handling --
+	---------------------------
+
+	procedure Search(
+			Join_Entities	: in out Join_Entity_Array;
+			Entity_Tag	: in     Ada.Tags.Tag;
+			Index		:    out Natural;
+			Auto_Assign	: in     Boolean := False
+		) is
+		-- sequential search inside the array. if nothing is found and auto_assign is false raise CONSTRAINT_ERROR with informative message
+		-- if nothing is found tries to assign the ID
+		use Ada.Tags;
+	begin
+		for i in Join_Entities'range loop
+			if Join_Entities( i ).Entity_Tag = No_Tag then
+				if Auto_Assign then
+					Join_Entities( i ).Entity_Tag := Entity_Tag;
+					Index := i;
+					return;
+				else
+					raise CONSTRAINT_ERROR with "can't find entity in the given array : " & Expanded_Name( Entity_Tag );
+				end if;
+			elsif Join_Entities( i ).Entity_Tag = Entity_Tag then
+				Index := i;
+				return;
+			end if;
+		end loop;
+
+		if Auto_Assign then
+			raise CONSTRAINT_ERROR with "array is full";
+		else
+			raise CONSTRAINT_ERROR with "can't find entity in the given full array : " & Expanded_Name( Entity_Tag );
+		end if;
+	end Search;
+
+	procedure Iterate(
+			Join_Entities	: in out Join_Entity_Array;
+			Iterator	: not null access procedure( Join_Entity : in out Join_Entity_Type )
+		) is
+		-- iterate for each single one of values of the join_entities
+		use Ada.Tags;
+	begin
+		for i in Join_Entities'Range loop
+			if Join_Entities(i).Entity_Tag = No_Tag then
+				return;
+			else
+				Iterator.all( Join_Entities(i) );
+			end if;
+		end loop;
+	end Iterate;
+
 	
 
 	function Hash( Tag : in Ada.Tags.Tag ) return Ada.Containers.Hash_Type is

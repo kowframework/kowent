@@ -188,6 +188,10 @@ package KOW_Ent.Queries is
 			);
 	-- iterate over all the appended descriptions
 
+	function Length(
+				Join_Query	: in Join_Query_Type
+			) return Natural;
+	-- count how many itens are registered in the join query
 private
 
 	-------------------------
