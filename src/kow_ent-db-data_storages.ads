@@ -225,7 +225,7 @@ private
 	-- Join Results Handling --
 	---------------------------
 	type Join_Entity_Type is record
-		Entity_Tag	: Ada.Tags.Tag;
+		Entity_Tag	: Ada.Tags.Tag := Ada.Tags.No_Tag;
 		Cache		: Entity_Values_Lists.List;
 		Current		: Entity_Values_Lists.Cursor;
 	end record;

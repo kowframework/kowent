@@ -36,8 +36,6 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
-with ada.text_io;
-
 --------------
 -- Ada 2005 --
 --------------
@@ -344,14 +342,12 @@ package body KOW_Ent.DB.Data_Storages is
 
 		procedure Initialize( Join_Entity : in out Join_Entity_Type ) is
 		begin
-			Ada.Text_IO.Put_Line( "initializing" );
 			Join_Entity.Current := First( Join_Entity.Cache );
 		end Initialize;
 
 
 		procedure Get_Next( Join_Entity : in out Join_Entity_Type ) is
 		begin
-			Ada.Text_IO.Put_line( "getting next");
 			Next( Join_Entity.Current );
 		end Get_Next;
 	begin
