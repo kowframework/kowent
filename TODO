@@ -1,6 +1,5 @@
 
 
-1. Fix the column name loading in joined queries in SQL package
 2. null values support
 3. Implement entity labels
 4. Implement extra properties
