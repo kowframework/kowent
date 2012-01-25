@@ -77,6 +77,10 @@ package body KOW_Ent.SQL is
 		procedure Append_Second is new APQ.Append_Integer( APQ.Second_Number );
 
 	begin
+		if Value.Is_Null then
+			APQ.Append( Q, "NULL" );
+		end if;
+
 		case Value.Type_of is
 			when APQ_Smallint =>
 				Append_Smallint( Q, Value.Smallint_Value );
@@ -165,6 +169,11 @@ package body KOW_Ent.SQL is
 		Idx : APQ.Column_Index_Type := APQ.Column_Index( Q, Column_Name );
 
 	begin
+
+		if APQ.Is_Null( Q, Idx ) then
+			Value.Is_Null := True;
+			return;
+		end if;
 		
 		case Value.Type_of is
 			when APQ_Smallint =>

@@ -94,30 +94,36 @@ package KOW_Ent is
 			) is record
 
 		Is_Null : Boolean := False;
+		-- the null state of the variable can be set in two ways:
+		-- 	1. manually (ie, the user sets using Value.Is_Null := true)
+		-- 	2. from the database backend.
+		--
+		-- remember your property type must take this into account.
 
 		case Type_Of is
 			when APQ_Smallint =>
 				Smallint_Value	: APQ.APQ_Smallint := APQ.APQ_Smallint'First;
 
 			when APQ_Integer =>
-				Integer_Value	: APQ.APQ_Integer;
+				Integer_Value	: APQ.APQ_Integer := APQ.APQ_Integer'First;
 
 			when APQ_Bigint =>
-				Bigint_Value	: APQ.APQ_Bigint;
+				Bigint_Value	: APQ.APQ_Bigint := APQ.APQ_Bigint'First;
 
 			when APQ_Real	=>
-				Real_Value	: APQ.APQ_Real;
+				Real_Value	: APQ.APQ_Real := APQ.APQ_Real'First;
 
 			when APQ_Double =>
-				Double_Value	: APQ.APQ_Double;
+				Double_Value	: APQ.APQ_Double := APQ.APQ_Double'First;
 
 			when APQ_Serial	=>
-				Serial_Value	: APQ.APQ_Serial;
+				Serial_Value	: APQ.APQ_Serial := APQ.APQ_Serial'First;
 
 			when APQ_Bigserial =>
-				Bigserial_Value	: APQ.APQ_Bigserial;
+				Bigserial_Value	: APQ.APQ_Bigserial := APQ.APQ_Bigserial'First;
 
-			when APQ_Date =>
+
+			when APQ_Date => -- TODO :: initialize the date, time and timestamp values
 				Date_Value	: APQ.APQ_Date;
 
 			when APQ_Time =>
@@ -129,16 +135,16 @@ package KOW_Ent is
 
 
 			when Hour_Number =>
-				Hour_Value	: APQ.Hour_Number;
+				Hour_Value	: APQ.Hour_Number := APQ.Hour_Number'First;
 			
 			when Minute_Number =>
-				Minute_Value	: APQ.Minute_Number;
+				Minute_Value	: APQ.Minute_Number := APQ.Minute_Number'First;
 
 			when Second_Number =>
-				Second_Value	: APQ.Second_Number;
+				Second_Value	: APQ.Second_Number := APQ.Second_Number'First;
 
 			when APQ_String =>
-				String_Value	: String( 1 .. String_Length );
+				String_Value	: String( 1 .. String_Length ) := ( others => ' ' );
 		end case;
 	end record;
 

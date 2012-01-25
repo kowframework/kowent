@@ -47,6 +47,9 @@ package body KOW_Ent.Properties is
 	function Get_Value( Property : in Valued_Property_Type ) return Value_Type is
 		-- get the value
 	begin
+		if Property.Value.Is_null and then not Property.Allow_Null then
+			raise CONSTRAINT_ERROR with "Trying to get a null value for the property " & Property.Name.all;
+		end if;
 		return Property.Value;
 	end Get_Value;
 
@@ -57,6 +60,10 @@ package body KOW_Ent.Properties is
 			) is
 	begin
 		Pragma Assert( Property.Type_Of = Value.Type_Of, "Trying to set value for unmatched type" );
+
+		if Value.Is_Null and then not Property.Allow_Null then
+			raise CONSTRAINT_ERROR with "Property " & Property.Name.all & " does not allow null values";
+		end if;
 		Property.Value := Value;
 	end Set_Value;
 
