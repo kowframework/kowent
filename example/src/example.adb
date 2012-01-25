@@ -27,6 +27,22 @@ use users;
 procedure Example is
 	
 	U : User_Entity;
+
+	First_Job : Boolean := True;
+
+	procedure new_job is
+		use KOW_Ent.Properties;
+		J : Job_Entity;
+	begin
+		if First_Job then
+			KOW_Lib.String_Util.Copy( From => "Job 1", To => J.Title.Value.String_Value );
+		else
+			KOW_Lib.String_Util.Copy( From => "Job 2", To => J.Title.Value.String_Value );
+		end if;
+
+		Set_Value( J.User_Id, Get_Value( U.Id ) );
+		Store( J );
+	end new_job;
 begin
 	KOW_Config.Add_Config_Path( "." );
 	KOW_Ent.DB.Setup;
@@ -40,6 +56,10 @@ begin
 	Store( U );
 	Put( u );
 
+
+
+	new_job;
+	new_job;
 
 
 	-- now we select some values..

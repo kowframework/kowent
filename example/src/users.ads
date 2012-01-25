@@ -44,6 +44,30 @@ package Users is
 					);
 
 
+	User_Id_Name	: constant KOW_Ent.Property_Name_Type := new String'( "user_id" );
+	Title_Name	: constant KOW_Ent.Property_Name_Type := new String'( "title" );
+	
+	type Job_Entity is new KOW_Ent.Entity_Type with record
+		ID	: KOW_Ent.Properties.Id_Property(
+							Name		=> Id_Name,
+							Container	=> Job_Entity'Unrestricted_Access
+						);
+		User_Id	: KOW_Ent.Properties.Bigserial_Property(
+							Name		=> User_ID_Name,
+							COntainer	=> Job_Entity'Unrestricted_Access
+						);
+		Title	: KOW_Ent.Properties.String_Property(
+							Name		=> Title_Name,
+							Container	=> Job_Entity'Unrestricted_Access,
+							String_Length	=> 100
+						);
+	end record;
+	package Job_Storages is new KOW_Ent.DB.Data_Storages(
+						Entity_Type	=> Job_Entity,
+						Entity_Alias	=> "jobs"
+					);
+
+
 
 
 end Users;
