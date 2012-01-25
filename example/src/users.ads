@@ -11,6 +11,7 @@ with KOW_Ent;			use KOW_Ent;
 with KOW_Ent.Data_Storages;
 with KOW_Ent.DB;
 with KOW_Ent.DB.Data_Storages;
+with KOW_Ent.Extra_Properties;
 with KOW_Ent.Properties;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
@@ -22,6 +23,7 @@ package Users is
 
 	Id_Name		: constant KOW_Ent.Property_Name_Type := new String'( "id" );
 	Name_Name	: constant KOW_Ent.Property_Name_Type := new String'( "name" );
+	Password_Name	: constant KOW_Ent.Property_Name_Type := new String'( "password" );
 
 
 	type User_Entity is new KOW_Ent.Entity_Type with record
@@ -34,6 +36,10 @@ package Users is
 							Container	=> User_Entity'Unrestricted_Access,
 							String_Length	=> 20,
 							Allow_Null	=> True
+						);
+		Passwd	: KOW_Ent.Extra_Properties.Password_Property_Type(
+							Name		=> Password_Name,
+							Container	=> User_Entity'Unrestricted_Access
 						);
 	end record;
 	procedure Put( Usr : User_Entity );

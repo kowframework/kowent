@@ -11,6 +11,7 @@ with KOW_Ent;			use KOW_Ent;
 with KOW_Ent.Data_Storages;
 with KOW_Ent.DB;
 with KOW_Ent.DB.Data_Storages;
+with KOW_Ent.Extra_Properties;
 with KOW_Ent.Properties;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
@@ -53,6 +54,7 @@ begin
 	Put( u );
 
 	KOW_Lib.String_Util.Copy( From => "Marcelo 2", To => U.Name.Value.String_Value );
+	KOW_Ent.Extra_Properties.Set_Password( U.Passwd, "OMFG They killed kenny!" );
 
 	Store( U );
 	Put( u );
