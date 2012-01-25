@@ -45,7 +45,7 @@ package KOW_Ent.Properties is
 				Type_Of		: Type_Of_Data_Type;
 				String_Length	: Natural;
 				Allow_Null	: Boolean
-			) is abstract new KOW_Ent.Property_Type( Name, Container ) with record
+			) is abstract new KOW_Ent.Property_Type( Name, Container, Allow_Null ) with record
 		Value : Value_Type( Type_of, String_Length );
 	end record;
 

@@ -197,7 +197,8 @@ package KOW_Ent is
 
 	type Property_Type(
 				Name		: Property_Name_Type;	-- the idea here is column name in a table
-				Container	: Property_Container_Ptr
+				Container	: Property_Container_Ptr;
+				Allow_Null	: Boolean
 			) is abstract new Ada.Finalization.Controlled with null record;
 
 	type Property_Ptr is access all Property_Type'Class;

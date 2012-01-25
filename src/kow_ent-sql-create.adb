@@ -52,13 +52,10 @@ with KOW_Ent.Queries.Logic_Relations;
 
 package body KOW_Ent.SQL.Create is
 
-	type Create_Generator_Type is tagged private;
-	-- all the calls in this type are dynamic dispatched
-
 
 	procedure Generate_Create(
 			Generator	: in out Create_Generator_Type;
-			Template_Entity	: in     KOW_Ent.Entity_Type'Class;
+			Template_Entity	: in out KOW_Ent.Entity_Type'Class;
 			Q		: in out APQ.Root_Query_Type
 		) is
 		-- generate the create query
@@ -221,9 +218,11 @@ package body KOW_Ent.SQL.Create is
 	procedure Append_Id_Specification(
 			Generator	: in out Create_Generator_Type;
 			Q		: in out APQ.Root_Query_Type'Class
-		);
-	-- append the index id specification
-
+		) is
+		-- append the index id specification
+	begin
+		APQ.Append( Q, "PRIMARY KEY(" & Generator.Id_Property.Name.all & ")" );
+	end Append_Id_Specification;
 
 
 	-----------------------------------------
@@ -307,7 +306,7 @@ package body KOW_Ent.SQL.Create is
 			Property	: in     KOW_Ent.Property_Type'Class;
 			Q		: in out APQ.Root_Query_Type'Class
 		) is
-		function Get_Type_Spec is
+		function Get_Type_Spec return String is
 			use APQ;
 		begin
 			if Engine_of( Q ) = Engine_PostgreSQL then
@@ -330,7 +329,7 @@ package body KOW_Ent.SQL.Create is
 			Property	: in     KOW_Ent.Property_Type'Class;
 			Q		: in out APQ.Root_Query_Type'Class
 		) is
-		function Get_Type_Spec is
+		function Get_Type_Spec return String is
 			use APQ;
 		begin
 			if Engine_of( Q ) = Engine_PostgreSQL then
@@ -468,7 +467,7 @@ package body KOW_Ent.SQL.Create is
 				-- I'm limiting this to 255 characters for compatibility reasons
 				--
 				-- and I am assuming all the database vendors support at least 255 charaters in VARCHAR elements.
-				return "VARCHAR (" & Natural'Image( Value.String_Length & ')';
+				return "VARCHAR (" & Natural'Image( Value.String_Length ) & ')';
 			else
 				-- and I'll support TEXT at most; if the user wants to use a bigger string
 				-- it's probably better to store it in a text file and then load it using
@@ -520,7 +519,7 @@ package body KOW_Ent.SQL.Create is
 			Property	: in     KOW_Ent.Property_Type'Class;
 			Q		: in out APQ.Root_Query_Type'Class
 		) is
-		use type APQ.Database_Type;
+		use APQ;
 		Type_Of : constant Type_Of_Data_Type := Get_Value( Property ).Type_Of;
 	begin
 		pragma Assert( Type_Of in APQ_Serial .. APQ_Bigserial, "Only APQ_Serial and APQ_Bigserial types can be auto-incrementing!" );
@@ -542,14 +541,6 @@ package body KOW_Ent.SQL.Create is
 				raise PROGRAM_ERROR with "Tryed to run KOW_Ent in a non-supported database backend driver. Sorry about that, but you'll have to create your own db schema. Everything else should work fine.";
 		end case;
 	end Spec_Auto_Increment;
-
-private
-	type Create_Generator_Type is tagged record
-		Id_Property : KOW_Ent.Property_Ptr;
-		-- this is set by append_column_information
-		-- 
-	end record;
-
 
 end KOW_Ent.SQL.Create;
 
