@@ -281,6 +281,11 @@ package KOW_Ent is
 	type Data_Storage_Ptr is access all Data_Storage_Interface'Class;
 
 
+	procedure Install(
+				Data_Storage	: in out Data_Storage_Interface
+			) is abstract;
+	-- create all the required files for the data storage to work
+	-- for DB storages, it means create the table structure for each one of the entities
 
 
 	---------------------------

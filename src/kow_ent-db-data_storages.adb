@@ -54,6 +54,7 @@ with KOW_Ent.Properties;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
 with KOW_Ent.SQL;
+with KOW_Ent.SQL.Create;
 
 
 
@@ -119,6 +120,42 @@ package body KOW_Ent.DB.Data_Storages is
 			Free( Entity_Access( Entity ) );
 		end if;
 	end Free;
+
+
+	overriding
+	procedure Install(
+				Data_Storage	: in out DB_Storage_Type
+			) is
+		-- create table for the given entity
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			Q		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Generator	: KOW_Ent.SQL.Create.Create_Generator_Type;
+			Template_Entity	: Entity_Type;
+		begin
+			KOW_Ent.SQL.Create.Generate_Create(
+						Generator	=> Generator,
+						Template_Entity	=> Template_Entity,
+						Q		=> Q
+					);
+
+
+			APQ.Execute_Checked( Q, Connection, "ERROR RUNNING KOW_ENT CREATE QUERY" );
+
+			loop
+				-- fetch all the results so we won't trash our connection
+				APQ.Fetch( Q );
+			end loop;
+		exception
+			when APQ.No_Tuple =>
+				null;
+		end Runner;
+	begin
+		APQ_Provider.Run(
+					Provider		=> KOW_Ent.DB.Provider.all,
+					Connection_Runner	=> Runner'Access,
+					Queue_On_OOI		=> True
+				);
+	end Install;
 
 	--------------------
 	-- Load Functions --

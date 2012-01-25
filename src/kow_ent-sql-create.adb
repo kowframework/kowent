@@ -56,7 +56,7 @@ package body KOW_Ent.SQL.Create is
 	procedure Generate_Create(
 			Generator	: in out Create_Generator_Type;
 			Template_Entity	: in out KOW_Ent.Entity_Type'Class;
-			Q		: in out APQ.Root_Query_Type
+			Q		: in out APQ.Root_Query_Type'Class
 		) is
 		-- generate the create query
 

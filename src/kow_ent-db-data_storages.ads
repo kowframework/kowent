@@ -93,6 +93,13 @@ package KOW_Ent.DB.Data_Storages is
 				Entity		: in out KOW_Ent.Entity_Ptr
 			);
 
+	overriding
+	procedure Install(
+				Data_Storage	: in out DB_Storage_Type
+			);
+	-- create table for the given entity
+
+
 	--------------------
 	-- Load Functions --
 	--------------------
