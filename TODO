@@ -1,10 +1,10 @@
 
 
-3. Implement entity labels
-4. Implement extra properties
+1. database initialization
+2. Implement entity labels
+3. Implement extra properties
 	=> Locale_Property
 	=> Foreign_Key property (maybe it's not really needed... is it?)
-5. database initialization
 
 
 
