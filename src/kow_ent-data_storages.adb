@@ -130,6 +130,16 @@ package body KOW_Ent.Data_Storages is
 	end Get_Data_Storage;
 
 
+	procedure Install is
+		-- run install in every registered data storage
+		use Data_Storage_Maps;
+		procedure Iterator( C : Cursor ) is
+		begin
+			Install( Element( C ).all );
+		end Iterator;
+	begin
+		Iterate( Storages, Iterator'Access );
+	end Install;
 -- private
 
 	function To_String( Entity_Tag : Ada.Tags.Tag ) return Entity_Tag_String is

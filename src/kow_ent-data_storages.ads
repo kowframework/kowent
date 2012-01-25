@@ -173,6 +173,8 @@ package KOW_Ent.Data_Storages is
 	function Get_Data_Storage( Entity_Tag : in Ada.Tags.Tag ) return Data_Storage_Ptr;
 
 
+	procedure Install;
+	-- run install in every registered data storage
 
 	----------------------------
 	-- Entity Query Interface --
