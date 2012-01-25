@@ -383,7 +383,7 @@ package body KOW_Ent.SQL is
 	end Generate_Select;
 
 
-		function Get_Table_Name(
+	function Get_Table_Name(
 				Generator	: in     Select_Generator_Type
 			) return String is
 		-- get the name for the current table (trimmed, of course)
@@ -451,8 +451,8 @@ package body KOW_Ent.SQL is
 			) is
 		-- append all the columns name
 		use KOW_Ent.Data_Storages;
-		Table_Name	: constant String := Get_Table_Name( Generator );
 		Is_First : Boolean := True;
+		Table_Name	: constant String := Trim( Get_Alias( Template ) );
 
 		procedure Iterator( Property : in Property_Ptr ) is
 			PN : constant String := Property.name.all;
@@ -464,11 +464,32 @@ package body KOW_Ent.SQL is
 			end if;
 			APQ.Append( Q, Table_Name & '.' & PN & " as " & Table_name & '_' & PN );
 		end Iterator;
+
+
+		procedure Join_Iterator( Description : KOW_Ent.Queries.Join_Description_Type ) is
+			Storage	: Data_Storage_Ptr := Data_Storages.Get_Data_Storage( Description.Query.Entity_Tag );
+			Template_Ptr : KOW_Ent.Entity_Ptr := Data_Storages.Create(
+								Data_Storage	=> Data_Storages.Data_Storage_Type'Class( Storage.all ),
+								Entity_Tag	=> Description.Query.Entity_Tag
+							);
+		begin
+			Append_Column_Names(
+						Generator	=> Select_Generator_Type'Class( Generator ),
+						Query		=> Description.Query,
+						Connection	=> Connection,
+						Q		=> Q,
+						Template	=> Template_Ptr.all
+					);
+		end Join_Iterator;
 	begin
 		KOW_Ent.Iterate( 
 				Container	=> Template, 
 				Iterator	=> Iterator'Access
 			);
+
+		if Query in KOW_Ent.Queries.Join_Query_Type'Class then
+			Iterate( KOW_Ent.Queries.Join_Query_Type'Class( Query ), Join_Iterator'Access );
+		end if;
 	end Append_Column_Names;
 	
 	procedure Append_Table_Names(
@@ -764,6 +785,9 @@ package body KOW_Ent.SQL is
 					Connection	: in     APQ.Root_Connection_Type'Class;
 					Query		: in out APQ.Root_Query_Type'Class
 				) is
+		use KOW_Ent.Data_Storages;
+		Storage	: Data_Storage_Ptr := Get_Data_Storage( Description.Query.Entity_Tag );
+		Table_Name : constant String := Trim( Get_Alias( Data_Storage_Type'Class( Storage.all ), Description.Query.Entity_Tag ) );
 	begin
 		case Description.Join is
 			when Queries.LEFT_JOIN =>
@@ -775,7 +799,7 @@ package body KOW_Ent.SQL is
 		end case;
 
 		APQ.Append( Query, " (" );
-		APQ.Append( Query, ") on (" );
+		APQ.Append( Query, ") " & Table_Name & " on (" );
 
 		if Is_Empty( Description.Condition ) then
 			raise PROGRAM_ERROR with "trying to join without an appropriate condition";
