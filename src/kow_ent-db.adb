@@ -71,6 +71,7 @@ package body KOW_Ent.DB is
 	-- Installation of the Core Schema --
 	-------------------------------------
 
+	Is_First_Run : Boolean := True;
 	procedure Install_Table_Schema is
 		-- this will do several things:
 		-- 	1. test the connection
@@ -121,6 +122,11 @@ package body KOW_Ent.DB is
 			Execute( Q, C );
 		end Runner;
 	begin
+		if Is_First_Run then
+			Is_First_Run := False;
+		else
+			return;
+		end if;
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
