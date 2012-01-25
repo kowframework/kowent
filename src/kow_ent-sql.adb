@@ -615,6 +615,7 @@ package body KOW_Ent.SQL is
 				Connection	: in     APQ.Root_Connection_Type'Class;
 				Q		: in out APQ.Root_Query_Type'Class
 			) is
+		use APQ;
 	begin
 		case Relation is
 			when Relation_Equal_To =>
@@ -624,7 +625,11 @@ package body KOW_Ent.SQL is
 				APQ.Append( Q, "!=" );
 
 			when Relation_Like =>
-				APQ.Append( Q, " LIKE " );
+				if Engine_Of( Connection ) = Engine_PostgreSQL then
+					APQ.Append( Q, " ILIKE " );
+				else
+					APQ.Append( Q, " LIKE " );
+				end if;
 
 			when Relation_Less_Than =>
 				APQ.Append( Q, "<" );
