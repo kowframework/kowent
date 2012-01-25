@@ -1,11 +1,12 @@
 
 
-1. Implement joined queries
-2. Implement entity labels
-3. Implement extra properties
+1. Fix the column name loading in joined queries in SQL package
+2. null values support
+3. Implement entity labels
+4. Implement extra properties
 	=> Locale_Property
-	=> Foreign_Key property
-4. Test all the filtering facilities
+	=> Foreign_Key property (maybe it's not really needed... is it?)
+5. database initialization
 
 
 
