@@ -191,6 +191,7 @@ package KOW_Ent is
 
 
 	type Property_Name_Type is access String;
+	type Property_Name_Array is Array( Positive range <> ) of Property_Name_Type;
 	function PN( Name : in String ) return Property_Name_Type;
 	-- alias to return new String'(Name);
 

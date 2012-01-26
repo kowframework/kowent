@@ -549,6 +549,61 @@ package body KOW_Ent.SQL.Create is
 	--------------------------
 	-- Index Generator Type --
 	--------------------------
+
+	procedure Generate_Index(
+					Generator	: in out Index_Generator_Type;
+					Table_Name	: in     String;
+					Properties	: in     Property_Name_Array;
+					Is_Unique	: in     Boolean;
+					Q		: in out APQ.Root_Query_Type'Class
+				) is
+		-- generate the CREATE INDEX query for the given information
+
+		function Index_Name( C : Positive := 1 )return String is
+			
+			function Columns( I : Positive ) return String is
+			begin
+				if I > Properties'Last then
+					return "";
+				else
+					return '_' & Properties( I ).all & Columns( I + 1 );
+				end if;
+			end Columns;
+		begin
+			return "Idx_" & Table_Name & Columns( Properties'First );
+		end Index_Name;
+
+		function Index return String is
+		begin
+			if Is_Unique then
+				return "UNIQUE INDEX";
+			else
+				return "INDEX";
+			end if;
+		end Index;
+
+
+		function Columns_List( I : in Positive := Properties'First ) return String is
+			function P return String is
+				C : constant String := Columns_List( I + 1 );
+			begin
+				return Properties( I ).all & C;
+			end P;
+		begin
+			if I > Properties'Last then
+				return "";
+			elsif I = Properties'First then
+				return P;
+			else
+				return ',' & P;
+			end if;
+		end Columns_List;
+	begin
+		APQ.Append( Q, "CREATE " & Index & ' ' & Index_Name & " on " & Table_Name & '(' & Columns_List & ')' );
+	end Generate_Index;
+
+
+
 end KOW_Ent.SQL.Create;
 
 

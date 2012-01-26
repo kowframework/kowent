@@ -219,7 +219,20 @@ package KOW_Ent.SQL.Create is
 	-- Index Generator Type --
 	--------------------------
 
---	type Index_Generator_Type is tagged private;
+	type Index_Generator_Type is tagged null record;
+
+
+	procedure Generate_Index(
+					Generator	: in out Index_Generator_Type;
+					Table_Name	: in     String;
+					Properties	: in     Property_Name_Array;
+					Is_Unique	: in     Boolean;
+					Q		: in out APQ.Root_Query_Type'Class
+				);
+	-- generate the CREATE INDEX query for the given information
+
+
+
 
 private
 	type Create_Generator_Type is tagged record
@@ -227,7 +240,6 @@ private
 		-- this is set by append_column_information
 		-- 
 	end record;
-
 
 end KOW_Ent.SQL.Create;
 
