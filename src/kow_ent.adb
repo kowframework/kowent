@@ -366,35 +366,4 @@ package body KOW_Ent is
 		return ID.All;
 	end Get_Id;
 
---	---------------------------
---	-- The Data Storage Type --
---	---------------------------
-
---	type Data_Storage_Type is interface;
-	-- this is the type that actually handles storing and retrieving data
-
---	type Data_Storage_Ptr is access all Data_Storage_Type'Class;
-
---	procedure Read(
---			Data_Storage	: in out Data_Storage_Type;
---			Container	: in out Property_Container_Type'Class;
---			Query		: in     Query_Type
---		) is abstract;
-	
---	procedure Write(
---			Data_Storage	: in out Data_Storage_Type;
---			Container	: in     Property_Container_Type'Class
---		) is abstract;
-
-
-	---------------------
-	-- The Entity Type --
-	---------------------
-	
---	type Entity_Type is new Property_Container_Type with record
---		Data_Storage	: Data_Storage_Ptr;
---	end record;
---
---	procedure Load()
-
 end KOW_Ent;

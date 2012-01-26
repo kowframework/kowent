@@ -198,9 +198,7 @@ package KOW_Ent is
 	type Property_Type(
 				Name		: Property_Name_Type;	-- the idea here is column name in a table
 				Container	: Property_Container_Ptr;
-				Allow_Null	: Boolean;
-				Is_Index	: Boolean;
-				Is_Unique	: Boolean
+				Allow_Null	: Boolean
 			) is abstract new Ada.Finalization.Controlled with null record;
 
 	type Property_Ptr is access all Property_Type'Class;
@@ -344,28 +342,6 @@ package KOW_Ent is
 	-- get the ID property
 	-- the default implementation look for elements where Is_Id( Property ) = true
 	-- if none found, raises constraint error with an informative message
-
---	procedure Read(
---			Data_Storage	: in out Data_Storage_Type;
---			Container	: in out Property_Container_Type'Class;
---			Query		: in     Query_Type
---		) is abstract;
-	
---	procedure Write(
---			Data_Storage	: in out Data_Storage_Type;
---			Container	: in     Property_Container_Type'Class
---		) is abstract;
-
-
-	---------------------
-	-- The Entity Type --
-	---------------------
-	
---	type Entity_Type is new Property_Container_Type with record
---		Data_Storage	: Data_Storage_Ptr;
---	end record;
---
---	procedure Load()
 
 	
 private

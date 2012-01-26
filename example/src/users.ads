@@ -36,22 +36,16 @@ package Users is
 							Name		=> Name_Name,
 							Container	=> User_Entity'Unrestricted_Access,
 							String_Length	=> 20,
-							Allow_Null	=> True,
-							Is_Index	=> True,
-							Is_Unique	=> False
+							Allow_Null	=> True
 						);
 		Passwd	: KOW_Ent.Extra_Properties.Password_Property_Type(
 							Name		=> Password_Name,
-							Container	=> User_Entity'Unrestricted_Access,
-							Is_Index	=> True,
-							Is_Unique	=> False
+							Container	=> User_Entity'Unrestricted_Access
 						);
 
 		Locale	: KOW_Ent.Extra_Properties.Locale_Property_Type(
 							Name		=> Locale_Name,
-							Container	=> User_Entity'Unrestricted_Access,
-							Is_Index	=> True,
-							Is_Unique	=> False
+							Container	=> User_Entity'Unrestricted_Access
 						);
 	end record;
 	procedure Put( Usr : User_Entity );
@@ -74,17 +68,13 @@ package Users is
 		User_Id	: KOW_Ent.Properties.Bigserial_Property(
 							Name		=> User_ID_Name,
 							COntainer	=> Job_Entity'Unrestricted_Access,
-							Allow_Null	=> True,
-							Is_Index	=> True,
-							Is_Unique	=> False
+							Allow_Null	=> True
 						);
 		Title	: KOW_Ent.Properties.String_Property(
 							Name		=> Title_Name,
 							Container	=> Job_Entity'Unrestricted_Access,
 							String_Length	=> 100,
-							Allow_Null	=> True,
-							Is_Index	=> True,
-							Is_Unique	=> False
+							Allow_Null	=> True
 						);
 	end record;
 	package Job_Storages is new KOW_Ent.DB.Data_Storages(

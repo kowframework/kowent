@@ -131,7 +131,6 @@ package body KOW_Ent.DB.Data_Storages is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
 			Q	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 			Create	: KOW_Ent.SQL.Create.Create_Generator_Type;
-			Index	: KOW_Ent.SQL.Create.Index_Generator_Type;
 		begin
 			KOW_Ent.SQL.Create.Generate_Create(
 						Generator	=> Create,
@@ -144,21 +143,6 @@ package body KOW_Ent.DB.Data_Storages is
 			-- ignore the results because I was getting an exception
 			-- trashing the connection is not such a big issue as this will only run
 			-- once for each installment and apq_provider is smart enough to reconnect
-
-
-			APQ.Clear( Q );
-
-			KOW_Ent.SQL.Create.Initialize(
-						Generator	=> Index,
-						Template_Entity	=> Template_Entity
-					);
-			loop
-				KOW_Ent.SQL.Create.Fetch( Index );
-				exit when not KOW_Ent.SQL.Create.Has_Element( Index );
-				KOW_Ent.SQL.Create.Generate( Index, Q );
-				APQ.Execute_Checked( Q, Connection, "ERROR RUNNING KOW_ENT CREATE INDEX QUERY" );
-				APQ.Clear( Q );
-			end loop;
 		end Runner;
 	begin
 		Install_Table_Schema;
