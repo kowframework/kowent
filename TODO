@@ -1,12 +1,5 @@
 
 
-
-3. Implement extra properties
-	=> Locale_Property
-
-
-
-
 Once this is finished I'll start yet another refactoring on KOW_View (remove all the unbounded_strings references in favour of streams).
 
 With that finished I can code the brand new kowview-entities from scratch once again.
