@@ -288,6 +288,8 @@ package KOW_Ent is
 			) is abstract;
 	-- create all the required files for the data storage to work
 	-- for DB storages, it means create the table structure for each one of the entities
+	--
+	-- also, calls the Post_Install method for each template entity used
 
 	procedure Create_Index(
 				Data_Storage	: in out Data_Storage_Interface;
@@ -355,7 +357,7 @@ package KOW_Ent is
 	-- if none found, raises constraint error with an informative message
 
 
-	procedure Pos_Install(
+	procedure Post_Install(
 				Entity		: in out Entity_Type;
 				Data_Storage	: in out Data_Storage_Interface'Class
 			) is null;

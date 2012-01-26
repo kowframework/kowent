@@ -5,7 +5,7 @@ package body Users is
 
 
 	overriding
-	procedure Pos_Install(
+	procedure Post_Install(
 				User		: in out User_Entity;
 				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
 			) is
@@ -19,7 +19,7 @@ package body Users is
 					Is_Unique	=> False
 				);
 
-	end Pos_Install;
+	end Post_Install;
 
 	procedure Put( Usr : User_Entity ) is
 	begin
@@ -29,7 +29,7 @@ package body Users is
 
 
 	overriding
-	procedure Pos_Install(
+	procedure Post_Install(
 				User		: in out Job_Entity;
 				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
 			) is
@@ -39,8 +39,8 @@ package body Users is
 					Data_Storage	=> Data_Storage,
 					Entity_Tag	=> Job_Entity'Tag,
 					Property_Names	=> ( 1 => Title_name ),
-					Is_Unique	=> True
+					Is_Unique	=> False
 				);
-	end Pos_Install;
+	end Post_Install;
 
 end Users;

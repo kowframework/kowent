@@ -66,7 +66,7 @@ package Users is
 	end record;
 
 	overriding
-	procedure Pos_Install(
+	procedure Post_Install(
 				User		: in out User_Entity;
 				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
 			);
@@ -108,7 +108,7 @@ package Users is
 	end record;
 
 	overriding
-	procedure Pos_Install(
+	procedure Post_Install(
 				User		: in out Job_Entity;
 				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
 			);

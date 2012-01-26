@@ -155,7 +155,7 @@ package body KOW_Ent.DB.Data_Storages is
 					Connection_Runner	=> Runner'Access,
 					Queue_On_OOI		=> True
 				);
-		Pos_Install( Template_Entity, Data_Storage );
+		Post_Install( Template_Entity, Data_Storage );
 
 		-- if I got here it means I can continue informing I exist..
 
