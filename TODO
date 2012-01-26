@@ -4,4 +4,3 @@
 
 After testing and fixing all the bugs of this release:
 	1. evaluate the need for a foreign_key property type
-	2. think about a more complex API for index creation, supporing multiple columns
