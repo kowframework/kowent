@@ -21,8 +21,14 @@ with KOW_Lib.String_Util;
 
 package Users is
 
+
+	-----------------
+	-- User Entity --
+	-----------------
+
 	Id_Name		: constant KOW_Ent.Property_Name_Type := new String'( "id" );
 	Name_Name	: constant KOW_Ent.Property_Name_Type := new String'( "name" );
+	Lastname_Name	: constant KOW_Ent.Property_Name_Type := new String'( "lastname" );
 	Password_Name	: constant KOW_Ent.Property_Name_Type := new String'( "password" );
 	Locale_Name	: constant KOW_Ent.Property_Name_Type := new String'( "locale" );
 
@@ -38,6 +44,16 @@ package Users is
 							String_Length	=> 20,
 							Allow_Null	=> True
 						);
+
+		Lastname: KOW_Ent.Properties.String_Property(
+							Name		=> Lastname_Name,
+							Container	=> User_Entity'Unrestricted_Access,
+							String_Length	=> 20,
+							Allow_Null	=> True
+						);
+
+
+
 		Passwd	: KOW_Ent.Extra_Properties.Password_Property_Type(
 							Name		=> Password_Name,
 							Container	=> User_Entity'Unrestricted_Access
@@ -48,6 +64,14 @@ package Users is
 							Container	=> User_Entity'Unrestricted_Access
 						);
 	end record;
+
+	overriding
+	procedure Pos_Install(
+				User		: in out User_Entity;
+				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
+			);
+	-- create the name/lastname index
+
 	procedure Put( Usr : User_Entity );
 
 
@@ -56,6 +80,11 @@ package Users is
 						Entity_Alias	=> "users"
 					);
 
+
+
+	----------------
+	-- Job Entity --
+	----------------
 
 	User_Id_Name	: constant KOW_Ent.Property_Name_Type := new String'( "user_id" );
 	Title_Name	: constant KOW_Ent.Property_Name_Type := new String'( "title" );
@@ -77,6 +106,14 @@ package Users is
 							Allow_Null	=> True
 						);
 	end record;
+
+	overriding
+	procedure Pos_Install(
+				User		: in out Job_Entity;
+				Data_Storage	: in out KOW_Ent.Data_Storage_Interface'Class
+			);
+	-- create the title index
+
 	package Job_Storages is new KOW_Ent.DB.Data_Storages(
 						Entity_Type	=> Job_Entity,
 						Entity_Alias	=> "jobs"
