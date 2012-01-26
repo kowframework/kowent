@@ -1,10 +1,6 @@
 
 
-Once this is finished I'll start yet another refactoring on KOW_View (remove all the unbounded_strings references in favour of streams).
-
-With that finished I can code the brand new kowview-entities from scratch once again.
 
 
-
-Remember to implement in KOW_View.Entities:
-1. Implement entity labels
+After testing and fixing all the bugs of this release:
+	1. evaluate the need for a foreign_key property type
