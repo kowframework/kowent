@@ -43,6 +43,7 @@
 --------------
 with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Finalization;
+with Ada.Tags;
 with Ada.Unchecked_Deallocation;
 
 -------------------
@@ -287,6 +288,15 @@ package KOW_Ent is
 			) is abstract;
 	-- create all the required files for the data storage to work
 	-- for DB storages, it means create the table structure for each one of the entities
+
+	procedure Create_Index(
+				Data_Storage	: in out Data_Storage_Interface;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Property_Names	: in     Property_Name_Array;
+				Is_Unique	: in     Boolean
+			) is abstract;
+	-- create a index with the given properties for the given entity_tag
+	-- is_unique define if each index entry should be unique or not
 
 
 	function Type_Of(

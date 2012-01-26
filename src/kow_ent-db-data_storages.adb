@@ -162,6 +162,39 @@ package body KOW_Ent.DB.Data_Storages is
 	end Install;
 
 	overriding
+	procedure Create_Index(
+				Data_Storage	: in out DB_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Property_Names	: in     Property_Name_Array;
+				Is_Unique	: in     Boolean
+			) is
+		-- create a index with the given properties for the given entity_tag
+		-- is_unique define if each index entry should be unique or not
+		procedure Runner( Connection : in out APQ.Root_Connection_Type'CLass ) is
+			Q	: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
+			Index	: KOW_Ent.SQL.Create.Index_Generator_Type;
+		begin
+
+			KOW_Ent.SQL.Create.Generate_Index(
+						Generator	=> Index,
+						Table_Name	=> Entity_Alias,
+						Properties	=> Property_Names,
+						Is_Unique	=> Is_Unique,
+						Q		=> Q
+					);
+			APQ.Execute_Checked( Q, Connection, "ERROR RUNNING KOW_ENT CREATE INDEX QUERY" );
+		end Runner;
+
+	begin
+		APQ_Provider.Run(
+					Provider		=> KOW_Ent.DB.Provider.all,
+					Connection_Runner	=> Runner'Access,
+					Queue_On_OOI		=> True
+				);
+	end Create_Index;
+
+
+	overriding
 	function Type_Of(
 				Data_Storage	: in     DB_Storage_Type
 			) return String is

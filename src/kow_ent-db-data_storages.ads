@@ -101,6 +101,16 @@ package KOW_Ent.DB.Data_Storages is
 			);
 	-- create table for the given entity
 
+	overriding
+	procedure Create_Index(
+				Data_Storage	: in out DB_Storage_Type;
+				Entity_Tag	: in     Ada.Tags.Tag;
+				Property_Names	: in     Property_Name_Array;
+				Is_Unique	: in     Boolean
+			);
+	-- create a index with the given properties for the given entity_tag
+	-- is_unique define if each index entry should be unique or not
+
 
 	overriding
 	function Type_Of(
