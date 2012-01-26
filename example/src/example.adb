@@ -15,6 +15,7 @@ with KOW_Ent.Extra_Properties;
 with KOW_Ent.Properties;
 with KOW_Ent.Queries;
 with KOW_Ent.Queries.Logic_Relations;
+with KOW_Lib.Locales;
 with KOW_Lib.String_Util;
 
 
@@ -55,6 +56,7 @@ begin
 
 	KOW_Lib.String_Util.Copy( From => "Marcelo 2", To => U.Name.Value.String_Value );
 	KOW_Ent.Extra_Properties.Set_Password( U.Passwd, "OMFG They killed kenny!" );
+	KOW_Ent.Extra_Properties.Set_Locale( U.Locale, KOW_Lib.Locales.Get_Locale( "en_US" ) );
 
 	Store( U );
 	Put( u );

@@ -24,6 +24,7 @@ package Users is
 	Id_Name		: constant KOW_Ent.Property_Name_Type := new String'( "id" );
 	Name_Name	: constant KOW_Ent.Property_Name_Type := new String'( "name" );
 	Password_Name	: constant KOW_Ent.Property_Name_Type := new String'( "password" );
+	Locale_Name	: constant KOW_Ent.Property_Name_Type := new String'( "locale" );
 
 
 	type User_Entity is new KOW_Ent.Entity_Type with record
@@ -39,6 +40,11 @@ package Users is
 						);
 		Passwd	: KOW_Ent.Extra_Properties.Password_Property_Type(
 							Name		=> Password_Name,
+							Container	=> User_Entity'Unrestricted_Access
+						);
+
+		Locale	: KOW_Ent.Extra_Properties.Locale_Property_Type(
+							Name		=> Locale_Name,
 							Container	=> User_Entity'Unrestricted_Access
 						);
 	end record;
