@@ -149,11 +149,13 @@ package body KOW_Ent.DB.Data_Storages is
 		-- this actually runs only once;
 		-- that's where the existence of databases is tested.
 
+
 		APQ_Provider.Run(
 					Provider		=> KOW_Ent.DB.Provider.all,
 					Connection_Runner	=> Runner'Access,
 					Queue_On_OOI		=> True
 				);
+		Pos_Install( Template_Entity, Data_Storage );
 
 		-- if I got here it means I can continue informing I exist..
 

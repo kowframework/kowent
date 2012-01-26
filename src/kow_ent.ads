@@ -354,6 +354,15 @@ package KOW_Ent is
 	-- the default implementation look for elements where Is_Id( Property ) = true
 	-- if none found, raises constraint error with an informative message
 
+
+	procedure Pos_Install(
+				Entity		: in out Entity_Type;
+				Data_Storage	: in out Data_Storage_Interface'Class
+			) is null;
+	-- called by the install procedure after it has created the storage schema
+	-- for this entity
+	
+
 	
 private
 
