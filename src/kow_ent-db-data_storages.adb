@@ -193,7 +193,7 @@ package body KOW_Ent.DB.Data_Storages is
 			) return String is
 		-- return the current version
 	begin
-		return "1.0a";
+		return "1.1a";
 	end Version_Of;
 
 	--------------------
