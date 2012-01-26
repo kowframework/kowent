@@ -213,6 +213,36 @@ package KOW_Ent.SQL.Create is
 	--
 	-- if not of serial type, raises program_error with informative message
 	
+
+
+	--------------------------
+	-- Index Generator Type --
+	--------------------------
+
+	type Index_Generator_Type is tagged private;
+
+	procedure Initialize(
+				Generator	: in out Index_Generator_Type;
+				Template_Entity	: in out KOW_Ent.Entity_Type'Class
+			);
+	-- populate the index generation stuff
+
+
+
+	procedure Fetch(
+				Generator	: in out Index_Generator_Type
+			);
+
+	function Has_Element(
+				Generator	: in     Index_Generator_Type
+			) return Boolean;
+
+	procedure Generate(
+				Generator	: in     Index_Generator_Type;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+
+
 private
 	type Create_Generator_Type is tagged record
 		Id_Property : KOW_Ent.Property_Ptr;
@@ -220,6 +250,16 @@ private
 		-- 
 	end record;
 
+
+
+	type Index_Generator_Type is tagged record
+		Properties	: Property_Lists.List;
+		-- the list containing the properties that are indexes
+
+		Current		: Property_Lists.Cursor;
+
+		Entity_Alias	: Entity_Alias_Type;
+	end record;
 
 end KOW_Ent.SQL.Create;
 

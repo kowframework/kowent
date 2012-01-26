@@ -544,6 +544,75 @@ package body KOW_Ent.SQL.Create is
 		end case;
 	end Spec_Auto_Increment;
 
+
+
+	--------------------------
+	-- Index Generator Type --
+	--------------------------
+
+
+	procedure Initialize(
+				Generator	: in out Index_Generator_Type;
+				Template_Entity	: in out KOW_Ent.Entity_Type'Class
+			) is
+		-- populate the index generation stuff
+		procedure Iterator( Property : Property_Ptr ) is
+		begin
+			if not Is_Id( Property.all ) and then Property.Is_Index then
+				Property_Lists.Append( Generator.Properties, Property );
+			elsif Property.Is_Unique then
+				if not Property.Is_Index then
+					raise PROGRAM_ERROR with "you can't have a non-index being unique";
+				end if;
+			end if;
+		end Iterator;
+	begin
+		KOW_Ent.Iterate( Template_Entity, Iterator'Access );
+		Generator.Entity_Alias := Get_Alias( Template_Entity );
+	end Initialize;
+
+
+	procedure Fetch(
+				Generator	: in out Index_Generator_Type
+			) is
+		use Property_Lists;
+	begin
+		if Generator.Current = No_Element then
+			Generator.Current := First( Generator.Properties );
+		else
+			Next( Generator.Current );
+		end if;
+	end Fetch;
+
+	function Has_Element(
+				Generator	: in     Index_Generator_Type
+			) return Boolean is
+	begin
+		return Property_Lists.Has_Element( Generator.Current );
+	end Has_Element;
+
+	procedure Generate(
+				Generator	: in     Index_Generator_Type;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+		Property : Property_Ptr := Property_Lists.Element( Generator.Current );
+		TN	: constant String := Trim( Generator.Entity_Alias );
+		CN	: constant String := Property.Name.all;
+
+		function Index return String is
+		begin
+			if Property.Is_Unique then
+				return "UNIQUE INDEX";
+			else
+				return "INDEX";
+			end if;
+		end Index;
+	begin
+		APQ.Append( Q, "CREATE " & Index  & ' ' & TN & '_' & CN & " on " & TN & '(' & CN & ')' );
+	end Generate;
+
+
+
 end KOW_Ent.SQL.Create;
 
 

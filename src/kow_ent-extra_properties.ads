@@ -52,13 +52,17 @@ package KOW_Ent.Extra_Properties is
 
 	type Locale_Property_Type(
 				Name		: Property_Name_Type;
-				Container	: Property_Container_Ptr
+				Container	: Property_Container_Ptr;
+				Is_Index	: Boolean;
+				Is_Unique	: Boolean
 			) is new KOW_Ent.Properties.Valued_Property_Type(
 							Name		=> Name,
 							Container	=> Container,
 							Type_Of		=> APQ_String,
 							String_Length	=> 8,
-							Allow_Null	=> False
+							Allow_Null	=> False,
+							Is_Index	=> Is_Index,
+							Is_Unique	=> Is_Unique
 						) with null record;
 	overriding
 	procedure Initialize( Property : in out Locale_Property_Type );
@@ -81,13 +85,17 @@ package KOW_Ent.Extra_Properties is
 
 	type Password_Property_Type(
 				Name		: Property_Name_type;
-				Container	: Property_Container_Ptr
+				Container	: Property_Container_Ptr;
+				Is_Index	: Boolean;
+				Is_Unique	: Boolean
 			) is new KOW_Ent.Properties.Valued_Property_Type(
 							Name		=> Name,
 						       	Container	=> Container,
 							Type_Of		=> APQ_String,
 							String_Length	=> 40,
-						       	Allow_NUll	=> False
+						       	Allow_NUll	=> False,
+							Is_index	=> Is_Index,
+							Is_Unique	=> Is_Unique
 					     ) with null record;
 	-- holds a SHA1 hashed passowrd
 
