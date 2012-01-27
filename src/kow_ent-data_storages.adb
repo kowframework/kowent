@@ -129,6 +129,9 @@ package body KOW_Ent.Data_Storages is
 		use Data_Storage_Maps;
 	begin
 		return Element( Storages, To_String( Entity_Tag ) );
+	exception
+		when CONSTRAINT_ERROR =>
+			raise CONSTRAINT_ERROR with "There is no data storage for the type " & Ada.Tags.Expanded_Name( Entity_Tag );
 	end Get_Data_Storage;
 
 
