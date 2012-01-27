@@ -262,6 +262,13 @@ private
 						Equivalent_Keys	=> "=",
 						Hash		=> Hash
 					);
+	package Data_Storage_Lists is new Ada.Containers.Doubly_Linked_Lists(
+						Element_Type	=> Data_Storage_Ptr
+					);
 	
-	Storages : Data_Storage_Maps.Map;
+	Storages		: Data_Storage_Maps.Map;
+
+	Elaboration_Order	: Data_Storage_Lists.List;
+	-- this will keep track the order the data storages have been registered
+	-- it's used by the install procedure
 end KOW_Ent.Data_Storages;

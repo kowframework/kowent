@@ -119,8 +119,10 @@ package body KOW_Ent.Data_Storages is
 			) is
 		-- create a relation between an entity and a data storage.
 		use Data_Storage_Maps;
+		use Data_Storage_Lists;
 	begin
 		Insert( Storages, To_String( Entity_Tag ), Data_Storage );
+		Append( Elaboration_Order, Data_Storage );
 	end Register_Entity;
 
 	function Get_Data_Storage( Entity_Tag : in Ada.Tags.Tag ) return Data_Storage_Ptr is
@@ -133,9 +135,9 @@ package body KOW_Ent.Data_Storages is
 	procedure Install is
 		-- run install in every registered data storage
 		use Ada.Containers;
-		use Data_Storage_Maps;
+		use Data_Storage_Lists;
 
-		type Storage_Array is array( 1 .. Length( Storages ) ) of Data_Storage_Ptr;
+		type Storage_Array is array( 1 .. Length( Elaboration_Order ) ) of Data_Storage_Ptr;
 		St : Storage_Array;
 
 		i : Count_Type := St'First;
@@ -146,7 +148,7 @@ package body KOW_Ent.Data_Storages is
 			i := i + 1;
 		end Iterator;
 	begin
-		Iterate( Storages, Iterator'Access );
+		Iterate( Elaboration_Order, Iterator'Access );
 		-- fetch all the data storages..
 
 		for i in St'Range loop
