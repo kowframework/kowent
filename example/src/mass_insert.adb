@@ -1,5 +1,6 @@
 
 
+with Ada.Exceptions;
 with Ada.Text_IO;
 
 
@@ -35,6 +36,10 @@ procedure Mass_Insert is
 		KOW_Lib.String_Util.Copy( From => "Marcelo", To => U.Name.Value.String_Value );
 		KOW_Ent.Extra_Properties.Set_Password( U.Passwd, "x" );
 		Store( u );
+	exception
+		when e : others =>
+			Ada.Text_IO.Put_Line( "Exception while inserting!" );
+			Ada.Text_IO.Put_line( Ada.Exceptions.Exception_Name( e ) & ": " & Ada.Exceptions.Exception_Information( e ) );
 	end Insert;
 
 	task type insert_task;
@@ -42,7 +47,7 @@ procedure Mass_Insert is
 	begin
 		for i in 1 .. 1_000 loop
 			Insert;
-		--	delay 0.1;
+			--delay 0.1;
 		end loop;
 	end insert_Task;
 
