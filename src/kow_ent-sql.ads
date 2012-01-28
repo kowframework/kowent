@@ -275,6 +275,15 @@ package KOW_Ent.SQL is
 
 	type Update_Generator_Type is new Select_Generator_Type with private;
 
+	overriding
+	procedure Append_Table_Names(
+				Generator	: in out Update_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			);
+	-- append all the tables that should be queried
+	-- in postgresql update query, only uses the table that's really going to be changed
+	-- in all others, update all the tables involved
 
 	procedure Generate_Update(
 				Generator	: in out Update_Generator_Type;

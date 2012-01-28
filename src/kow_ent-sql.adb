@@ -858,6 +858,29 @@ package body KOW_Ent.SQL is
 	-------------------------------
 
 
+	overriding
+	procedure Append_Table_Names(
+				Generator	: in out Update_Generator_Type;
+				Connection	: in     APQ.Root_Connection_Type'Class;
+				Q		: in out APQ.Root_Query_Type'Class
+			) is
+		-- append all the tables that should be queried
+		-- in postgresql update query, only uses the table that's really going to be changed
+		-- in all others, update all the tables involved
+		use APQ;
+	begin
+		if Engine_of( Q ) = Engine_PostgreSQL then
+			Append( Q, Trim( Table_Alias_Lists.First_Element( Generator.Tables_To_Select ) ) );
+		else
+			Append_Table_Names(
+						Generator	=> Select_Generator_Type( Generator ),
+						Connection	=> Connection,
+						Q		=> Q
+					);
+		end if;
+	end Append_Table_Names;
+
+
 	procedure Generate_Update(
 				Generator	: in out Update_Generator_Type;
 				Connection	: in     APQ.Root_Connection_Type'Class;
@@ -873,6 +896,7 @@ package body KOW_Ent.SQL is
 
 
 		procedure Iterator( P : in Property_Ptr ) is
+			use APQ;
 		begin
 			if Ignore_For_Update( P.all ) then
 				return;
@@ -885,7 +909,11 @@ package body KOW_Ent.SQL is
 				APQ.Append( Q, "," );
 			end if;
 
-			APQ.Append( Q, Table_Name & '.' & P.Name.all & "=" );
+			if Engine_Of( Q ) = Engine_PostgreSQL then
+				APQ.Append( Q, P.Name.all & "=" );
+			else
+				APQ.Append( Q, Table_Name & '.' & P.Name.all & "=" );
+			end if;
 			Append_Value( Get_Value( P.all ), Connection, Q );
 		end Iterator;
 
@@ -906,7 +934,7 @@ package body KOW_Ent.SQL is
 	begin
 		
 		APQ.Append( Q, "UPDATE " );
-			Append_Table_Names( Generator, Connection, Q );
+			Append_Table_Names( Update_Generator_Type'Class( Generator ), Connection, Q );
 
 		APQ.Append( Q, " SET " );
 

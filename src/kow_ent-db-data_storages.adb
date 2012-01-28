@@ -36,7 +36,6 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
-with ada.text_io;
 --------------
 -- Ada 2005 --
 --------------
@@ -600,7 +599,6 @@ package body KOW_Ent.DB.Data_Storages is
 			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
 			SQL.Generate_Update( Generator, Connection, Query, Entity, Criteria );
-			--Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT UPDATE QUERY" );
 		end Runner;
 	begin

@@ -46,5 +46,6 @@ package body Users is
 	end Post_Install;
 
 begin
-	kow_lib.log.default_level := kow_lib.log.level_debug;
+	null;
+	--kow_lib.log.default_level := kow_lib.log.level_debug;
 end Users;
