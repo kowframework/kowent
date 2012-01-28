@@ -36,6 +36,7 @@
 -- stored in Database backends using the native DB types.                   --
 ------------------------------------------------------------------------------
 
+with ada.text_io;
 --------------
 -- Ada 2005 --
 --------------
@@ -534,22 +535,42 @@ package body KOW_Ent.DB.Data_Storages is
 				Entity		: in out KOW_Ent.Entity_Type'Class
 			) is
 		procedure Runner( Connection : in out APQ.Root_Connection_Type'Class ) is
+			use APQ;
 			Generator	: SQL.Insert_Generator_Type;
 			Query		: APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 			Id_Property	: Property_Ptr;
 		begin
 			SQL.Generate_Insert( Generator, Connection, Query, Entity, Id_Property );
+			if Id_Property /= null and then Engine_of( Query ) = Engine_PostgreSQL then
+				APQ.Append( Query, " RETURNING " & Id_Property.Name.all );
+			end if;
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT INSERT QUERY" );
 
 			if Id_Property /= null then
 				-- set the ID value from DB
-				declare
-					OID : APQ.Row_Id_Type;
-				begin
-					OID := APQ.Command_OID( Query );
-					Properties.Id_Property( Id_Property.all ).Value.Bigserial_Value := APQ.APQ_Bigserial( OID );
-					-- the Id_Property pointer is only set if it's in the id_property type
-				end;
+
+				if Engine_Of( Query ) = Engine_PostgreSQL then
+					-- KOW_Ent uses serial column types to represent it.
+					-- thus rendering the command_oid feature useless in this vendor
+					--
+					-- in both ct_lib and mysql the behaviour of command_oid is to return
+					-- the value of the ID auto increment column.
+					Fetch( Query );
+					KOW_Ent.SQL.Load_Value(
+								Value		=> Properties.Id_Property( Id_Property.all ).Value,
+								Connection	=> Connection,
+								Q		=> Query,
+								Column_Name	=> Id_Property.Name.All
+							);
+				else
+					declare
+						OID : APQ.Row_Id_Type;
+					begin
+						OID := APQ.Command_OID( Query );
+						Properties.Id_Property( Id_Property.all ).Value.Bigserial_Value := APQ.APQ_Bigserial( OID );
+						-- the Id_Property pointer is only set if it's in the id_property type
+					end;
+				end if;
 			end if;
 		end Runner;
 	begin
@@ -579,6 +600,7 @@ package body KOW_Ent.DB.Data_Storages is
 			Query : APQ.Root_Query_Type'Class := APQ.New_Query( Connection );
 		begin
 			SQL.Generate_Update( Generator, Connection, Query, Entity, Criteria );
+			--Ada.Text_IO.Put_line( APQ.To_String( Query ) );
 			APQ.Execute_Checked( Query, Connection, "ERROR RUNNING KOW_ENT UPDATE QUERY" );
 		end Runner;
 	begin

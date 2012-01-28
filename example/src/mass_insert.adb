@@ -5,6 +5,7 @@ with Ada.Text_IO;
 
 with APQ;
 with APQ_Provider.MySQL;
+with APQ_Provider.PostgreSQL;
 
 with KOW_Config;
 with KOW_Ent;			use KOW_Ent;
