@@ -82,6 +82,9 @@ package body KOW_Ent.SQL is
 		end if;
 
 		case Value.Type_of is
+			when APQ_Boolean =>
+				APQ.Append( Q, Value.Boolean_Value );
+
 			when APQ_Smallint =>
 				Append_Smallint( Q, Value.Smallint_Value );
 
@@ -176,6 +179,9 @@ package body KOW_Ent.SQL is
 		end if;
 		
 		case Value.Type_of is
+			when APQ_Boolean =>
+				Value.Boolean_Value := APQ.Value( Q, Idx );
+
 			when APQ_Smallint =>
 				Value.Smallint_Value := Smallint_Value( Q, Idx );
 

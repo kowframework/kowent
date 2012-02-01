@@ -64,6 +64,8 @@ package KOW_Ent is
 
 	type Type_Of_Data_Type is (
 				-- these values are mapped back to the APQ type with the same name
+				APQ_Boolean,
+
 				APQ_Smallint,
 				APQ_Integer,
 				APQ_Bigint,
@@ -102,6 +104,9 @@ package KOW_Ent is
 		-- remember your property type must take this into account.
 
 		case Type_Of is
+			when APQ_Boolean =>
+				Boolean_Value	: APQ.APQ_Boolean := False;
+
 			when APQ_Smallint =>
 				Smallint_Value	: APQ.APQ_Smallint := APQ.APQ_Smallint'First;
 
@@ -154,7 +159,7 @@ package KOW_Ent is
 
 
 	function To_String( Value : in Value_Type ) return String;
-	-- convert the value into a not trimmed string
+	-- convert the value into a trimmed string
 	
 	procedure From_String( Value : in out Value_Type; String_Value : in String );
 	-- set the value form a string

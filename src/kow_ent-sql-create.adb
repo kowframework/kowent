@@ -109,7 +109,7 @@ package body KOW_Ent.SQL.Create is
 		end if;
 
 		case Val.Type_Of is
-				when APQ_Smallint =>
+				when APQ_Boolean | APQ_Smallint =>
 					Spec_Smallint(
 							Generator	=> Create_Generator_Type'Class( Generator ),
 							Property	=> Property.all,

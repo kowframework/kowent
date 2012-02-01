@@ -64,54 +64,62 @@ package body KOW_Ent is
 
 	function To_String( Value : in Value_Type ) return String is
 		-- convert the value into a not trimmed string
+		function TS return String is
+		begin
+			case Value.Type_Of is
+				when APQ_Boolean =>
+					return APQ.APQ_Boolean'Image( Value.Boolean_Value );
+
+
+				when APQ_Smallint =>
+					return APQ.APQ_Smallint'Image( Value.Smallint_Value );
+
+				when APQ_Integer =>
+					return APQ.APQ_Integer'Image( Value.Integer_Value );
+
+				when APQ_Bigint =>
+					return APQ.APQ_Bigint'Image( Value.Bigint_Value );
+
+				when APQ_Real	=>
+					return APQ.APQ_Real'Image( Value.Real_Value );
+
+				when APQ_Double =>
+					return APQ.APQ_Double'Image( Value.Double_Value );
+
+				when APQ_Serial	=>
+					return APQ.APQ_Serial'Image( Value.Serial_Value );
+
+				when APQ_Bigserial =>
+					return APQ.APQ_Bigserial'Image( Value.Bigserial_Value );
+
+				when APQ_Date =>
+					-- TODO :: convert to string
+					return "";
+
+				when APQ_Time =>
+					-- TODO :: convert to string
+					return "";
+
+				when APQ_Timestamp =>
+					-- TODO :: convert to string
+					return "";
+
+
+				when Hour_Number =>
+					return APQ.Hour_Number'Image( Value.Hour_Value );
+				
+				when Minute_Number =>
+					return APQ.Minute_Number'Image( Value.Minute_Value );
+
+				when Second_Number =>
+					return APQ.Second_Number'Image( Value.Second_Value );
+
+				when APQ_String =>
+					return Value.String_Value;
+			end case;
+		end TS;
 	begin
-		case Value.Type_Of is
-			when APQ_Smallint =>
-				return APQ.APQ_Smallint'Image( Value.Smallint_Value );
-
-			when APQ_Integer =>
-				return APQ.APQ_Integer'Image( Value.Integer_Value );
-
-			when APQ_Bigint =>
-				return APQ.APQ_Bigint'Image( Value.Bigint_Value );
-
-			when APQ_Real	=>
-				return APQ.APQ_Real'Image( Value.Real_Value );
-
-			when APQ_Double =>
-				return APQ.APQ_Double'Image( Value.Double_Value );
-
-			when APQ_Serial	=>
-				return APQ.APQ_Serial'Image( Value.Serial_Value );
-
-			when APQ_Bigserial =>
-				return APQ.APQ_Bigserial'Image( Value.Bigserial_Value );
-
-			when APQ_Date =>
-				-- TODO :: convert to string
-				return "";
-
-			when APQ_Time =>
-				-- TODO :: convert to string
-				return "";
-
-			when APQ_Timestamp =>
-				-- TODO :: convert to string
-				return "";
-
-
-			when Hour_Number =>
-				return APQ.Hour_Number'Image( Value.Hour_Value );
-			
-			when Minute_Number =>
-				return APQ.Minute_Number'Image( Value.Minute_Value );
-
-			when Second_Number =>
-				return APQ.Second_Number'Image( Value.Second_Value );
-
-			when APQ_String =>
-				return Value.String_Value;
-		end case;
+		return Ada.Strings.Fixed.Trim( TS, Ada.Strings.Both );
 	end To_String;
 
 
@@ -122,6 +130,9 @@ package body KOW_Ent is
 		-- if the value.type_of=apq_string, raises constraint_error only if string_value'length > value.string_value'length
 	begin
 		case Value.Type_Of is
+			when APQ_Boolean =>
+				Value.Boolean_Value := APQ.APQ_Boolean'Value( String_Value );
+
 			when APQ_Smallint =>
 				Value.Smallint_Value := APQ.APQ_Smallint'Value( String_Value );
 
