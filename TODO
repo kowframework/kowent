@@ -4,3 +4,4 @@
 
 After testing and fixing all the bugs of this release:
 	1. evaluate the need for a foreign_key property type
+	1. implement to_string and from_string for date/time values
