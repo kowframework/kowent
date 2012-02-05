@@ -55,7 +55,10 @@ package KOW_Ent.Properties is
 	-- return the type of the value; used for calling set_valued in the right way
 
 	overriding
-	function Get_Value( Property : in Valued_Property_Type ) return Value_Type;
+	function Get_Value(
+				Property	: in Valued_Property_Type;
+				For_Store	: in Boolean := False
+			) return Value_Type;
 	-- get the value
 	
 	overriding

@@ -44,7 +44,10 @@ package body KOW_Ent.Properties is
 	end Get_Type;
 
 
-	function Get_Value( Property : in Valued_Property_Type ) return Value_Type is
+	function Get_Value(
+				Property	: in Valued_Property_Type;
+				For_Store	: in Boolean := False
+			) return Value_Type is
 		-- get the value
 	begin
 		if Property.Value.Is_null and then not Property.Allow_Null then

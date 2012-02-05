@@ -20,4 +20,3 @@ clean:
 distclean: 
 	@-${MAKE} clean
 	@-${MAKE} -C samples clean
-	@-cd examples && gprclean

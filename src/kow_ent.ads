@@ -219,7 +219,10 @@ package KOW_Ent is
 	function Get_Type ( Property : in Property_Type ) return Type_Of_Data_Type is abstract;
 	-- return the type of the value; used for calling set_valued in the right way
 
-	function Get_Value( Property : in Property_Type ) return Value_Type is abstract;
+	function Get_Value(
+				Property 	: in Property_Type;
+				For_Store	: in Boolean := False
+			) return Value_Type is abstract;
 	-- get the value
 	
 	procedure Set_Value(

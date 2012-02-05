@@ -292,7 +292,7 @@ package body KOW_Ent.SQL is
 			end if;
 
 			Append_Value( 
-					Value		=> Get_Value( Property.all ),
+					Value		=> Get_Value( Property.all, True ),
 					Connection	=> Connection,
 					Q		=> Q
 				);
@@ -920,7 +920,7 @@ package body KOW_Ent.SQL is
 			else
 				APQ.Append( Q, Table_Name & '.' & P.Name.all & "=" );
 			end if;
-			Append_Value( Get_Value( P.all ), Connection, Q );
+			Append_Value( Get_Value( P.all, True ), Connection, Q );
 		end Iterator;
 
 
