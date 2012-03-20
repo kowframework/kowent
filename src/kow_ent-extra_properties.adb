@@ -63,34 +63,40 @@ package body KOW_Ent.Extra_Properties is
 	procedure Initialize( Property : in out Locale_Property_Type ) is
 		-- initialize the locale as the default locale
 	begin
-		Set_Locale( Property, KOW_Lib.Locales.Get_Default_Locale );
+		Set_Locale_Code( Property, KOW_Lib.Locales.Get_Default_Locale_Code );
 		-- set the locale
 
 		KOW_Ent.Initialize( Property_Type( Property ) );
 		-- run the standard registration code
 	end Initialize;
 
-	procedure Set_Locale(
+	procedure Set_Locale_Code(
 				Property	: in out Locale_Property_Type;
-				Locale		: in     KOW_Lib.Locales.Locale
+				Locale_Code	: in     KOW_Lib.Locales.Locale_Code_Type
 			) is
-		-- set the locale
 	begin
-		KOW_lib.String_Util.Copy( 
-						From	=> Ada.Strings.Unbounded.To_String( Locale.Code ),
+		KOW_Lib.String_Util.Copy(
+						From	=> KOW_Lib.Locales.To_String( Locale_Code ),
 						To	=> Property.Value.String_Value
 					);
-	end Set_Locale;
+	end Set_Locale_Code;
+	-- set the locale
 	
 	function Get_Locale(
 				Property	: in     Locale_Property_Type
-			) return KOW_Lib.Locales.Locale is
+			) return KOW_Lib.Locales.Locale_Type is
+		-- it's an alias for KOW_Lib.Locales.Get_Locale( Get_locale_Code (Property ));
 	begin
-		return KOW_Lib.Locales.Get_Locale(
-					Ada.Strings.Fixed.Trim( Property.Value.String_Value, Ada.Strings.Right )
-				);
+		return KOW_Lib.Locales.Get_Locale( Get_Locale_Code( Property ) );
 	end Get_Locale;
-	
+
+	function Get_Locale_Code(
+				Property	: in     Locale_Property_Type
+			) return KOW_Lib.Locales.Locale_Code_Type is
+	begin
+		return KOW_Lib.Locales.From_String( Ada.Strings.Fixed.Trim( Property.Value.String_Value, Ada.Strings.Right ) );
+	end Get_Locale_Code;
+
 
 	----------------------------
 	-- Password Property Type --

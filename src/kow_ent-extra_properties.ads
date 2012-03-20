@@ -57,23 +57,29 @@ package KOW_Ent.Extra_Properties is
 							Name		=> Name,
 							Container	=> Container,
 							Type_Of		=> APQ_String,
-							String_Length	=> 8,
+							String_Length	=> 5,
 							Allow_Null	=> False
 						) with null record;
 	overriding
 	procedure Initialize( Property : in out Locale_Property_Type );
 	-- initialize the locale as the default locale
 	
-	procedure Set_Locale(
+	procedure Set_Locale_Code(
 				Property	: in out Locale_Property_Type;
-				Locale		: in     KOW_Lib.Locales.Locale
+				Locale_Code	: in     KOW_Lib.Locales.Locale_Code_Type
 			);
 	-- set the locale
 	
 	function Get_Locale(
 				Property	: in     Locale_Property_Type
-			) return KOW_Lib.Locales.Locale;
+			) return KOW_Lib.Locales.Locale_Type;
+	-- it's an alias for KOW_Lib.Locales.Get_Locale( Get_locale_Code (Property ));
 	
+	function Get_Locale_Code(
+				Property	: in     Locale_Property_Type
+			) return KOW_Lib.Locales.Locale_Code_Type;
+	
+
 
 	----------------------------
 	-- Password Property Type --
