@@ -364,6 +364,9 @@ package KOW_Ent is
 	-- the default implementation look for elements where Is_Id( Property ) = true
 	-- if none found, raises constraint error with an informative message
 
+	function Is_New( Entity : in Entity_Type ) return Boolean;
+	-- check if the data storage of the entity is set.
+	-- this would mean the entity didn't come from any storage... thus it's a new entity
 
 	procedure Post_Install(
 				Entity		: in out Entity_Type;

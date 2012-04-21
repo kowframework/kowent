@@ -320,17 +320,19 @@ package body KOW_Ent is
 		-- procedure used to store the entity;
 		-- for retrieving please read the documentation of the used data storage
 	begin
-		if Entity.Data_Storage /= null and then Entity.Data_Storage.all in Data_Storages.Data_Storage_Type'Class then
+		if Is_New( Entity_Type'Class( Entity ) ) then
+			Data_Storages.Insert(
+					Data_Storages.Data_Storage_Type'Class( Data_Storages.Get_Data_Storage( Entity_Type'Class( Entity )'Tag ).all ),
+					Entity
+				);
+		elsif Entity.Data_Storage /= null and then Entity.Data_Storage.all in Data_Storages.Data_Storage_Type'Class then
 			Data_Storages.Update(
 					Data_Storages.Data_Storage_Type'Class( Entity.Data_Storage.all ),
 					Entity,
 					Get_Id( Entity_Type'Class( Entity ) )
 				);
 		else
-			Data_Storages.Insert(
-					Data_Storages.Data_Storage_Type'Class( Data_Storages.Get_Data_Storage( Entity_Type'Class( Entity )'Tag ).all ),
-					Entity
-				);
+			raise PROGRAM_ERROR with "The entity isn't new but it has no data storage access initialized.... something is very wrong";
 		end if;
 	end Store;
 
@@ -376,5 +378,14 @@ package body KOW_Ent is
 
 		return ID.All;
 	end Get_Id;
+
+
+	function Is_New( Entity : in Entity_Type ) return Boolean is
+		-- check if the data storage of the entity is set.
+		-- this would mean the entity didn't come from any storage... thus it's a new entity
+	begin
+		return Entity.Data_Storage = null;
+	end Is_New;
+
 
 end KOW_Ent;
