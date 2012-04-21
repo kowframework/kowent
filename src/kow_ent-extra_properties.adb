@@ -107,7 +107,7 @@ package body KOW_Ent.Extra_Properties is
 				Password	: in     String
 			) is
 	begin
-		-- this is the code that will encode de password as SHA1.
+		-- this is the code that will encode the password as SHA1.
 		Property.Value := Password_Value( Password );
 	end Set_Password;
 

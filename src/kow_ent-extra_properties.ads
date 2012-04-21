@@ -101,7 +101,7 @@ package KOW_Ent.Extra_Properties is
 				Property	: in out Password_Property_Type;
 				Password	: in     String
 			);
-	-- this is the code that will encode de password as SHA1.
+	-- this is the code that will encode the password as SHA1.
 
 
 	function SHA1_Hash( Value : in String ) return String;
