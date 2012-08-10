@@ -95,8 +95,6 @@ package body KOW_Ent.DB is
 				loop
 					Fetch( Q );
 				end loop;
-
-				raise PROGRAM_ERROR with "this shouldn't be raised.. something is very wrong";
 			exception
 				when APQ.No_Tuple =>
 					raise ALREADY_INSTALLED with "please remove manually - this will erase all your data";
