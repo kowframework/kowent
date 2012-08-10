@@ -93,16 +93,13 @@ package body KOW_Ent is
 					return APQ.APQ_Bigserial'Image( Value.Bigserial_Value );
 
 				when APQ_Date =>
-					-- TODO :: convert to string
-					return "";
+					return APQ.To_String( Value.Date_Value );
 
 				when APQ_Time =>
-					-- TODO :: convert to string
-					return "";
+					return APQ.To_String( Value.Time_Value );
 
 				when APQ_Timestamp =>
-					-- TODO :: convert to string
-					return "";
+					return APQ.To_String( Value.Timestamp_Value );
 
 
 				when Hour_Number =>
@@ -155,15 +152,12 @@ package body KOW_Ent is
 				Value.Bigserial_Value := APQ.APQ_Bigserial'Value( String_Value );
 
 			when APQ_Date =>
-				-- TODO :: convert from string
-				null;
+				Value.Date_Value := APQ.To_Date( String_Value );
 			when APQ_Time =>
-				-- TODO :: convert from string
-				null;
+				Value.Time_Value := APQ.To_Time( String_Value );
 
 			when APQ_Timestamp =>
-				-- TODO :: convert from string
-				null;
+				Value.Timestamp_Value := APQ.To_Timestamp( String_Value );
 
 
 			when Hour_Number =>
